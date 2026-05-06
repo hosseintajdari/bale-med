@@ -5,6 +5,7 @@ from .bale_client import BaleAPIError, BaleClient
 from .config import get_settings
 from .database import save_incoming_message
 from .models import IncomingMessage
+from .replies import build_safe_reply
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,10 @@ def get_reply_text(message_text: str | None, default_reply_text: str) -> str:
         return default_reply_text
 
     command = message_text.strip().split(maxsplit=1)[0].lower()
-    return COMMAND_REPLIES.get(command, default_reply_text)
+    if command in COMMAND_REPLIES:
+        return COMMAND_REPLIES[command]
+
+    return build_safe_reply(message_text, default_reply_text)
 
 
 def route_update(update: dict[str, Any]) -> dict[str, Any]:

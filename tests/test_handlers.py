@@ -19,6 +19,7 @@ class HandlerTests(unittest.TestCase):
                 "BALE_ENABLE_SENDING",
                 "DATABASE_PATH",
                 "BALE_REPLY_TEXT",
+                "BALE_WEBHOOK_SECRET",
             )
         }
 
@@ -36,6 +37,7 @@ class HandlerTests(unittest.TestCase):
                             "BALE_ENABLE_SENDING=false",
                             "DATABASE_PATH=test.db",
                             "BALE_REPLY_TEXT=سلام حسین جان!",
+                            "BALE_WEBHOOK_SECRET=test-secret",
                         ]
                     ),
                     encoding="utf-8",

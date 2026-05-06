@@ -16,8 +16,8 @@ This vision and the milestone order are allowed to change as the pharmacy workfl
 
 - Milestone 1: Done - Project skeleton and local foundation.
 - Milestone 2: Done - Real Bale webhook on local laptop with tunnel and real reply.
-- Milestone 3: Next - Secure webhook with secret path.
-- Milestone 4: Basic bot commands.
+- Milestone 3: Done - Secure webhook with secret path.
+- Milestone 4: Done - Basic bot commands.
 - Milestone 5: Safe pharmacy reply layer.
 - Milestone 6: Better logging and admin review.
 - Milestone 7: VPS deployment preparation.
@@ -196,6 +196,8 @@ Implemented methods:
 Webhook behavior:
 - Always stores incoming updates.
 - Supports only `message.text` path for acknowledgement behavior.
+- Handles `/start`, `/help`, and `/status` with simple, non-medical command replies.
+- Unknown text keeps the configured safe acknowledgement reply.
 - If `BALE_ENABLE_SENDING=false`, reply is prepared but not sent.
 - If `BALE_ENABLE_SENDING=true`, sends:
   `پیام شما دریافت شد. این ربات جایگزین نظر داروساز نیست و در صورت نیاز توسط داروساز بررسی میشود.`

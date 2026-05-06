@@ -115,8 +115,26 @@ class HandlerTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertTrue(result["reply_prepared"])
         self.assertTrue(result["reply_result"]["skipped"])
-        self.assertEqual(result["reply_result"]["text"], "سلام حسین جان!")
+        self.assertIn("medicine name", result["reply_result"]["text"])
+        self.assertIn("pharmacist", result["reply_result"]["text"])
         self.assertEqual(row, ("demo-chat", "123", "Hello pharmacy"))
+
+    def test_normal_text_returns_safe_intake_reply(self):
+        result = self._route_text_message("I need help with a medicine question")
+
+        reply_text = result["reply_result"]["text"]
+        self.assertIn("medicine name", reply_text)
+        self.assertIn("patient age range", reply_text)
+        self.assertIn("pharmacist", reply_text)
+        self.assertNotIn("take", reply_text.lower())
+
+    def test_high_risk_text_returns_escalation_reply(self):
+        result = self._route_text_message("Can I change medication dosage while pregnant?")
+
+        reply_text = result["reply_result"]["text"]
+        self.assertIn("pharmacist review", reply_text)
+        self.assertIn("cannot give diagnosis", reply_text)
+        self.assertIn("dosage", reply_text)
 
     def test_raw_update_storage_is_disabled_by_default(self):
         original_cwd = Path.cwd()
@@ -242,10 +260,12 @@ class HandlerTests(unittest.TestCase):
 
         self.assertEqual(result["reply_result"]["text"], "Bot is running and ready to receive pharmacy intake messages.")
 
-    def test_unknown_text_keeps_default_safe_reply(self):
+    def test_unknown_text_uses_safe_intake_reply(self):
         result = self._route_text_message("Hello pharmacy")
 
-        self.assertEqual(result["reply_result"]["text"], "سلام حسین جان!")
+        reply_text = result["reply_result"]["text"]
+        self.assertIn("medicine name", reply_text)
+        self.assertIn("pharmacist", reply_text)
 
 
 if __name__ == "__main__":

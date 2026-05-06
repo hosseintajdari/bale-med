@@ -7,10 +7,6 @@ from .config import get_settings
 from .database import init_db
 from .handlers import route_update
 
-settings = get_settings()
-if not settings.bale_webhook_secret:
-    raise RuntimeError("BALE_WEBHOOK_SECRET is required for /webhook/bale/{secret}")
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -33,6 +29,9 @@ def health_check() -> dict[str, str]:
 
 @app.post("/webhook/bale/{secret}")
 async def bale_webhook(secret: str, request: Request) -> dict[str, Any]:
+    settings = get_settings()
+    if not settings.bale_webhook_secret:
+        raise RuntimeError("BALE_WEBHOOK_SECRET is required for /webhook/bale/{secret}")
     if secret != settings.bale_webhook_secret:
         raise HTTPException(status_code=404, detail="Not Found")
     update = await request.json()

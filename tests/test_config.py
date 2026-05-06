@@ -17,6 +17,7 @@ class SettingsTests(unittest.TestCase):
                 "BALE_ENABLE_SENDING",
                 "DATABASE_PATH",
                 "BALE_REPLY_TEXT",
+                "BALE_WEBHOOK_SECRET",
             )
         }
 
@@ -34,6 +35,7 @@ class SettingsTests(unittest.TestCase):
                             "BALE_ENABLE_SENDING=true",
                             "DATABASE_PATH=test.db",
                             "BALE_REPLY_TEXT=سلام حسین جان!",
+                            "BALE_WEBHOOK_SECRET=test-secret",
                         ]
                     ),
                     encoding="utf-8",
@@ -53,6 +55,7 @@ class SettingsTests(unittest.TestCase):
         self.assertTrue(settings.bale_enable_sending)
         self.assertEqual(settings.database_path, "test.db")
         self.assertEqual(settings.bale_reply_text, "سلام حسین جان!")
+        self.assertEqual(settings.bale_webhook_secret, "test-secret")
 
 
 if __name__ == "__main__":

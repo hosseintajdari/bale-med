@@ -12,6 +12,7 @@ class Settings:
     bale_enable_sending: bool
     database_path: str
     bale_reply_text: str
+    bale_webhook_secret: str
 
 
 def _to_bool(value: str | None, default: bool = False) -> bool:
@@ -33,4 +34,5 @@ def get_settings() -> Settings:
         bale_enable_sending=_to_bool(os.getenv("BALE_ENABLE_SENDING"), default=False),
         database_path=os.getenv("DATABASE_PATH", "bale_bot.db"),
         bale_reply_text=os.getenv("BALE_REPLY_TEXT", default_reply_text),
+        bale_webhook_secret=os.getenv("BALE_WEBHOOK_SECRET", ""),
     )

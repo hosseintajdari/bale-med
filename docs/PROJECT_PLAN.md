@@ -13,8 +13,8 @@ The vision and milestone order are living project guidance. They may change as r
 ## Milestone Map
 1. Milestone 1: Done - Project skeleton and local foundation.
 2. Milestone 2: Done - Real Bale webhook on local laptop with tunnel and real reply.
-3. Milestone 3: Next - Secure webhook with secret path.
-4. Milestone 4: Basic bot commands.
+3. Milestone 3: Done - Secure webhook with secret path.
+4. Milestone 4: Done - Basic bot commands.
 5. Milestone 5: Safe pharmacy reply layer.
 6. Milestone 6: Better logging and admin review.
 7. Milestone 7: VPS deployment preparation.
@@ -35,6 +35,9 @@ Build a small FastAPI service that can receive Bale webhook updates, store the r
 - Diagnosis, prescription changes, dosage recommendations, or clinical decision-making.
 - User authentication, admin dashboards, or production deployment automation.
 - Complex conversation state machines.
+
+## Milestone 4: Basic Bot Commands
+Add simple command replies for `/start`, `/help`, and `/status`. These replies are intentionally non-medical: they introduce the bot as a pharmacy message intake assistant, list available commands, and confirm the service is running. Unknown text keeps the configured safe acknowledgement behavior.
 
 ## Known Assumptions and Open Questions
 - Webhook payload shape is treated as Telegram-like for now (`message`, `message.chat.id`, `message.message_id`, `message.text`).

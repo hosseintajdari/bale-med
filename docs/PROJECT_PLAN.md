@@ -1,12 +1,14 @@
 # Project Plan
 
 ## Current Status
-The project has a minimal FastAPI webhook app, SQLite message storage, a cautious Bale API client, and dry-run reply behavior. Local `.env` loading and basic regression tests are now in place so development can continue with less manual setup.
+The project has a minimal FastAPI webhook app, SQLite message storage, a cautious Bale API client, secure webhook secret-path handling, dry-run reply behavior, and basic safe commands for `/start`, `/help`, and `/status`.
+
+Milestone 5 is now the active milestone: build a safe pharmacy reply layer that collects structured intake information and escalates risky or unclear cases to pharmacist review without giving medical advice.
 
 ## Long-Term Product Vision
 Build a safe pharmacy automation assistant for Bale that supports a real pharmacy workflow from first contact through pharmacist review. The assistant should receive messages, collect structured intake information, avoid clinical decision-making, preserve auditability, and route cases to a pharmacist when judgment is needed.
 
-Later milestones may add basic bot commands, safer reply layers, admin review tools, VPS deployment, and LLM/AI integration. AI must be introduced only inside pharmacist-approved boundaries and must not diagnose, prescribe, replace a pharmacist, or recommend medication changes.
+Later milestones may add better logging, pharmacist/admin review tools, VPS deployment, and LLM/AI integration. AI must be introduced only inside pharmacist-approved boundaries and must not diagnose, prescribe, replace a pharmacist, or recommend medication changes.
 
 The vision and milestone order are living project guidance. They may change as requirements, pharmacy workflow details, or Bale API constraints become clearer. Update this plan before making implementation changes that alter the project direction.
 
@@ -15,47 +17,75 @@ The vision and milestone order are living project guidance. They may change as r
 2. Milestone 2: Done - Real Bale webhook on local laptop with tunnel and real reply.
 3. Milestone 3: Done - Secure webhook with secret path.
 4. Milestone 4: Done - Basic bot commands.
-5. Milestone 5: Safe pharmacy reply layer.
-6. Milestone 6: Better logging and admin review.
-7. Milestone 7: VPS deployment preparation.
-8. Milestone 8: Real VPS deployment.
-9. Milestone 9: LLM/AI integration.
+5. Milestone 5: Current - Safe pharmacy reply layer.
+6. Milestone 6: Planned - Better logging and admin review.
+7. Milestone 7: Planned - VPS deployment preparation.
+8. Milestone 8: Planned - Real VPS deployment.
+9. Milestone 9: Planned - LLM/AI integration.
 
-## Milestone 1: Local Webhook Skeleton
-Build a small FastAPI service that can receive Bale webhook updates, store the raw incoming message data in SQLite, and prepare a safe reply path without sending medical advice.
+## Completed Milestones
 
-## MVP Scope
-- Provide `GET /health` for service checks.
-- Provide `POST /webhook/bale` for incoming Bale updates.
-- Store every incoming webhook payload for auditability.
-- Extract optional message fields only when they are present.
-- Keep outbound Bale replies as a placeholder until the exact Bale Bot API documentation is checked.
+### Milestone 1: Local Webhook Skeleton
+Built a small FastAPI service that can receive Bale webhook updates, store incoming message data in SQLite, and prepare a safe reply path without sending medical advice.
 
-## Out of Scope for Milestone 1
-- Diagnosis, prescription changes, dosage recommendations, or clinical decision-making.
-- User authentication, admin dashboards, or production deployment automation.
-- Complex conversation state machines.
+### Milestone 2: Real Bale Webhook on Local Laptop
+Verified the local app can be exposed through a public tunnel, receive real Bale webhook messages, and use the Bale send path when explicitly enabled.
 
-## Milestone 4: Basic Bot Commands
-Add simple command replies for `/start`, `/help`, and `/status`. These replies are intentionally non-medical: they introduce the bot as a pharmacy message intake assistant, list available commands, and confirm the service is running. Unknown text keeps the configured safe acknowledgement behavior.
+### Milestone 3: Secure Webhook with Secret Path
+Changed the webhook route to `/webhook/bale/{secret}`, added `BALE_WEBHOOK_SECRET`, and made wrong secrets return 404.
+
+### Milestone 4: Basic Bot Commands
+Added simple command replies for `/start`, `/help`, and `/status`. These replies are intentionally non-medical: they introduce the bot as a pharmacy message intake assistant, list available commands, and confirm the service is running. Unknown text keeps the configured safe acknowledgement behavior.
+
+## Current Milestone: Milestone 5 - Safe Pharmacy Reply Layer
+
+### Goal
+Create a safe pharmacy response layer that collects structured information and avoids medical advice.
+
+### Scope IN
+1. Add a small safe reply layer for normal pharmacy intake messages.
+2. Keep all replies operational, not clinical.
+3. Ask for structured information such as patient age range, medicine name, request/symptom summary, pregnancy/breastfeeding status when relevant, and allergy or serious side-effect information when relevant.
+4. Add clear escalation behavior for risky or unclear messages.
+5. Route high-risk, ambiguous, or medical-judgment requests to pharmacist review.
+6. Add tests for normal intake reply, high-risk escalation reply, existing command behavior, and preserved safety boundaries.
+7. Update `README.md`, `docs/PROJECT_PLAN.md`, and `docs/SAFETY_RULES.md` if behavior changes.
+
+### Scope OUT
+- No diagnosis.
+- No differential diagnosis.
+- No prescription replacement.
+- No medication start/stop/change advice.
+- No dosage recommendation.
+- No autonomous triage decision.
+- No LLM integration.
+- No admin dashboard.
+- No VPS deployment changes.
+
+### Safety Rules
+- If a message asks for medical judgment, escalate to pharmacist review.
+- If a message includes urgent symptoms, serious side effects, pregnancy/breastfeeding, child medication, allergy, overdose, controlled medication, or unclear medication use, escalate to pharmacist review.
+- When unsure, escalate by default.
+- Replies should collect information and acknowledge receipt; they must not make clinical decisions.
+
+### Verification
+```powershell
+python -m unittest discover -s tests
+python -m compileall app tests
+git diff --check
+```
 
 ## Known Assumptions and Open Questions
 - Webhook payload shape is treated as Telegram-like for now (`message`, `message.chat.id`, `message.message_id`, `message.text`).
-- Bale send-message endpoint, method, headers, and payload contract are unknown and must be confirmed.
-- Webhook authentication/signature mechanism is unknown and must be confirmed before public deployment.
+- Bale send-message endpoint, method, headers, and payload contract still need confirmation before production use.
+- Webhook authentication/signature mechanism is unknown beyond the current secret path and must be confirmed before public deployment.
 - Canonical tracker: `docs/ASSUMPTIONS_BALE_API.md`.
 
 ## Readiness Gates Before Enabling Real Use
 1. Confirm Bale webhook schema with official documentation and update code/docs accordingly.
 2. Confirm Bale outbound send-message contract and test in a non-production environment.
-3. Select and document webhook authentication strategy.
+3. Confirm whether Bale supports webhook signature/header authentication beyond secret-path protection.
 4. Validate VPS runbook end-to-end, including restart and log inspection.
 5. Review SQLite storage path, backup, and retention strategy for operational safety.
 6. Keep `BALE_ENABLE_SENDING=false` until the exact Bale behavior is confirmed.
-
-## Next Milestones
-1. Confirm exact Bale Bot API webhook and send-message fields.
-2. Add webhook authentication or a secret path/token before public exposure.
-3. Add pharmacist handoff workflow and structured intake questions.
-4. Add patient-safe conversation state for intake only, not medical advice.
-5. Add privacy-minded logging and retention rules for stored messages.
+7. Complete Milestone 5 safety tests before broad patient-facing use.

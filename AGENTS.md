@@ -1,6 +1,6 @@
 # Repository Guidelines
 
-We are starting a new project: a pharmacy automation chatbot connected to Bale messenger. Bale Bot API is similar to Telegram Bot API.
+We are building a pharmacy automation chatbot connected to Bale messenger. Bale Bot API is similar to Telegram Bot API, but exact fields must be verified before production use.
 
 ## Goal
 Build a minimal but production-minded MVP for a pharmacy assistant bot.
@@ -21,45 +21,38 @@ Build a minimal but production-minded MVP for a pharmacy assistant bot.
 - Prepare the project so it can later be deployed on a VPS.
 - Use Git-friendly structure.
 
-## First Task
-1. Inspect the current folder.
-2. Create a clear project plan before coding.
-3. Create these files:
-   - `README.md`
-   - `AGENTS.md`
-   - `.gitignore`
-   - `.env.example`
-   - `requirements.txt`
-   - `app/main.py`
-   - `app/config.py`
-   - `app/bale_client.py`
-   - `app/handlers.py`
-   - `app/models.py`
-   - `app/database.py`
-   - `docs/PROJECT_PLAN.md`
-   - `docs/SAFETY_RULES.md`
-4. Implement only a minimal working skeleton:
-   - FastAPI app
-   - health check endpoint
-   - webhook endpoint for Bale updates
-   - basic message router
-   - simple SQLite storage for incoming messages
-   - placeholder function for sending messages back to Bale
-5. Add clear TODO comments where Bale API details must be filled after checking the exact Bale documentation.
-6. Do not invent unknown Bale API fields. Use safe placeholders and document assumptions.
-7. Add run instructions for Windows PowerShell.
-8. After creating files, show:
-   - file tree
-   - what was created
-   - how to run locally
-   - what to do next
+## Current Project Status
+- Milestone 1: Done - Project skeleton and local foundation.
+- Milestone 2: Done - Real Bale webhook on local laptop with tunnel and real reply.
+- Milestone 3: Done - Secure webhook with secret path.
+- Milestone 4: Done - Basic bot commands.
+- Milestone 5: Current - Safe pharmacy reply layer.
+- Milestone 6: Planned - Better logging and admin review.
+- Milestone 7: Planned - VPS deployment preparation.
+- Milestone 8: Planned - Real VPS deployment.
+- Milestone 9: Planned - LLM/AI integration.
 
-## Guardrails
-- Do not overwrite existing files without asking.
-- Do not add unnecessary frameworks.
-- Do not build a complex architecture yet.
-- Do not create medical advice logic yet.
-- First milestone is: receive a message, store it, and prepare a safe reply path.
+## Current Milestone: Milestone 5
+
+Goal:
+Create a safe pharmacy reply layer that collects structured intake information and avoids medical advice.
+
+Scope IN:
+1. Add safe intake-style replies for pharmacy workflow messages.
+2. Keep all replies operational, not clinical.
+3. Ask for structured information when appropriate.
+4. Escalate risky, unclear, or medical-judgment requests to pharmacist review.
+5. Add tests for normal intake, escalation, and existing command behavior.
+6. Update docs if behavior changes.
+
+Scope OUT:
+1. No diagnosis.
+2. No prescription replacement.
+3. No dosage recommendations.
+4. No medication start/stop/change advice.
+5. No autonomous triage decision.
+6. No LLM integration.
+7. No VPS deployment changes.
 
 ## Milestone Workflow
 Use this format for each project milestone:
@@ -108,17 +101,6 @@ Important:
 - Do not make unrelated changes.
 - If unrelated issues are found, report them but do not fix them in the milestone.
 ```
-
-## Current Milestone Status
-- Milestone 1: Done - Project skeleton and local foundation.
-- Milestone 2: Done - Real Bale webhook on local laptop with tunnel and real reply.
-- Milestone 3: Next - Secure webhook with secret path.
-- Milestone 4: Basic bot commands.
-- Milestone 5: Safe pharmacy reply layer.
-- Milestone 6: Better logging and admin review.
-- Milestone 7: VPS deployment preparation.
-- Milestone 8: Real VPS deployment.
-- Milestone 9: LLM/AI integration.
 
 ## Current Verification Commands
 Use `unittest`, not `pytest`, unless the project intentionally changes test frameworks later.

@@ -1,10 +1,15 @@
 from contextlib import asynccontextmanager
 from typing import Any
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 
+from .config import get_settings
 from .database import init_db
 from .handlers import route_update
+
+settings = get_settings()
+if not settings.bale_webhook_secret:
+    raise RuntimeError("BALE_WEBHOOK_SECRET is required for /webhook/bale/{secret}")
 
 
 @asynccontextmanager
@@ -26,7 +31,9 @@ def health_check() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.post("/webhook/bale")
-async def bale_webhook(request: Request) -> dict[str, Any]:
+@app.post("/webhook/bale/{secret}")
+async def bale_webhook(secret: str, request: Request) -> dict[str, Any]:
+    if secret != settings.bale_webhook_secret:
+        raise HTTPException(status_code=404, detail="Not Found")
     update = await request.json()
     return route_update(update)

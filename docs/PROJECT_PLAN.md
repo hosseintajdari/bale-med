@@ -3,6 +3,24 @@
 ## Current Status
 The project has a minimal FastAPI webhook app, SQLite message storage, a cautious Bale API client, and dry-run reply behavior. Local `.env` loading and basic regression tests are now in place so development can continue with less manual setup.
 
+## Long-Term Product Vision
+Build a safe pharmacy automation assistant for Bale that supports a real pharmacy workflow from first contact through pharmacist review. The assistant should receive messages, collect structured intake information, avoid clinical decision-making, preserve auditability, and route cases to a pharmacist when judgment is needed.
+
+Later milestones may add basic bot commands, safer reply layers, admin review tools, VPS deployment, and LLM/AI integration. AI must be introduced only inside pharmacist-approved boundaries and must not diagnose, prescribe, replace a pharmacist, or recommend medication changes.
+
+The vision and milestone order are living project guidance. They may change as requirements, pharmacy workflow details, or Bale API constraints become clearer. Update this plan before making implementation changes that alter the project direction.
+
+## Milestone Map
+1. Milestone 1: Done - Project skeleton and local foundation.
+2. Milestone 2: Done - Real Bale webhook on local laptop with tunnel and real reply.
+3. Milestone 3: Next - Secure webhook with secret path.
+4. Milestone 4: Basic bot commands.
+5. Milestone 5: Safe pharmacy reply layer.
+6. Milestone 6: Better logging and admin review.
+7. Milestone 7: VPS deployment preparation.
+8. Milestone 8: Real VPS deployment.
+9. Milestone 9: LLM/AI integration.
+
 ## Milestone 1: Local Webhook Skeleton
 Build a small FastAPI service that can receive Bale webhook updates, store the raw incoming message data in SQLite, and prepare a safe reply path without sending medical advice.
 

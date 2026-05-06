@@ -2,13 +2,13 @@
 
 Minimal FastAPI skeleton for a pharmacy automation chatbot connected to Bale messenger.
 
-The first milestone is intentionally small: receive a Bale webhook update, store it in SQLite, and prepare a safe reply path. The bot does not provide diagnosis, prescriptions, dosage recommendations, or medical advice.
+The first milestones are intentionally small: receive a Bale webhook update, store it in SQLite, prepare a safe reply path, secure the webhook route, and support basic non-medical bot commands. The bot does not provide diagnosis, prescriptions, dosage recommendations, or medical advice.
 
 ## Long-Term Product Vision
 
 Build a safe pharmacy automation assistant for Bale that helps a real pharmacy receive messages, collect structured intake information, keep an auditable history, and route cases to a pharmacist when human judgment is needed.
 
-The long-term system may later include basic bot commands, pharmacist review workflows, VPS deployment, and LLM/AI support. Any AI features must stay inside pharmacist-approved safety boundaries and must not diagnose, prescribe, replace a pharmacist, or recommend medication changes.
+The long-term system may later include pharmacist review workflows, VPS deployment, and LLM/AI support. Any AI features must stay inside pharmacist-approved safety boundaries and must not diagnose, prescribe, replace a pharmacist, or recommend medication changes.
 
 This vision and the milestone order are allowed to change as the pharmacy workflow becomes clearer. When direction changes, update the milestone plan before changing implementation.
 
@@ -18,19 +18,19 @@ This vision and the milestone order are allowed to change as the pharmacy workfl
 - Milestone 2: Done - Real Bale webhook on local laptop with tunnel and real reply.
 - Milestone 3: Done - Secure webhook with secret path.
 - Milestone 4: Done - Basic bot commands.
-- Milestone 5: Safe pharmacy reply layer.
-- Milestone 6: Better logging and admin review.
-- Milestone 7: VPS deployment preparation.
-- Milestone 8: Real VPS deployment.
-- Milestone 9: LLM/AI integration.
+- Milestone 5: Current - Safe pharmacy reply layer.
+- Milestone 6: Planned - Better logging and admin review.
+- Milestone 7: Planned - VPS deployment preparation.
+- Milestone 8: Planned - Real VPS deployment.
+- Milestone 9: Planned - LLM/AI integration.
 
 ## MVP Guarantees vs Non-Goals
 
 | Area | Current MVP |
 | --- | --- |
-| In scope | Receive Bale webhook payload, store message data, prepare safe acknowledgement path |
+| In scope | Receive Bale webhook payload, store message data, prepare safe acknowledgement path, handle basic commands |
 | Not in scope | Diagnosis, treatment advice, dosage changes, prescription replacement |
-| Bale outbound API | Placeholder only, not enabled for real delivery |
+| Bale outbound API | Available only when explicitly enabled; keep disabled by default |
 | Deployment | Local-first with VPS runbook, not full production hardening |
 
 ## Project Structure
@@ -39,7 +39,7 @@ This vision and the milestone order are allowed to change as the pharmacy workfl
 app/
   main.py          FastAPI app and routes
   config.py        Environment-based settings
-  bale_client.py   Placeholder Bale API client
+  bale_client.py   Cautious Bale API client
   handlers.py      Basic update router
   models.py        Simple data models
   database.py      SQLite setup and storage helpers
@@ -175,6 +175,7 @@ python -m unittest discover -s tests
 Run this before and after changes. These tests currently check:
 - local `.env` loading
 - webhook routing, SQLite storage, and dry-run reply preparation
+- basic command replies
 
 ## Bale API Assumptions
 
@@ -183,9 +184,9 @@ Current parsing is intentionally conservative and based on Telegram-like structu
 - `message.chat.id` may provide chat identity.
 - `message.message_id` and `message.text` may exist.
 
-These are assumptions, not confirmed Bale contract. Track and verify them in [ASSUMPTIONS_BALE_API.md](/C:/Users/Maryam-pc/projects/bale/docs/ASSUMPTIONS_BALE_API.md) before enabling outbound calls.
+These are assumptions, not confirmed Bale contract. Track and verify them in [ASSUMPTIONS_BALE_API.md](docs/ASSUMPTIONS_BALE_API.md) before enabling outbound calls for real users.
 
-## Bale Client (Milestone 2)
+## Bale Client
 
 Implemented methods:
 - `getMe`
@@ -195,6 +196,7 @@ Implemented methods:
 
 Webhook behavior:
 - Always stores incoming updates.
+- Uses `/webhook/bale/{secret}` and returns 404 for a wrong secret.
 - Supports only `message.text` path for acknowledgement behavior.
 - Handles `/start`, `/help`, and `/status` with simple, non-medical command replies.
 - Unknown text keeps the configured safe acknowledgement reply.
@@ -205,4 +207,4 @@ Webhook behavior:
 
 ## VPS Notes
 
-Minimal VPS deployment guidance is documented in [DEPLOYMENT_VPS.md](/C:/Users/Maryam-pc/projects/bale/docs/DEPLOYMENT_VPS.md). Treat webhook authentication and HTTPS reverse-proxy setup as deployment blockers before public exposure.
+Minimal VPS deployment guidance is documented in [DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md). Treat webhook authentication and HTTPS reverse-proxy setup as deployment blockers before public exposure.

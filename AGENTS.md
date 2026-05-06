@@ -26,23 +26,23 @@ Build a minimal but production-minded MVP for a pharmacy assistant bot.
 - Milestone 2: Done - Real Bale webhook on local laptop with tunnel and real reply.
 - Milestone 3: Done - Secure webhook with secret path.
 - Milestone 4: Done - Basic bot commands.
-- Milestone 5: Current - Safe pharmacy reply layer.
-- Milestone 6: Planned - Better logging and admin review.
+- Milestone 5: Done - Safe pharmacy reply layer.
+- Milestone 6: Current - Better logging and admin review.
 - Milestone 7: Planned - VPS deployment preparation.
 - Milestone 8: Planned - Real VPS deployment.
 - Milestone 9: Planned - LLM/AI integration.
 
-## Current Milestone: Milestone 5
+## Current Milestone: Milestone 6
 
 Goal:
-Create a safe pharmacy reply layer that collects structured intake information and avoids medical advice.
+Add a minimal review-tracking foundation so pharmacist-review cases are visible in stored message metadata and future admin tools can use a reliable audit trail.
 
 Scope IN:
-1. Add safe intake-style replies for pharmacy workflow messages.
-2. Keep all replies operational, not clinical.
-3. Ask for structured information when appropriate.
-4. Escalate risky, unclear, or medical-judgment requests to pharmacist review.
-5. Add tests for normal intake, escalation, and existing command behavior.
+1. Store whether each incoming message needs pharmacist review.
+2. Store a simple review reason for escalation-triggering messages.
+3. Store a basic review status for future pharmacist/admin tools.
+4. Keep logging useful without logging secrets or unnecessary sensitive data.
+5. Add tests for normal intake, escalation metadata, existing command behavior, and fresh SQLite initialization.
 6. Update docs if behavior changes.
 
 Scope OUT:
@@ -52,7 +52,8 @@ Scope OUT:
 4. No medication start/stop/change advice.
 5. No autonomous triage decision.
 6. No LLM integration.
-7. No VPS deployment changes.
+7. No admin dashboard.
+8. No VPS deployment changes.
 
 ## Milestone Workflow
 Use this format for each project milestone:

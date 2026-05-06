@@ -1,9 +1,9 @@
 # Project Plan
 
 ## Current Status
-The project has a minimal FastAPI webhook app, SQLite message storage, a cautious Bale API client, secure webhook secret-path handling, dry-run reply behavior, and basic safe commands for `/start`, `/help`, and `/status`.
+The project has a minimal FastAPI webhook app, SQLite message storage, a cautious Bale API client, secure webhook secret-path handling, dry-run reply behavior, basic safe commands for `/start`, `/help`, and `/status`, and a safe pharmacy reply layer.
 
-Milestone 5 is now the active milestone: build a safe pharmacy reply layer that collects structured intake information and escalates risky or unclear cases to pharmacist review without giving medical advice.
+Milestone 6 is now the active milestone: improve logging and create a minimal pharmacist-review foundation without adding an admin dashboard yet.
 
 ## Long-Term Product Vision
 Build a safe pharmacy automation assistant for Bale that supports a real pharmacy workflow from first contact through pharmacist review. The assistant should receive messages, collect structured intake information, avoid clinical decision-making, preserve auditability, and route cases to a pharmacist when judgment is needed.
@@ -17,8 +17,8 @@ The vision and milestone order are living project guidance. They may change as r
 2. Milestone 2: Done - Real Bale webhook on local laptop with tunnel and real reply.
 3. Milestone 3: Done - Secure webhook with secret path.
 4. Milestone 4: Done - Basic bot commands.
-5. Milestone 5: Current - Safe pharmacy reply layer.
-6. Milestone 6: Planned - Better logging and admin review.
+5. Milestone 5: Done - Safe pharmacy reply layer.
+6. Milestone 6: Current - Better logging and admin review.
 7. Milestone 7: Planned - VPS deployment preparation.
 8. Milestone 8: Planned - Real VPS deployment.
 9. Milestone 9: Planned - LLM/AI integration.
@@ -37,19 +37,22 @@ Changed the webhook route to `/webhook/bale/{secret}`, added `BALE_WEBHOOK_SECRE
 ### Milestone 4: Basic Bot Commands
 Added simple command replies for `/start`, `/help`, and `/status`. These replies are intentionally non-medical: they introduce the bot as a pharmacy message intake assistant, list available commands, and confirm the service is running. Unknown text keeps the configured safe acknowledgement behavior.
 
-## Current Milestone: Milestone 5 - Safe Pharmacy Reply Layer
+### Milestone 5: Safe Pharmacy Reply Layer
+
+Added a deterministic safe reply layer that asks for structured intake information for normal pharmacy messages and escalates high-risk, unclear, or medical-judgment messages to pharmacist review without giving medical advice. Tests cover normal intake, escalation, common allergy and pregnancy wording, command behavior, and preserved safety boundaries.
+
+## Current Milestone: Milestone 6 - Better Logging and Admin Review
 
 ### Goal
-Create a safe pharmacy response layer that collects structured information and avoids medical advice.
+Add a minimal review-tracking foundation so pharmacist-review cases are visible in stored message metadata and future admin tools can use a reliable audit trail.
 
 ### Scope IN
-1. Add a small safe reply layer for normal pharmacy intake messages.
-2. Keep all replies operational, not clinical.
-3. Ask for structured information such as patient age range, medicine name, request/symptom summary, pregnancy/breastfeeding status when relevant, and allergy or serious side-effect information when relevant.
-4. Add clear escalation behavior for risky or unclear messages.
-5. Route high-risk, ambiguous, or medical-judgment requests to pharmacist review.
-6. Add tests for normal intake reply, high-risk escalation reply, existing command behavior, and preserved safety boundaries.
-7. Update `README.md`, `docs/PROJECT_PLAN.md`, and `docs/SAFETY_RULES.md` if behavior changes.
+1. Store whether each incoming message needs pharmacist review.
+2. Store a simple review reason for escalation-triggering messages.
+3. Store a basic review status that can support later pharmacist/admin tools.
+4. Keep logging useful without logging secrets or unnecessary sensitive data.
+5. Add tests for normal intake, escalation metadata, command behavior, and fresh SQLite initialization.
+6. Update `README.md`, `docs/PROJECT_PLAN.md`, and `docs/SAFETY_RULES.md` if behavior changes.
 
 ### Scope OUT
 - No diagnosis.
@@ -67,6 +70,7 @@ Create a safe pharmacy response layer that collects structured information and a
 - If a message includes urgent symptoms, serious side effects, pregnancy/breastfeeding, child medication, allergy, overdose, controlled medication, or unclear medication use, escalate to pharmacist review.
 - When unsure, escalate by default.
 - Replies should collect information and acknowledge receipt; they must not make clinical decisions.
+- Review metadata is operational tracking only; it is not a diagnosis, treatment decision, or emergency triage decision.
 
 ### Verification
 ```powershell
@@ -88,4 +92,4 @@ git diff --check
 4. Validate VPS runbook end-to-end, including restart and log inspection.
 5. Review SQLite storage path, backup, and retention strategy for operational safety.
 6. Keep `BALE_ENABLE_SENDING=false` until the exact Bale behavior is confirmed.
-7. Complete Milestone 5 safety tests before broad patient-facing use.
+7. Complete Milestone 6 review tracking before broad patient-facing use.

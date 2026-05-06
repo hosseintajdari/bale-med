@@ -4,6 +4,26 @@ Minimal FastAPI skeleton for a pharmacy automation chatbot connected to Bale mes
 
 The first milestone is intentionally small: receive a Bale webhook update, store it in SQLite, and prepare a safe reply path. The bot does not provide diagnosis, prescriptions, dosage recommendations, or medical advice.
 
+## Long-Term Product Vision
+
+Build a safe pharmacy automation assistant for Bale that helps a real pharmacy receive messages, collect structured intake information, keep an auditable history, and route cases to a pharmacist when human judgment is needed.
+
+The long-term system may later include basic bot commands, pharmacist review workflows, VPS deployment, and LLM/AI support. Any AI features must stay inside pharmacist-approved safety boundaries and must not diagnose, prescribe, replace a pharmacist, or recommend medication changes.
+
+This vision and the milestone order are allowed to change as the pharmacy workflow becomes clearer. When direction changes, update the milestone plan before changing implementation.
+
+## Milestone Map
+
+- Milestone 1: Done - Project skeleton and local foundation.
+- Milestone 2: Done - Real Bale webhook on local laptop with tunnel and real reply.
+- Milestone 3: Next - Secure webhook with secret path.
+- Milestone 4: Basic bot commands.
+- Milestone 5: Safe pharmacy reply layer.
+- Milestone 6: Better logging and admin review.
+- Milestone 7: VPS deployment preparation.
+- Milestone 8: Real VPS deployment.
+- Milestone 9: LLM/AI integration.
+
 ## MVP Guarantees vs Non-Goals
 
 | Area | Current MVP |

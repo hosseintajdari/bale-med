@@ -69,6 +69,7 @@ BALE_API_BASE_URL=https://tapi.bale.ai
 BALE_ENABLE_SENDING=false
 BALE_REPLY_TEXT=پیام شما دریافت شد. این ربات جایگزین نظر داروساز نیست و در صورت نیاز توسط داروساز بررسی میشود.
 DATABASE_PATH=bale_bot.db
+BALE_WEBHOOK_SECRET=...
 ```
 
 `BALE_ENABLE_SENDING` defaults to `false` and prevents accidental real sends.
@@ -107,7 +108,7 @@ python -c "from app.bale_client import BaleClient; import json; print(json.dumps
 
 ```powershell
 Invoke-RestMethod -Method Post `
-  -Uri http://127.0.0.1:8000/webhook/bale `
+  -Uri http://127.0.0.1:8000/webhook/bale/your-secret `
   -ContentType "application/json" `
   -Body '{"message":{"chat":{"id":"demo-chat"},"text":"Hello pharmacy"}}'
 ```
@@ -129,7 +130,7 @@ Invoke-RestMethod -Method Get -Uri http://127.0.0.1:8000/health
 
 # 3) Webhook test with mock payload
 Invoke-RestMethod -Method Post `
-  -Uri http://127.0.0.1:8000/webhook/bale `
+  -Uri http://127.0.0.1:8000/webhook/bale/your-secret `
   -ContentType "application/json" `
   -Body '{"message":{"chat":{"id":"demo-chat"},"text":"Hello pharmacy"}}'
 

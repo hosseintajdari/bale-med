@@ -62,6 +62,61 @@ class HandlerTests(unittest.TestCase):
                     else:
                         os.environ[key] = value
 
+    def _route_text_message_and_fetch_review_row(self, text: str) -> tuple[dict, tuple]:
+        original_cwd = Path.cwd()
+        original_values = {key: os.environ.get(key) for key in self.ENV_KEYS}
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            try:
+                os.chdir(temp_dir)
+                for key in original_values:
+                    os.environ.pop(key, None)
+
+                Path(".env").write_text(
+                    "\n".join(
+                        [
+                            "BALE_BOT_TOKEN=test-token",
+                            "BALE_API_BASE_URL=https://example.test",
+                            "BALE_ENABLE_SENDING=false",
+                            "DATABASE_PATH=test.db",
+                            "BALE_REPLY_TEXT=سلام حسین جان!",
+                            "BALE_WEBHOOK_SECRET=test-secret",
+                        ]
+                    ),
+                    encoding="utf-8",
+                )
+
+                init_db()
+                result = route_update(
+                    {
+                        "message": {
+                            "message_id": 123,
+                            "chat": {"id": "demo-chat"},
+                            "text": text,
+                        }
+                    }
+                )
+
+                connection = sqlite3.connect("test.db")
+                try:
+                    row = connection.execute(
+                        """
+                        SELECT needs_review, review_reason, review_status
+                        FROM incoming_messages
+                        """
+                    ).fetchone()
+                finally:
+                    connection.close()
+
+                return result, row
+            finally:
+                os.chdir(original_cwd)
+                for key, value in original_values.items():
+                    if value is None:
+                        os.environ.pop(key, None)
+                    else:
+                        os.environ[key] = value
+
     def test_route_update_stores_message_and_prepares_dry_run_reply(self):
         original_cwd = Path.cwd()
         original_values = {key: os.environ.get(key) for key in self.ENV_KEYS}
@@ -149,6 +204,62 @@ class HandlerTests(unittest.TestCase):
         reply_text = result["reply_result"]["text"]
         self.assertIn("pharmacist review", reply_text)
         self.assertIn("cannot give diagnosis", reply_text)
+
+    def test_normal_text_stores_no_review_required(self):
+        result, row = self._route_text_message_and_fetch_review_row("I need help with a medicine question")
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(row, (0, None, "not_required"))
+
+    def test_escalation_text_stores_pending_review_metadata(self):
+        result, row = self._route_text_message_and_fetch_review_row("Can I use this during pregnancy?")
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(row, (1, "pharmacist_review_required", "pending"))
+
+    def test_command_text_stores_no_review_required(self):
+        result, row = self._route_text_message_and_fetch_review_row("/status")
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(row, (0, None, "not_required"))
+
+    def test_fresh_database_has_review_metadata_columns(self):
+        original_cwd = Path.cwd()
+        original_values = {key: os.environ.get(key) for key in self.ENV_KEYS}
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            try:
+                os.chdir(temp_dir)
+                for key in original_values:
+                    os.environ.pop(key, None)
+
+                os.environ["BALE_BOT_TOKEN"] = "test-token"
+                os.environ["BALE_API_BASE_URL"] = "https://example.test"
+                os.environ["BALE_ENABLE_SENDING"] = "false"
+                os.environ["DATABASE_PATH"] = "test.db"
+                os.environ["BALE_WEBHOOK_SECRET"] = "test-secret"
+
+                init_db()
+
+                connection = sqlite3.connect("test.db")
+                try:
+                    columns = {
+                        row[1]
+                        for row in connection.execute("PRAGMA table_info(incoming_messages)").fetchall()
+                    }
+                finally:
+                    connection.close()
+            finally:
+                os.chdir(original_cwd)
+                for key, value in original_values.items():
+                    if value is None:
+                        os.environ.pop(key, None)
+                    else:
+                        os.environ[key] = value
+
+        self.assertIn("needs_review", columns)
+        self.assertIn("review_reason", columns)
+        self.assertIn("review_status", columns)
 
     def test_raw_update_storage_is_disabled_by_default(self):
         original_cwd = Path.cwd()

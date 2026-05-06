@@ -46,6 +46,9 @@ Added a deterministic safe reply layer that asks for structured intake informati
 ### Goal
 Add a minimal review-tracking foundation so pharmacist-review cases are visible in stored message metadata and future admin tools can use a reliable audit trail.
 
+### Current State
+Incoming messages now store basic review metadata: whether pharmacist review is needed, a simple review reason, and a review status. Escalation-triggering messages are marked pending for pharmacist review; normal intake and command messages are marked not required.
+
 ### Scope IN
 1. Store whether each incoming message needs pharmacist review.
 2. Store a simple review reason for escalation-triggering messages.

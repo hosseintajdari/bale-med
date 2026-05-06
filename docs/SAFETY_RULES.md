@@ -18,6 +18,8 @@ Escalate immediately when input is incomplete, ambiguous, high-risk, or requests
 ## Privacy and Auditability
 Store incoming messages only for legitimate workflow needs. Do not log secrets, Bale tokens, private keys, or unnecessary personal data. Keep raw webhook payloads available for debugging and audit trails during the MVP, then revisit retention rules before production.
 
+Review metadata is operational workflow tracking only. It may mark that pharmacist review is needed, but it must not be treated as diagnosis, treatment advice, or emergency triage.
+
 ## Data Handling for MVP
 - Store only what is required for auditability and workflow continuity.
 - Keep credentials in environment variables only.

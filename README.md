@@ -174,7 +174,7 @@ python -m unittest discover -s tests
 
 Run this before and after changes. These tests currently check:
 - local `.env` loading
-- webhook routing, SQLite storage, and dry-run reply preparation
+- webhook routing, SQLite storage, review metadata, and dry-run reply preparation
 - basic command replies
 - safe intake and pharmacist-review escalation replies
 
@@ -197,6 +197,7 @@ Implemented methods:
 
 Webhook behavior:
 - Always stores incoming updates.
+- Stores basic pharmacist-review metadata for incoming messages.
 - Uses `/webhook/bale/{secret}` and returns 404 for a wrong secret.
 - Supports only `message.text` path for acknowledgement behavior.
 - Handles `/start`, `/help`, and `/status` with simple, non-medical command replies.

@@ -5,7 +5,7 @@ from .bale_client import BaleAPIError, BaleClient
 from .config import get_settings
 from .database import save_incoming_message
 from .models import IncomingMessage
-from .replies import build_safe_reply
+from .replies import build_safe_reply, needs_pharmacist_review
 
 logger = logging.getLogger(__name__)
 
@@ -30,9 +30,45 @@ def get_reply_text(message_text: str | None, default_reply_text: str) -> str:
     return build_safe_reply(message_text, default_reply_text)
 
 
+def get_review_metadata(message_text: str | None) -> dict[str, str | bool | None]:
+    if message_text is None:
+        return {
+            "needs_review": False,
+            "review_reason": None,
+            "review_status": "not_required",
+        }
+
+    command = message_text.strip().split(maxsplit=1)[0].lower()
+    if command in COMMAND_REPLIES:
+        return {
+            "needs_review": False,
+            "review_reason": None,
+            "review_status": "not_required",
+        }
+
+    if needs_pharmacist_review(message_text):
+        return {
+            "needs_review": True,
+            "review_reason": "pharmacist_review_required",
+            "review_status": "pending",
+        }
+
+    return {
+        "needs_review": False,
+        "review_reason": None,
+        "review_status": "not_required",
+    }
+
+
 def route_update(update: dict[str, Any]) -> dict[str, Any]:
     incoming = IncomingMessage.from_update(update)
-    saved_id = save_incoming_message(incoming)
+    review_metadata = get_review_metadata(incoming.text)
+    saved_id = save_incoming_message(
+        incoming,
+        needs_review=bool(review_metadata["needs_review"]),
+        review_reason=review_metadata["review_reason"],
+        review_status=str(review_metadata["review_status"]),
+    )
     settings = get_settings()
 
     reply_result = None

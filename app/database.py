@@ -32,8 +32,10 @@ def init_db() -> None:
 
 
 def save_incoming_message(message: IncomingMessage) -> int:
+    settings = get_settings()
     received_at = datetime.now(timezone.utc).isoformat()
-    raw_update = json.dumps(message.raw_update, ensure_ascii=False)
+    raw_payload = message.raw_update if settings.bale_store_raw_updates else {"raw_update_storage": "disabled"}
+    raw_update = json.dumps(raw_payload, ensure_ascii=False)
 
     with closing(get_connection()) as connection:
         with connection:

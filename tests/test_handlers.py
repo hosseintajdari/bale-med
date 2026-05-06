@@ -136,6 +136,20 @@ class HandlerTests(unittest.TestCase):
         self.assertIn("cannot give diagnosis", reply_text)
         self.assertIn("dosage", reply_text)
 
+    def test_allergy_text_returns_escalation_reply(self):
+        result = self._route_text_message("I have an allergy to this medicine")
+
+        reply_text = result["reply_result"]["text"]
+        self.assertIn("pharmacist review", reply_text)
+        self.assertIn("cannot give diagnosis", reply_text)
+
+    def test_pregnancy_text_returns_escalation_reply(self):
+        result = self._route_text_message("Can I use this during pregnancy?")
+
+        reply_text = result["reply_result"]["text"]
+        self.assertIn("pharmacist review", reply_text)
+        self.assertIn("cannot give diagnosis", reply_text)
+
     def test_raw_update_storage_is_disabled_by_default(self):
         original_cwd = Path.cwd()
         original_values = {key: os.environ.get(key) for key in self.ENV_KEYS}

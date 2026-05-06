@@ -8,6 +8,23 @@ from .models import IncomingMessage
 
 logger = logging.getLogger(__name__)
 
+COMMAND_REPLIES = {
+    "/start": (
+        "Hello. I am a pharmacy message intake assistant. "
+        "I can receive your message for pharmacy review, but I am not a medical advisor."
+    ),
+    "/help": "Available commands: /start, /help, /status",
+    "/status": "Bot is running and ready to receive pharmacy intake messages.",
+}
+
+
+def get_reply_text(message_text: str | None, default_reply_text: str) -> str:
+    if message_text is None:
+        return default_reply_text
+
+    command = message_text.strip().split(maxsplit=1)[0].lower()
+    return COMMAND_REPLIES.get(command, default_reply_text)
+
 
 def route_update(update: dict[str, Any]) -> dict[str, Any]:
     incoming = IncomingMessage.from_update(update)
@@ -16,7 +33,7 @@ def route_update(update: dict[str, Any]) -> dict[str, Any]:
 
     reply_result = None
     can_prepare_reply = incoming.chat_id is not None and incoming.text is not None
-    reply_text = settings.bale_reply_text
+    reply_text = get_reply_text(incoming.text, settings.bale_reply_text)
 
     if can_prepare_reply and not settings.bale_enable_sending:
         reply_result = {

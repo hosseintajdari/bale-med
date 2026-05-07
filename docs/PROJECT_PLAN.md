@@ -3,7 +3,7 @@
 ## Current Status
 The project has a minimal FastAPI webhook app, SQLite message storage, a cautious Bale API client, secure webhook secret-path handling, dry-run reply behavior, basic safe commands for `/start`, `/help`, and `/status`, and a safe pharmacy reply layer.
 
-Milestone 6 is now the active milestone: improve logging and create a minimal pharmacist-review foundation without adding an admin dashboard yet.
+Milestone 6 is done. Milestone 7 is now the active milestone: prepare the project for VPS deployment without changing production infrastructure yet.
 
 ## Long-Term Product Vision
 Build a safe pharmacy automation assistant for Bale that supports a real pharmacy workflow from first contact through pharmacist review. The assistant should receive messages, collect structured intake information, avoid clinical decision-making, preserve auditability, and route cases to a pharmacist when judgment is needed.
@@ -18,8 +18,8 @@ The vision and milestone order are living project guidance. They may change as r
 3. Milestone 3: Done - Secure webhook with secret path.
 4. Milestone 4: Done - Basic bot commands.
 5. Milestone 5: Done - Safe pharmacy reply layer.
-6. Milestone 6: Current - Better logging and admin review.
-7. Milestone 7: Planned - VPS deployment preparation.
+6. Milestone 6: Done - Better logging and admin review.
+7. Milestone 7: Current - VPS deployment preparation.
 8. Milestone 8: Planned - Real VPS deployment.
 9. Milestone 9: Planned - LLM/AI integration.
 
@@ -41,7 +41,7 @@ Added simple command replies for `/start`, `/help`, and `/status`. These replies
 
 Added a deterministic safe reply layer that asks for structured intake information for normal pharmacy messages and escalates high-risk, unclear, or medical-judgment messages to pharmacist review without giving medical advice. Tests cover normal intake, escalation, common allergy and pregnancy wording, command behavior, and preserved safety boundaries.
 
-## Current Milestone: Milestone 6 - Better Logging and Admin Review
+## Completed Milestone: Milestone 6 - Better Logging and Admin Review
 
 ### Goal
 Add a minimal review-tracking and logging foundation so pharmacist-review cases are visible in stored message metadata and future admin tools can use a reliable audit trail.
@@ -96,4 +96,4 @@ git diff --check
 4. Validate VPS runbook end-to-end, including restart and log inspection.
 5. Review SQLite storage path, backup, and retention strategy for operational safety.
 6. Keep `BALE_ENABLE_SENDING=false` until the exact Bale behavior is confirmed.
-7. Complete Milestone 6 review tracking before broad patient-facing use.
+7. Complete Milestone 7 deployment preparation before broad patient-facing use.

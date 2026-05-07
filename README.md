@@ -19,8 +19,8 @@ This vision and the milestone order are allowed to change as the pharmacy workfl
 - Milestone 3: Done - Secure webhook with secret path.
 - Milestone 4: Done - Basic bot commands.
 - Milestone 5: Done - Safe pharmacy reply layer.
-- Milestone 6: Current - Better logging and admin review.
-- Milestone 7: Planned - VPS deployment preparation.
+- Milestone 6: Done - Better logging and admin review.
+- Milestone 7: Current - VPS deployment preparation.
 - Milestone 8: Planned - Real VPS deployment.
 - Milestone 9: Planned - LLM/AI integration.
 

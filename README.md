@@ -50,6 +50,13 @@ docs/
   DEPLOYMENT_VPS.md        Minimal VPS deployment runbook
 ```
 
+## Repository Standards
+
+- [CONTRIBUTING.md](CONTRIBUTING.md) explains safe local setup, verification, and commit expectations.
+- [SECURITY.md](SECURITY.md) explains how to handle secrets, sensitive data, and security reports.
+- GitHub issue and pull request templates are in [.github/](.github/).
+- Keep changes small, milestone-aligned, and safe for a real pharmacy workflow.
+
 ## Setup on Windows PowerShell
 
 ```powershell

@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 from app.database import init_db
-from app.handlers import route_update
+from app.handlers import get_reply_text, route_update
 
 
 class HandlerTests(unittest.TestCase):
@@ -403,7 +403,21 @@ class HandlerTests(unittest.TestCase):
     def test_status_command_confirms_bot_is_running(self):
         result = self._route_text_message("/status")
 
-        self.assertEqual(result["reply_result"]["text"], "Bot is running and ready to receive pharmacy intake messages.")
+        reply_text = result["reply_result"]["text"]
+        self.assertIn("Bot is running", reply_text)
+        self.assertIn("sending is OFF", reply_text)
+        self.assertIn("dry-run mode", reply_text)
+        self.assertNotIn("test-token", reply_text)
+        self.assertNotIn("test-secret", reply_text)
+
+    def test_status_command_reports_when_sending_is_enabled(self):
+        reply_text = get_reply_text("/status", "fallback", bale_enable_sending=True)
+
+        self.assertIn("Bot is running", reply_text)
+        self.assertIn("sending is ON", reply_text)
+        self.assertIn("real Bale replies may be sent", reply_text)
+        self.assertNotIn("test-token", reply_text)
+        self.assertNotIn("test-secret", reply_text)
 
     def test_unknown_text_uses_safe_intake_reply(self):
         result = self._route_text_message("Hello pharmacy")

@@ -210,7 +210,7 @@ Webhook behavior:
 - Stores basic pharmacist-review metadata for incoming messages.
 - Uses `/webhook/bale/{secret}` and returns 404 for a wrong secret.
 - Supports only `message.text` path for acknowledgement behavior.
-- Handles `/start`, `/help`, and `/status` with simple, non-medical command replies.
+- Handles `/start`, `/help`, and `/status` with simple, non-medical command replies. `/status` reports whether sending is ON or OFF without exposing secrets.
 - Unknown text keeps the configured safe acknowledgement reply.
 - If `BALE_ENABLE_SENDING=false`, reply is prepared but not sent.
 - Writes sanitized operational logs for incoming webhook handling and reply preparation. Logs include stored row id, whether text exists, text length, review status, and send mode; they should not include secrets, raw webhook payloads, chat ids, or full message text.

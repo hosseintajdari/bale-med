@@ -35,7 +35,7 @@ Verified the local app can be exposed through a public tunnel, receive real Bale
 Changed the webhook route to `/webhook/bale/{secret}`, added `BALE_WEBHOOK_SECRET`, and made wrong secrets return 404.
 
 ### Milestone 4: Basic Bot Commands
-Added simple command replies for `/start`, `/help`, and `/status`. These replies are intentionally non-medical: they introduce the bot as a pharmacy message intake assistant, list available commands, and confirm the service is running. Unknown text keeps the configured safe acknowledgement behavior.
+Added simple command replies for `/start`, `/help`, and `/status`. These replies are intentionally non-medical: they introduce the bot as a pharmacy message intake assistant, list available commands, and confirm the service is running. `/status` also reports whether sending is ON or OFF without exposing secrets. Unknown text keeps the configured safe acknowledgement behavior.
 
 ### Milestone 5: Safe Pharmacy Reply Layer
 

@@ -15,15 +15,26 @@ COMMAND_REPLIES = {
         "I can receive your message for pharmacy review, but I am not a medical advisor."
     ),
     "/help": "Available commands: /start, /help, /status",
-    "/status": "Bot is running and ready to receive pharmacy intake messages.",
 }
 
 
-def get_reply_text(message_text: str | None, default_reply_text: str) -> str:
+def get_status_reply(bale_enable_sending: bool) -> str:
+    if bale_enable_sending:
+        return "Bot is running. Operating mode: sending is ON, so real Bale replies may be sent."
+    return "Bot is running. Operating mode: sending is OFF, so the bot is in dry-run mode."
+
+
+def get_reply_text(
+    message_text: str | None,
+    default_reply_text: str,
+    bale_enable_sending: bool = False,
+) -> str:
     if message_text is None:
         return default_reply_text
 
     command = message_text.strip().split(maxsplit=1)[0].lower()
+    if command == "/status":
+        return get_status_reply(bale_enable_sending)
     if command in COMMAND_REPLIES:
         return COMMAND_REPLIES[command]
 
@@ -87,7 +98,11 @@ def route_update(update: dict[str, Any]) -> dict[str, Any]:
 
     reply_result = None
     can_prepare_reply = incoming.chat_id is not None and incoming.text is not None
-    reply_text = get_reply_text(incoming.text, settings.bale_reply_text)
+    reply_text = get_reply_text(
+        incoming.text,
+        settings.bale_reply_text,
+        bale_enable_sending=settings.bale_enable_sending,
+    )
 
     if can_prepare_reply and not settings.bale_enable_sending:
         reply_result = {

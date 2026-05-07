@@ -91,6 +91,41 @@ class WebhookRouteTests(unittest.TestCase):
 
         self.assertEqual(count, 0)
 
+    def test_pending_reviews_endpoint_lists_only_pending_review_items(self):
+        with TestClient(self.main_module.app) as client:
+            client.post("/webhook/bale/test-secret", json=self._payload("Hello pharmacy"))
+            client.post(
+                "/webhook/bale/test-secret",
+                json=self._payload("Can I use this medicine during pregnancy?"),
+            )
+
+            response = client.get("/local/reviews/pending")
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(len(data["pending_reviews"]), 1)
+        pending = data["pending_reviews"][0]
+        self.assertEqual(pending["chat_id"], "demo-chat")
+        self.assertEqual(pending["message_id"], "123")
+        self.assertEqual(pending["text"], "Can I use this medicine during pregnancy?")
+        self.assertEqual(pending["review_reason"], "pharmacist_review_required")
+        self.assertEqual(pending["review_status"], "pending")
+        self.assertNotIn("raw_update", pending)
+
+    def test_pending_reviews_endpoint_returns_empty_list_for_fresh_database(self):
+        with TestClient(self.main_module.app) as client:
+            response = client.get("/local/reviews/pending")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"pending_reviews": []})
+
+    def test_pending_reviews_endpoint_rejects_non_local_client(self):
+        with TestClient(self.main_module.app, client=("203.0.113.10", 50000)) as client:
+            response = client.get("/local/reviews/pending")
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()["detail"], "Not Found")
+
 
 if __name__ == "__main__":
     unittest.main()

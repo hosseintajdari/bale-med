@@ -85,3 +85,26 @@ def save_incoming_message(
                 ),
             )
             return int(cursor.lastrowid)
+
+
+def list_pending_review_items() -> list[dict[str, str | int | None]]:
+    with closing(get_connection()) as connection:
+        connection.row_factory = sqlite3.Row
+        rows = connection.execute(
+            """
+            SELECT
+                id,
+                received_at,
+                chat_id,
+                message_id,
+                text,
+                review_reason,
+                review_status
+            FROM incoming_messages
+            WHERE needs_review = 1
+              AND review_status = 'pending'
+            ORDER BY id ASC
+            """
+        ).fetchall()
+
+    return [dict(row) for row in rows]

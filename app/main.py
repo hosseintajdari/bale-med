@@ -4,7 +4,7 @@ from typing import Any
 from fastapi import FastAPI, HTTPException, Request
 
 from .config import get_settings
-from .database import init_db
+from .database import init_db, list_pending_review_items
 from .handlers import route_update
 
 
@@ -25,6 +25,14 @@ app = FastAPI(
 @app.get("/health")
 def health_check() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/local/reviews/pending")
+def pending_reviews(request: Request) -> dict[str, list[dict[str, str | int | None]]]:
+    client_host = request.client.host if request.client else ""
+    if client_host not in {"127.0.0.1", "::1", "localhost", "testclient"}:
+        raise HTTPException(status_code=404, detail="Not Found")
+    return {"pending_reviews": list_pending_review_items()}
 
 
 @app.post("/webhook/bale/{secret}")

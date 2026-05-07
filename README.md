@@ -115,6 +115,16 @@ Invoke-RestMethod -Method Post `
 
 Dry-run behavior note: keep `BALE_ENABLE_SENDING=false` so webhook processing stores the message and prepares reply metadata without calling Bale `sendMessage`.
 
+## Local Pending Review List
+
+After the app is running locally, use this read-only JSON endpoint to see messages waiting for pharmacist review:
+
+```powershell
+Invoke-RestMethod -Method Get -Uri http://127.0.0.1:8000/local/reviews/pending
+```
+
+The endpoint returns only pending review rows and does not include stored raw webhook payloads. It is intended for local inspection, not public deployment.
+
 ## Local Smoke Test (PowerShell)
 
 ```powershell
@@ -174,7 +184,7 @@ python -m unittest discover -s tests
 
 Run this before and after changes. These tests currently check:
 - local `.env` loading
-- webhook routing, SQLite storage, review metadata, and dry-run reply preparation
+- webhook routing, SQLite storage, review metadata, local pending-review listing, and dry-run reply preparation
 - basic command replies
 - safe intake and pharmacist-review escalation replies
 

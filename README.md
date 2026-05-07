@@ -220,4 +220,4 @@ Webhook behavior:
 
 ## VPS Notes
 
-Minimal VPS deployment guidance is documented in [DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md). Treat webhook authentication and HTTPS reverse-proxy setup as deployment blockers before public exposure.
+Milestone 7 is deployment preparation only. Minimal VPS deployment guidance and the preparation checklist are documented in [DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md). Treat webhook authentication, HTTPS reverse-proxy setup, backup/restore, and real sending approval as blockers before public exposure.

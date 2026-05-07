@@ -83,6 +83,56 @@ python -m compileall app tests
 git diff --check
 ```
 
+## Current Milestone: Milestone 7 - VPS Deployment Preparation
+
+### Goal
+Prepare a clear, safe VPS deployment checklist and runbook so the project can move to real deployment later without guessing, exposing secrets, or changing production infrastructure too early.
+
+### Current State
+The app runs locally, uses environment variables for secrets, keeps outgoing Bale messages disabled by default, stores data in SQLite, and has a minimal VPS runbook in `docs/DEPLOYMENT_VPS.md`. Milestone 7 should improve deployment readiness only. Real VPS setup, DNS, SSL, firewall changes, and webhook registration remain separate approval-gated work.
+
+### Pieces
+1. VPS readiness checklist: define the exact prerequisites before deployment, including domain, Ubuntu VPS, deploy user, Python version, HTTPS reverse proxy, firewall plan, backup path, and secret handling.
+2. Environment preparation: document production-like `.env` values using placeholders only, keep `BALE_ENABLE_SENDING=false`, and confirm `.env` remains uncommitted.
+3. App run strategy: document the local-only uvicorn command, the intended VPS command, and the systemd service shape without installing it yet.
+4. HTTPS and reverse proxy plan: document whether Nginx or Caddy will terminate HTTPS, how traffic should forward to `127.0.0.1:8000`, and which checks must pass before exposing the webhook.
+5. Webhook setup plan: document the final public webhook URL shape and the Bale API assumptions that must be verified before calling `setWebhook` for production.
+6. Storage and backup plan: document the SQLite file location, backup expectation, restore check, and retention question for pharmacy workflow safety.
+7. Operations checklist: document restart, status, logs, smoke test, rollback, and what information must never be logged.
+8. Deployment decision gate: list the exact checks that must pass before Milestone 8 begins.
+
+### Scope IN
+1. Improve deployment documentation and checklists.
+2. Keep deployment commands copy-pasteable and beginner-friendly.
+3. Add missing safety gates around secrets, logging, backups, HTTPS, and webhook setup.
+4. Keep all values in docs as placeholders unless they are safe defaults.
+5. Verify the docs-only change with the normal project checks.
+
+### Scope OUT
+- No real VPS deployment.
+- No DNS, SSL, firewall, Nginx, Caddy, or systemd changes on a server.
+- No real webhook registration for production.
+- No enabling `BALE_ENABLE_SENDING=true`.
+- No real secrets in Git.
+- No LLM/AI integration.
+- No admin dashboard.
+
+### Verification
+```powershell
+python -m unittest discover -s tests
+python -m compileall app tests
+git diff --check
+git status --short
+```
+
+### Done When
+1. `docs/DEPLOYMENT_VPS.md` has a practical Milestone 7 checklist.
+2. `README.md` and this project plan point to Milestone 7 correctly.
+3. The normal verification commands pass.
+4. No secrets, database files, logs, tunnel output, or production config are committed.
+5. Commit message is:
+   `docs: define milestone 7 deployment prep`
+
 ## Known Assumptions and Open Questions
 - Webhook payload shape is treated as Telegram-like for now (`message`, `message.chat.id`, `message.message_id`, `message.text`).
 - Bale send-message endpoint, method, headers, and payload contract still need confirmation before production use.

@@ -213,6 +213,7 @@ Webhook behavior:
 - Handles `/start`, `/help`, and `/status` with simple, non-medical command replies.
 - Unknown text keeps the configured safe acknowledgement reply.
 - If `BALE_ENABLE_SENDING=false`, reply is prepared but not sent.
+- Writes sanitized operational logs for incoming webhook handling and reply preparation. Logs include stored row id, whether text exists, text length, review status, and send mode; they should not include secrets, raw webhook payloads, chat ids, or full message text.
 - If `BALE_ENABLE_SENDING=true`, sends:
   `پیام شما دریافت شد. این ربات جایگزین نظر داروساز نیست و در صورت نیاز توسط داروساز بررسی میشود.`
 - Do not call `setWebhook` to `127.0.0.1` because Bale requires public HTTPS URL for webhook delivery.

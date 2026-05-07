@@ -223,6 +223,26 @@ class HandlerTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertEqual(row, (0, None, "not_required"))
 
+    def test_route_update_logs_sanitized_webhook_and_reply_audit_events(self):
+        message_text = "private patient text with test-token test-secret demo-chat"
+
+        with self.assertLogs("app.handlers", level="INFO") as captured:
+            result = self._route_text_message(message_text)
+
+        self.assertTrue(result["ok"])
+        log_output = "\n".join(captured.output)
+        self.assertIn("webhook_update_received", log_output)
+        self.assertIn("reply_prepared", log_output)
+        self.assertIn("stored_message_id=", log_output)
+        self.assertIn("has_text=True", log_output)
+        self.assertIn("text_length=", log_output)
+        self.assertIn("review_status=not_required", log_output)
+        self.assertIn("sending_enabled=False", log_output)
+        self.assertNotIn(message_text, log_output)
+        self.assertNotIn("test-token", log_output)
+        self.assertNotIn("test-secret", log_output)
+        self.assertNotIn("demo-chat", log_output)
+
     def test_fresh_database_has_review_metadata_columns(self):
         original_cwd = Path.cwd()
         original_values = {key: os.environ.get(key) for key in self.ENV_KEYS}

@@ -44,18 +44,18 @@ Added a deterministic safe reply layer that asks for structured intake informati
 ## Current Milestone: Milestone 6 - Better Logging and Admin Review
 
 ### Goal
-Add a minimal review-tracking foundation so pharmacist-review cases are visible in stored message metadata and future admin tools can use a reliable audit trail.
+Add a minimal review-tracking and logging foundation so pharmacist-review cases are visible in stored message metadata and future admin tools can use a reliable audit trail.
 
 ### Current State
-Incoming messages now store basic review metadata: whether pharmacist review is needed, a simple review reason, and a review status. Escalation-triggering messages are marked pending for pharmacist review; normal intake and command messages are marked not required. A minimal local JSON endpoint lists pending pharmacist-review items without exposing raw webhook payloads.
+Incoming messages now store basic review metadata: whether pharmacist review is needed, a simple review reason, and a review status. Escalation-triggering messages are marked pending for pharmacist review; normal intake and command messages are marked not required. A minimal local JSON endpoint lists pending pharmacist-review items without exposing raw webhook payloads. Sanitized audit logs record webhook intake and reply preparation without logging secrets, raw payloads, chat ids, or full message text.
 
 ### Scope IN
 1. Store whether each incoming message needs pharmacist review.
 2. Store a simple review reason for escalation-triggering messages.
 3. Store a basic review status that can support later pharmacist/admin tools.
-4. Keep logging useful without logging secrets or unnecessary sensitive data.
+4. Keep logging useful without logging secrets, raw payloads, chat ids, or full message text.
 5. Add a minimal local-only pending-review JSON endpoint.
-6. Add tests for normal intake, escalation metadata, command behavior, pending-review listing, and fresh SQLite initialization.
+6. Add tests for normal intake, escalation metadata, sanitized logging, command behavior, pending-review listing, and fresh SQLite initialization.
 7. Update `README.md`, `docs/PROJECT_PLAN.md`, and `docs/SAFETY_RULES.md` if behavior changes.
 
 ### Scope OUT

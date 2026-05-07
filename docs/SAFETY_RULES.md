@@ -16,7 +16,7 @@ Route to a pharmacist when a message includes urgent symptoms, unclear medicatio
 Escalate immediately when input is incomplete, ambiguous, high-risk, or requests clinical judgment. If unsure, escalate by default.
 
 ## Privacy and Auditability
-Store incoming messages only for legitimate workflow needs. Do not log secrets, Bale tokens, private keys, or unnecessary personal data. Keep raw webhook payloads available for debugging and audit trails during the MVP, then revisit retention rules before production.
+Store incoming messages only for legitimate workflow needs. Do not log secrets, Bale tokens, private keys, raw webhook payloads, chat ids, or full message text. Operational logs may include sanitized audit fields such as stored row id, text presence, text length, review status, and send mode. Keep raw webhook payload storage disabled by default, then revisit retention rules before production.
 
 Review metadata is operational workflow tracking only. It may mark that pharmacist review is needed, but it must not be treated as diagnosis, treatment advice, or emergency triage.
 

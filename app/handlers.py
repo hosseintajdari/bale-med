@@ -70,6 +70,20 @@ def route_update(update: dict[str, Any]) -> dict[str, Any]:
         review_status=str(review_metadata["review_status"]),
     )
     settings = get_settings()
+    has_text = incoming.text is not None
+    text_length = len(incoming.text) if incoming.text is not None else 0
+
+    logger.info(
+        "webhook_update_received stored_message_id=%s has_chat_id=%s has_message_id=%s "
+        "has_text=%s text_length=%s needs_review=%s review_status=%s",
+        saved_id,
+        incoming.chat_id is not None,
+        incoming.message_id is not None,
+        has_text,
+        text_length,
+        bool(review_metadata["needs_review"]),
+        review_metadata["review_status"],
+    )
 
     reply_result = None
     can_prepare_reply = incoming.chat_id is not None and incoming.text is not None
@@ -83,7 +97,13 @@ def route_update(update: dict[str, Any]) -> dict[str, Any]:
             "chat_id": incoming.chat_id,
             "text": reply_text,
         }
-        logger.info("Prepared reply but sending is disabled for chat_id=%s", incoming.chat_id)
+        logger.info(
+            "reply_prepared stored_message_id=%s sending_enabled=%s skipped=%s review_status=%s",
+            saved_id,
+            settings.bale_enable_sending,
+            True,
+            review_metadata["review_status"],
+        )
     elif can_prepare_reply and settings.bale_enable_sending:
         client = BaleClient(settings)
         try:
@@ -91,8 +111,15 @@ def route_update(update: dict[str, Any]) -> dict[str, Any]:
                 chat_id=incoming.chat_id,
                 text=reply_text,
             )
+            logger.info(
+                "reply_prepared stored_message_id=%s sending_enabled=%s skipped=%s review_status=%s",
+                saved_id,
+                settings.bale_enable_sending,
+                False,
+                review_metadata["review_status"],
+            )
         except (BaleAPIError, ValueError) as exc:
-            logger.exception("Failed to send Bale message for chat_id=%s", incoming.chat_id)
+            logger.exception("reply_send_failed stored_message_id=%s", saved_id)
             reply_result = {
                 "ok": False,
                 "skipped": False,

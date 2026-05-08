@@ -51,7 +51,9 @@ Milestone 8 may start only after the deployment owner confirms the blockers abov
 
 ## Milestone 8 VPS Deployment Execution Plan
 
-Milestone 8 is the first real VPS deployment milestone. It starts only after a VPS is purchased and SSH access works. It does not include AI, a Web UI, a dashboard, medical logic changes, DNS changes before approval, or enabling real outgoing Bale messages.
+Milestone 8 is the first real VPS deployment milestone. Milestone 8A has started as readiness and GitHub workflow tracking only. Real server work starts only after a VPS is purchased and SSH access works. It does not include AI, a Web UI, a dashboard, medical logic changes, DNS changes before approval, or enabling real outgoing Bale messages.
+
+Milestone 8 GitHub rule: use one small branch and pull request per submilestone, then merge and sync `main` before starting the next submilestone.
 
 Default deployment choice: use Caddy as the reverse proxy because it is beginner-friendly and can manage HTTPS automatically. Nginx is a valid alternative if the VPS provider, hosting panel, or future operator is more comfortable with Nginx.
 
@@ -84,6 +86,8 @@ Do not buy if ports 80/443 are blocked, SSH is unavailable, the IP changes unexp
 ### 8A: VPS Base Access and Hardening Checklist
 
 Goal: Get safe SSH access and basic server hardening in place before app deployment.
+
+Status: Started for readiness tracking and GitHub workflow only. Waiting for confirmed VPS access before running server commands.
 
 Scope IN:
 - Confirm SSH access.

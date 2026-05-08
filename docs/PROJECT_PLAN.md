@@ -3,7 +3,7 @@
 ## Current Status
 The project has a minimal FastAPI webhook app, SQLite message storage, a cautious Bale API client, secure webhook secret-path handling, dry-run reply behavior, Persian user-facing replies for `/start`, `/help`, `/status`, and safe pharmacy intake/escalation flows, review metadata, a minimal duplicate-delivery guard, local-only pharmacist review status actions, optional Bale admin review notifications, local SQLite backup and restore helpers, a final deployment readiness checklist, a Milestone 8 VPS deployment execution plan, and repository/issue alignment notes.
 
-Milestone 7A, Milestone 7B, Milestone 7C, Milestone 7D, Milestone 7E, Milestone 7F, Milestone 7G, and Milestone 7I are done. Milestone 8 planning is documented, but real VPS deployment has not started. The next implementation milestone is executing Milestone 8 after VPS purchase.
+Milestone 7A, Milestone 7B, Milestone 7C, Milestone 7D, Milestone 7E, Milestone 7F, Milestone 7G, and Milestone 7I are done. Milestone 8 planning is documented. Milestone 8A has started as VPS readiness and GitHub PR workflow tracking while waiting for confirmed VPS access.
 
 ## Long-Term Product Vision
 Build a safe pharmacy automation assistant for Bale that supports a real pharmacy workflow from first contact through pharmacist review, especially where pharmacy teams need constrained, auditable tools for rural or border healthcare workflows. The assistant should receive messages, collect structured intake information, avoid clinical decision-making, preserve auditability, and route cases to a pharmacist when judgment is needed.
@@ -28,8 +28,8 @@ The vision and milestone order are living project guidance. They may change as r
    - Milestone 7F: Done - Persian and RTL-safe user-facing replies.
    - Milestone 7G: Done - Bale admin review notifications.
    - Milestone 7I: Done - Repository context and issue alignment.
-8. Milestone 8: Planned next - Real VPS deployment execution.
-   - Milestone 8A: Planned - VPS base access and hardening checklist.
+8. Milestone 8: Started - Real VPS deployment workflow.
+   - Milestone 8A: Started - VPS readiness and GitHub PR workflow; waiting for VPS access.
    - Milestone 8B: Planned - Install Python, Git, venv, and clone repo.
    - Milestone 8C: Planned - Configure `.env` with placeholders and keep sending disabled.
    - Milestone 8D: Planned - Run app manually on `127.0.0.1:8000`.
@@ -40,6 +40,49 @@ The vision and milestone order are living project guidance. They may change as r
    - Milestone 8I: Planned - First monitored dry-run operation.
    - Milestone 8J: Planned - Decide whether to enable real sending later.
 9. Milestone 9: Planned - LLM/AI integration.
+
+## Active Milestone: Milestone 8A - VPS Readiness and GitHub PR Workflow
+
+### Goal
+Start Milestone 8 with a professional branch, pull request, and merge workflow while waiting for real VPS access.
+
+### Current State
+No VPS access has been confirmed yet. Milestone 8A is open only to track readiness and GitHub workflow discipline before server-side work begins.
+
+### Scope IN
+1. Use one branch and pull request per Milestone 8 submilestone.
+2. Keep the first Milestone 8A change documentation-only.
+3. Keep `BALE_ENABLE_SENDING=false` as the first deployment safety default.
+4. Wait for confirmed VPS access before server hardening or app deployment.
+
+### Scope OUT
+- No real VPS deployment.
+- No DNS, SSL, firewall, Caddy, Nginx, or systemd changes on a server.
+- No production webhook registration.
+- No enabling `BALE_ENABLE_SENDING=true`.
+- No secrets in Git.
+- No app behavior changes.
+
+### Verification
+```powershell
+git diff --check
+```
+
+For any later Milestone 8 code or config change, also run:
+
+```powershell
+python -m unittest discover -s tests
+python -m compileall app tests
+```
+
+### GitHub Workflow
+Each next submilestone should start from synced `main`, use a branch named like `codex/milestone-8x-short-name`, open a draft PR, pass review/checks, merge to `main`, and sync local `main` before the next branch starts.
+
+### Done When
+1. The Milestone 8A branch is pushed.
+2. A draft PR into `main` is opened.
+3. The PR is merged after checks/review.
+4. Local `main` is synced after merge.
 
 ## Completed Milestones
 

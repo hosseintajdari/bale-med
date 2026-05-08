@@ -1,14 +1,16 @@
 # Bale Pharmacy Assistant Bot
 
-Minimal FastAPI skeleton for a pharmacy automation chatbot connected to Bale messenger.
+Local-first FastAPI MVP for a Bale-based pharmacy workflow assistant.
 
-The first milestones are intentionally small: receive a Bale webhook update, store it in SQLite, prepare a safe reply path, secure the webhook route, and support basic non-medical bot commands. The bot does not provide diagnosis, prescriptions, dosage recommendations, or medical advice.
+The project supports safe pharmacy message intake, pharmacist review tracking, duplicate webhook handling, SQLite backup/restore, and optional admin review notifications. It is intended for constrained pharmacy workflows, including rural or border healthcare settings where clear handoff to a pharmacist matters.
+
+This is not a deployed production system and not a clinically validated product. The bot does not provide diagnosis, prescriptions, dosage recommendations, autonomous triage, or medication-change advice.
 
 ## Long-Term Product Vision
 
 Build a safe pharmacy automation assistant for Bale that helps a real pharmacy receive messages, collect structured intake information, keep an auditable history, and route cases to a pharmacist when human judgment is needed.
 
-The long-term system may later include pharmacist review workflows, VPS deployment, and LLM/AI support. Any AI features must stay inside pharmacist-approved safety boundaries and must not diagnose, prescribe, replace a pharmacist, or recommend medication changes.
+The system is workflow-based, pharmacist-centered, safety-first, local-first, and AI-optional. Later milestones may add real VPS deployment, stronger pharmacist/admin tools, and LLM/AI support. Any AI features must stay inside pharmacist-approved safety boundaries and must not diagnose, prescribe, replace a pharmacist, or recommend medication changes.
 
 This vision and the milestone order are allowed to change as the pharmacy workflow becomes clearer. When direction changes, update the milestone plan before changing implementation.
 
@@ -20,7 +22,7 @@ This vision and the milestone order are allowed to change as the pharmacy workfl
 - Milestone 4: Done - Basic bot commands.
 - Milestone 5: Done - Safe pharmacy reply layer.
 - Milestone 6: Done - Better logging and admin review.
-- Milestone 7: Current - VPS deployment preparation.
+- Milestone 7: Done - VPS deployment preparation and repository alignment.
   - Milestone 7A: Done - Bale webhook duplicate-delivery guard.
   - Milestone 7B: Done - Minimal local pharmacist review actions.
   - Milestone 7C: Done - Local SQLite backup and retention safety foundation.
@@ -28,17 +30,19 @@ This vision and the milestone order are allowed to change as the pharmacy workfl
   - Milestone 7E: Done - Local SQLite restore rehearsal.
   - Milestone 7F: Done - Persian and RTL-safe user-facing replies.
   - Milestone 7G: Done - Optional Bale admin review notifications.
-- Milestone 8: Planned - Real VPS deployment.
+  - Milestone 7I: Done - Repository context and issue alignment.
+- Milestone 8: Planned next - Real VPS deployment.
 - Milestone 9: Planned - LLM/AI integration.
 
 ## MVP Guarantees vs Non-Goals
 
 | Area | Current MVP |
 | --- | --- |
-| In scope | Receive Bale webhook payload, store message data, prepare safe acknowledgement path, handle basic commands |
-| Not in scope | Diagnosis, treatment advice, dosage changes, prescription replacement |
+| In scope | Secure Bale webhook intake, SQLite message storage, safe Persian replies, duplicate-delivery guard, pharmacist-review metadata/actions, backup/restore helpers, optional admin review notifications |
+| Not in scope | Diagnosis, treatment advice, dosage changes, prescription replacement, autonomous clinical decision-making, Web UI, AI/LLM behavior |
 | Bale outbound API | Available only when explicitly enabled; keep disabled by default |
-| Deployment | Local-first with VPS runbook, not full production hardening |
+| Deployment | Local-first with VPS runbook; real VPS deployment has not started |
+| Clinical status | Safety-oriented workflow support only; not clinically validated |
 
 ## Project Structure
 
@@ -287,6 +291,14 @@ Webhook behavior:
   `پیام شما دریافت شد. این ربات جایگزین نظر داروساز یا پزشک نیست. در صورت نیاز، پیام شما توسط داروساز بررسی می‌شود.`
 - Do not call `setWebhook` to `127.0.0.1` because Bale requires public HTTPS URL for webhook delivery.
 
+## Current Limitations and Next Priorities
+
+Real VPS deployment has not started. The next milestone is Milestone 8: execute the deployment checklist safely while keeping `BALE_ENABLE_SENDING=false` at first.
+
+Before public exposure, verify Bale webhook and `sendMessage` assumptions, configure HTTPS/reverse proxy/firewall rules, protect local-only endpoints, test backup/restore on the deployment host, confirm sanitized logs, and approve a retention/deletion policy.
+
+AI, Web UI, clinical protocols, diagnosis, autonomous triage, and patient outcome claims remain postponed.
+
 ## VPS Notes
 
-Milestone 7 is deployment preparation only. Minimal VPS deployment guidance and the final go/no-go checklist are documented in [DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md). Treat Bale webhook assumption verification, HTTPS reverse-proxy setup, firewall planning, local-only endpoint exposure, deployment-host backup/restore proof, rollback planning, sanitized logs, and real sending approval as blockers before public exposure.
+Milestone 7 deployment preparation is complete. Minimal VPS deployment guidance and the final go/no-go checklist are documented in [DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md). Treat Bale webhook assumption verification, HTTPS reverse-proxy setup, firewall planning, local-only endpoint exposure, deployment-host backup/restore proof, rollback planning, sanitized logs, and real sending approval as blockers before public exposure.

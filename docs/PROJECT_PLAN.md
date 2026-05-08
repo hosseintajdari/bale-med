@@ -1,14 +1,14 @@
 # Project Plan
 
 ## Current Status
-The project has a minimal FastAPI webhook app, SQLite message storage, a cautious Bale API client, secure webhook secret-path handling, dry-run reply behavior, Persian user-facing replies for `/start`, `/help`, `/status`, and safe pharmacy intake/escalation flows, review metadata, a minimal duplicate-delivery guard, local-only pharmacist review status actions, optional Bale admin review notifications, local SQLite backup and restore helpers, and a final deployment readiness checklist.
+The project has a minimal FastAPI webhook app, SQLite message storage, a cautious Bale API client, secure webhook secret-path handling, dry-run reply behavior, Persian user-facing replies for `/start`, `/help`, `/status`, and safe pharmacy intake/escalation flows, review metadata, a minimal duplicate-delivery guard, local-only pharmacist review status actions, optional Bale admin review notifications, local SQLite backup and restore helpers, a final deployment readiness checklist, and repository/issue alignment notes.
 
-Milestone 7A, Milestone 7B, Milestone 7C, Milestone 7D, Milestone 7E, Milestone 7F, and Milestone 7G are done. Real VPS deployment has not started.
+Milestone 7A, Milestone 7B, Milestone 7C, Milestone 7D, Milestone 7E, Milestone 7F, Milestone 7G, and Milestone 7I are done. Real VPS deployment has not started. The next implementation milestone is Milestone 8.
 
 ## Long-Term Product Vision
-Build a safe pharmacy automation assistant for Bale that supports a real pharmacy workflow from first contact through pharmacist review. The assistant should receive messages, collect structured intake information, avoid clinical decision-making, preserve auditability, and route cases to a pharmacist when judgment is needed.
+Build a safe pharmacy automation assistant for Bale that supports a real pharmacy workflow from first contact through pharmacist review, especially where pharmacy teams need constrained, auditable tools for rural or border healthcare workflows. The assistant should receive messages, collect structured intake information, avoid clinical decision-making, preserve auditability, and route cases to a pharmacist when judgment is needed.
 
-Later milestones may add better logging, pharmacist/admin review tools, VPS deployment, and LLM/AI integration. AI must be introduced only inside pharmacist-approved boundaries and must not diagnose, prescribe, replace a pharmacist, or recommend medication changes.
+The project is workflow-based, pharmacist-centered, safety-first, local-first, and AI-optional. Later milestones may add real VPS deployment, stronger pharmacist/admin review tools, and LLM/AI integration. AI must be introduced only inside pharmacist-approved boundaries and must not diagnose, prescribe, replace a pharmacist, or recommend medication changes.
 
 The vision and milestone order are living project guidance. They may change as requirements, pharmacy workflow details, or Bale API constraints become clearer. Update this plan before making implementation changes that alter the project direction.
 
@@ -19,7 +19,7 @@ The vision and milestone order are living project guidance. They may change as r
 4. Milestone 4: Done - Basic bot commands.
 5. Milestone 5: Done - Safe pharmacy reply layer.
 6. Milestone 6: Done - Better logging and admin review.
-7. Milestone 7: Current - VPS deployment preparation.
+7. Milestone 7: Done - VPS deployment preparation and repository alignment.
    - Milestone 7A: Done - Bale webhook duplicate-delivery guard.
    - Milestone 7B: Done - Minimal local pharmacist review actions.
    - Milestone 7C: Done - Local SQLite backup and retention safety foundation.
@@ -27,7 +27,8 @@ The vision and milestone order are living project guidance. They may change as r
    - Milestone 7E: Done - Local SQLite restore rehearsal.
    - Milestone 7F: Done - Persian and RTL-safe user-facing replies.
    - Milestone 7G: Done - Bale admin review notifications.
-8. Milestone 8: Planned - Real VPS deployment.
+   - Milestone 7I: Done - Repository context and issue alignment.
+8. Milestone 8: Planned next - Real VPS deployment.
 9. Milestone 9: Planned - LLM/AI integration.
 
 ## Completed Milestones
@@ -141,7 +142,7 @@ python -m compileall app tests
 git diff --check
 ```
 
-## Current Milestone: Milestone 7 - VPS Deployment Preparation
+## Completed Milestone: Milestone 7 - VPS Deployment Preparation
 
 ### Goal
 Prepare a clear, safe VPS deployment checklist and runbook so the project can move to real deployment later without guessing, exposing secrets, or changing production infrastructure too early.
@@ -364,6 +365,33 @@ python -m compileall app tests
 git diff --check
 ```
 
+## Completed Milestone: Milestone 7I - Repository Context and Issue Alignment
+
+### Goal
+Align repository documentation, milestone status, and GitHub issue review notes with the actual implementation without marketing exaggeration.
+
+### Current State
+The README and project plan now describe the project as a local-first FastAPI pharmacy workflow assistant rather than a bare skeleton. They list the implemented secure webhook, Persian replies, duplicate-delivery guard, pharmacist review workflow, SQLite backup/restore helpers, optional admin notifications, postponed Web UI/AI work, and honest deployment status.
+
+GitHub issue state was reviewed without editing issues in this milestone. The repository is private and has no GitHub repository description or homepage set. Direct GitHub Project board read access was not available through the exposed tools.
+
+### Scope OUT
+- No application code changes.
+- No feature changes.
+- No AI or LLM integration.
+- No dashboard.
+- No VPS deployment.
+- No medical claims.
+- No fake impact metrics.
+- No automatic GitHub issue changes.
+
+### Verification
+```powershell
+python -m unittest discover -s tests
+python -m compileall app tests
+git diff --check
+```
+
 ## Known Assumptions and Open Questions
 - Webhook payload shape is treated as Telegram-like for now (`message`, `message.chat.id`, `message.message_id`, `message.text`) with optional top-level `update_id`.
 - Duplicate-delivery handling uses `update_id` if present, otherwise `chat_id + message_id`. The exact Bale uniqueness contract still needs official confirmation.
@@ -380,4 +408,4 @@ git diff --check
 6. Confirm local-only endpoints are not exposed publicly.
 7. Review SQLite storage path, backup command, restore command, and retention strategy for operational safety.
 8. Keep `BALE_ENABLE_SENDING=false` until the exact Bale behavior is confirmed and real sending is explicitly approved.
-9. Complete Milestone 7 deployment preparation before broad patient-facing use.
+9. Complete Milestone 8 deployment execution checks before broad patient-facing use.

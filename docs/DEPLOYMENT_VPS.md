@@ -4,7 +4,7 @@ This runbook is for the current MVP only. It does not replace production securit
 
 ## Milestone 7 Checklist
 
-Milestone 7 is preparation only. Do not deploy to a real VPS, change DNS, configure SSL, edit firewall rules, register a production webhook, or enable real outgoing Bale messages until Milestone 8 is explicitly approved.
+Milestone 7 preparation is complete. Do not deploy to a real VPS, change DNS, configure SSL, edit firewall rules, register a production webhook, or enable real outgoing Bale messages until Milestone 8 is explicitly approved.
 
 Work through these pieces in order:
 
@@ -29,6 +29,7 @@ Use this checklist as the final documentation gate before real VPS deployment st
 - Environment values are documented with placeholders, not real secrets.
 - `BALE_ENABLE_SENDING=false` is the required first VPS deployment setting.
 - `BALE_STORE_RAW_UPDATES=false` keeps raw webhook payload storage disabled by default.
+- Optional admin notifications exist but remain disabled by default with `BALE_ENABLE_ADMIN_NOTIFICATIONS=false`.
 - Webhook route requires `BALE_WEBHOOK_SECRET` through `/webhook/bale/{secret}`.
 - Logs are designed to avoid secrets, chat ids, raw payloads, and full patient text.
 - The app is intended to bind uvicorn to `127.0.0.1:8000` behind a reverse proxy.
@@ -41,7 +42,7 @@ Use this checklist as the final documentation gate before real VPS deployment st
 - Backup command must be tested on the deployment host after `DATABASE_PATH` is set.
 - Restore command must be tested on the deployment host after `DATABASE_PATH` is set.
 - Bale webhook assumptions still require official verification, including payload schema, retry behavior, duplicate identifiers, and webhook authentication/signature support.
-- Bale send-message assumptions still require verification before `BALE_ENABLE_SENDING=true`.
+- Bale send-message assumptions still require verification before `BALE_ENABLE_SENDING=true` or before admin notifications are enabled.
 - Sanitized logs must be rechecked on the VPS to confirm they do not expose secrets, chat ids, raw payloads, or full patient text.
 - Retention duration and deletion process must be approved before storing real patient messages long term.
 

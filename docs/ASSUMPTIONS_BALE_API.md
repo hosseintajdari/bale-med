@@ -11,6 +11,7 @@ This file is the canonical list of Bale API assumptions used by the MVP. Do not 
 6. Bale base URL format is `https://tapi.bale.ai/bot<token>/METHOD_NAME`.
 7. Requests use `POST` with `application/json`.
 8. `sendMessage` currently uses `chat_id`, `text`, and optional `reply_to_message_id`.
+9. Optional admin review notifications use the same unverified `sendMessage` assumptions when enabled.
 
 ## Current MVP Duplicate-Delivery Behavior
 1. If top-level `update_id` is present, the app stores `update:<update_id>` as its internal duplicate guard key.
@@ -25,6 +26,7 @@ This file is the canonical list of Bale API assumptions used by the MVP. Do not 
 - Bale retry behavior and duplicate delivery expectations.
 - Webhook authentication/signature mechanism beyond the current secret path.
 - Bale response schema, error codes, rate limits, and retry guidance for API methods.
+- Whether using `sendMessage` for admin review notifications needs any different constraints from normal user replies.
 
 ## Verification Checklist
 1. Confirm exact incoming webhook payload schema and required fields.
@@ -34,6 +36,7 @@ This file is the canonical list of Bale API assumptions used by the MVP. Do not 
 5. Confirm auth mechanism and any required headers beyond token-in-path.
 6. Confirm rate limits and retry guidance.
 7. Confirm optional fields and constraints for `setWebhook` and `getWebhookInfo`.
+8. Confirm that admin review notifications can safely use the same `sendMessage` contract.
 
 ## Blocking Items Before Public Deployment
 - Unknown webhook authentication/signature validation method.

@@ -17,6 +17,36 @@ Work through these pieces in order:
 7. Confirm operations commands: restart, status, logs, health check, webhook smoke test, rollback.
 8. Confirm deployment blockers are resolved before Milestone 8 starts.
 
+## Final Go/No-Go Checklist Before Milestone 8
+
+Use this checklist as the final documentation gate before real VPS deployment starts. If any blocker is unresolved, do not start Milestone 8.
+
+### Ready for Milestone 8 Planning
+- Duplicate webhook delivery guard exists for stable update identifiers.
+- Local pharmacist review listing and mark-reviewed action exist.
+- Local SQLite backup helper exists and the backup command is documented.
+- Environment values are documented with placeholders, not real secrets.
+- `BALE_ENABLE_SENDING=false` is the required first VPS deployment setting.
+- `BALE_STORE_RAW_UPDATES=false` keeps raw webhook payload storage disabled by default.
+- Webhook route requires `BALE_WEBHOOK_SECRET` through `/webhook/bale/{secret}`.
+- Logs are designed to avoid secrets, chat ids, raw payloads, and full patient text.
+- The app is intended to bind uvicorn to `127.0.0.1:8000` behind a reverse proxy.
+- Rollback plan is documented as checking out a previous commit and restarting the service.
+
+### Blocked Before Public Exposure
+- HTTPS must be configured and verified through a reverse proxy such as Nginx or Caddy.
+- Firewall plan must be defined before server exposure: allow SSH and HTTPS only unless a different need is explicitly approved.
+- Local-only endpoints such as `/local/reviews/pending` and `/local/reviews/{message_id}/mark-reviewed` must not be publicly exposed through the reverse proxy.
+- Backup command must be tested on the deployment host after `DATABASE_PATH` is set.
+- Restore process is still a blocker: copy-back restore steps must be documented and tested before broad patient-facing use.
+- Bale webhook assumptions still require official verification, including payload schema, retry behavior, duplicate identifiers, and webhook authentication/signature support.
+- Bale send-message assumptions still require verification before `BALE_ENABLE_SENDING=true`.
+- Sanitized logs must be rechecked on the VPS to confirm they do not expose secrets, chat ids, raw payloads, or full patient text.
+- Retention duration and deletion process must be approved before storing real patient messages long term.
+
+### Go Decision
+Milestone 8 may start only after the deployment owner confirms the blockers above are either resolved or explicitly accepted as controlled risks. Public webhook registration and real outgoing sending remain separate approval-gated actions.
+
 ## Prerequisites
 - Ubuntu VPS with Python 3.11+.
 - Non-root deploy user with sudo access.
@@ -95,7 +125,9 @@ WantedBy=multi-user.target
 - The helper copies only the configured SQLite database file into `backups/` with a timestamped filename. It does not copy `.env`, tokens, logs, or tunnel output.
 - Keep backups outside Git. Do not commit database files, backup files, `.env`, logs, tunnel output, or generated QR output.
 - Keep release snapshots or tagged commits.
-- Roll back by checking out previous commit and restarting service.
+- Roll back by checking out the previous known-good commit and restarting service:
+  `git checkout <previous-good-commit>`
+  `sudo systemctl restart bale-bot`
 
 ## Data Retention Notes
 - Stored local data includes incoming message metadata, message text, duplicate-delivery identifiers, pharmacist-review metadata, timestamps, and raw webhook storage status.

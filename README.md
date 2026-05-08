@@ -24,6 +24,7 @@ This vision and the milestone order are allowed to change as the pharmacy workfl
   - Milestone 7A: Done - Bale webhook duplicate-delivery guard.
   - Milestone 7B: Done - Minimal local pharmacist review actions.
   - Milestone 7C: Done - Local SQLite backup and retention safety foundation.
+  - Milestone 7D: Done - Final deployment readiness checklist.
 - Milestone 8: Planned - Real VPS deployment.
 - Milestone 9: Planned - LLM/AI integration.
 
@@ -258,4 +259,4 @@ Webhook behavior:
 
 ## VPS Notes
 
-Milestone 7 is deployment preparation only. Minimal VPS deployment guidance and the preparation checklist are documented in [DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md). Treat webhook authentication, HTTPS reverse-proxy setup, backup/restore, and real sending approval as blockers before public exposure.
+Milestone 7 is deployment preparation only. Minimal VPS deployment guidance and the final go/no-go checklist are documented in [DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md). Treat Bale webhook assumption verification, HTTPS reverse-proxy setup, firewall planning, local-only endpoint exposure, backup/restore proof, rollback planning, sanitized logs, and real sending approval as blockers before public exposure.

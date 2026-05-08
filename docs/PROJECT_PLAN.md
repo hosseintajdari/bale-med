@@ -1,9 +1,9 @@
 # Project Plan
 
 ## Current Status
-The project has a minimal FastAPI webhook app, SQLite message storage, a cautious Bale API client, secure webhook secret-path handling, dry-run reply behavior, basic safe commands for `/start`, `/help`, and `/status`, a safe pharmacy reply layer, review metadata, a minimal duplicate-delivery guard, local-only pharmacist review status actions, and a local SQLite backup helper.
+The project has a minimal FastAPI webhook app, SQLite message storage, a cautious Bale API client, secure webhook secret-path handling, dry-run reply behavior, basic safe commands for `/start`, `/help`, and `/status`, a safe pharmacy reply layer, review metadata, a minimal duplicate-delivery guard, local-only pharmacist review status actions, a local SQLite backup helper, and a final deployment readiness checklist.
 
-Milestone 7A, Milestone 7B, and Milestone 7C are done. The next milestone should stay small and continue preparing the MVP for safe deployment without changing production infrastructure yet.
+Milestone 7A, Milestone 7B, Milestone 7C, and Milestone 7D are done. Real VPS deployment has not started.
 
 ## Long-Term Product Vision
 Build a safe pharmacy automation assistant for Bale that supports a real pharmacy workflow from first contact through pharmacist review. The assistant should receive messages, collect structured intake information, avoid clinical decision-making, preserve auditability, and route cases to a pharmacist when judgment is needed.
@@ -23,6 +23,7 @@ The vision and milestone order are living project guidance. They may change as r
    - Milestone 7A: Done - Bale webhook duplicate-delivery guard.
    - Milestone 7B: Done - Minimal local pharmacist review actions.
    - Milestone 7C: Done - Local SQLite backup and retention safety foundation.
+   - Milestone 7D: Done - Final deployment readiness checklist.
 8. Milestone 8: Planned - Real VPS deployment.
 9. Milestone 9: Planned - LLM/AI integration.
 
@@ -221,6 +222,51 @@ python -m compileall app tests
 git diff --check
 ```
 
+## Completed Milestone: Milestone 7D - Final Deployment Readiness Checklist
+
+### Goal
+Finalize a clear go/no-go checklist before starting real VPS deployment.
+
+### Current State
+The final deployment readiness checklist is documented in `docs/DEPLOYMENT_VPS.md`. It separates items that are ready for Milestone 8 planning from blockers that must be resolved before public exposure.
+
+### Ready
+- Duplicate webhook delivery guard exists.
+- Local pharmacist review actions exist.
+- SQLite backup helper exists and the manual backup command is documented.
+- Webhook secret path is implemented.
+- `BALE_ENABLE_SENDING=false` is the required first VPS deployment setting.
+- Raw webhook storage is disabled by default.
+- Sanitized logging expectations are documented.
+- Rollback plan is documented.
+
+### Still Blocked Before Public Exposure
+- HTTPS and reverse proxy must be configured and verified.
+- Firewall plan must be defined and approved.
+- Local-only endpoints must not be publicly exposed.
+- Backup command must be tested on the deployment host.
+- Restore process must be documented and tested.
+- Bale webhook assumptions must be verified with official documentation.
+- Bale send-message assumptions must be verified before real sending.
+- VPS logs must be checked for secret and patient-data safety.
+- Retention duration and deletion process must be approved before long-term real patient data storage.
+
+### Scope OUT
+- No code changes.
+- No tests changes.
+- No real VPS deployment.
+- No DNS, SSL, firewall, or reverse-proxy changes.
+- No webhook registration.
+- No enabling `BALE_ENABLE_SENDING=true`.
+- No AI, diagnosis, dashboard, or database schema change.
+
+### Verification
+```powershell
+python -m unittest discover -s tests
+python -m compileall app tests
+git diff --check
+```
+
 ## Known Assumptions and Open Questions
 - Webhook payload shape is treated as Telegram-like for now (`message`, `message.chat.id`, `message.message_id`, `message.text`) with optional top-level `update_id`.
 - Duplicate-delivery handling uses `update_id` if present, otherwise `chat_id + message_id`. The exact Bale uniqueness contract still needs official confirmation.
@@ -233,6 +279,8 @@ git diff --check
 2. Confirm Bale outbound send-message contract and test in a non-production environment.
 3. Confirm whether Bale supports webhook signature/header authentication beyond secret-path protection.
 4. Validate VPS runbook end-to-end, including restart and log inspection.
-5. Review SQLite storage path, backup, and retention strategy for operational safety.
-6. Keep `BALE_ENABLE_SENDING=false` until the exact Bale behavior is confirmed.
-7. Complete Milestone 7 deployment preparation before broad patient-facing use.
+5. Verify HTTPS, reverse proxy, and firewall plan before public exposure.
+6. Confirm local-only endpoints are not exposed publicly.
+7. Review SQLite storage path, backup command, restore process, and retention strategy for operational safety.
+8. Keep `BALE_ENABLE_SENDING=false` until the exact Bale behavior is confirmed and real sending is explicitly approved.
+9. Complete Milestone 7 deployment preparation before broad patient-facing use.

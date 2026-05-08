@@ -11,17 +11,33 @@ logger = logging.getLogger(__name__)
 
 COMMAND_REPLIES = {
     "/start": (
-        "Hello. I am a pharmacy message intake assistant. "
-        "I can receive your message for pharmacy review, but I am not a medical advisor."
+        "سلام.\n"
+        "من دستیار دریافت پیام داروخانه هستم.\n"
+        "پیام شما را برای بررسی داروساز ثبت می‌کنم.\n"
+        "این ربات جایگزین نظر داروساز یا پزشک نیست."
     ),
-    "/help": "Available commands: /start, /help, /status",
+    "/help": (
+        "دستورهای قابل استفاده:\n"
+        "/start\n"
+        "/help\n"
+        "/status\n\n"
+        "برای پرسش دارویی، پیام خود را کوتاه و روشن بنویسید."
+    ),
 }
 
 
 def get_status_reply(bale_enable_sending: bool) -> str:
     if bale_enable_sending:
-        return "Bot is running. Operating mode: sending is ON, so real Bale replies may be sent."
-    return "Bot is running. Operating mode: sending is OFF, so the bot is in dry-run mode."
+        return (
+            "ربات فعال است.\n"
+            "ارسال پیام واقعی روشن است.\n"
+            "ممکن است پاسخ واقعی در بله ارسال شود."
+        )
+    return (
+        "ربات فعال است.\n"
+        "ارسال پیام واقعی خاموش است.\n"
+        "ربات در حالت آزمایشی کار می‌کند."
+    )
 
 
 def get_reply_text(

@@ -26,6 +26,7 @@ This vision and the milestone order are allowed to change as the pharmacy workfl
   - Milestone 7C: Done - Local SQLite backup and retention safety foundation.
   - Milestone 7D: Done - Final deployment readiness checklist.
   - Milestone 7E: Done - Local SQLite restore rehearsal.
+  - Milestone 7F: Done - Persian and RTL-safe user-facing replies.
 - Milestone 8: Planned - Real VPS deployment.
 - Milestone 9: Planned - LLM/AI integration.
 
@@ -79,7 +80,7 @@ when you run commands from the project folder. Do not commit `.env`.
 BALE_BOT_TOKEN=...
 BALE_API_BASE_URL=https://tapi.bale.ai
 BALE_ENABLE_SENDING=false
-BALE_REPLY_TEXT=پیام شما دریافت شد. این ربات جایگزین نظر داروساز نیست و در صورت نیاز توسط داروساز بررسی میشود.
+BALE_REPLY_TEXT=پیام شما دریافت شد. این ربات جایگزین نظر داروساز یا پزشک نیست. در صورت نیاز، پیام شما توسط داروساز بررسی می‌شود.
 DATABASE_PATH=bale_bot.db
 BALE_WEBHOOK_SECRET=...
 ```
@@ -230,7 +231,7 @@ Run this before and after changes. These tests currently check:
 - local `.env` loading
 - webhook routing, SQLite storage, duplicate-delivery handling, review metadata, local pending-review listing, and dry-run reply preparation
 - basic command replies
-- safe intake and pharmacist-review escalation replies
+- Persian safe intake and pharmacist-review escalation replies
 
 ## Bale API Assumptions
 
@@ -258,12 +259,12 @@ Webhook behavior:
 - Supports local-only pharmacist review actions for marking pending review items as reviewed.
 - Uses `/webhook/bale/{secret}` and returns 404 for a wrong secret.
 - Supports only `message.text` path for acknowledgement behavior.
-- Handles `/start`, `/help`, and `/status` with simple, non-medical command replies. `/status` reports whether sending is ON or OFF without exposing secrets.
+- Handles `/start`, `/help`, and `/status` with simple Persian, non-medical command replies. `/status` reports whether sending is on or off without exposing secrets.
 - Unknown text keeps the configured safe acknowledgement reply.
 - If `BALE_ENABLE_SENDING=false`, reply is prepared but not sent.
 - Writes sanitized operational logs for incoming webhook handling and reply preparation. Logs include stored row id, whether text exists, text length, review status, and send mode; they should not include secrets, raw webhook payloads, chat ids, or full message text.
 - If `BALE_ENABLE_SENDING=true`, sends:
-  `پیام شما دریافت شد. این ربات جایگزین نظر داروساز نیست و در صورت نیاز توسط داروساز بررسی میشود.`
+  `پیام شما دریافت شد. این ربات جایگزین نظر داروساز یا پزشک نیست. در صورت نیاز، پیام شما توسط داروساز بررسی می‌شود.`
 - Do not call `setWebhook` to `127.0.0.1` because Bale requires public HTTPS URL for webhook delivery.
 
 ## VPS Notes

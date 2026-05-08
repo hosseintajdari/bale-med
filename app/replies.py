@@ -22,16 +22,21 @@ HIGH_RISK_KEYWORDS = (
 )
 
 SAFE_INTAKE_REPLY = (
-    "Thanks. Your message was received by the pharmacy. "
-    "Please send the medicine name, patient age range, the main question or symptom, "
-    "and any allergy, pregnancy, breastfeeding, child use, or serious side-effect information. "
-    "A pharmacist should review medical questions before any decision."
+    "پیام شما دریافت شد.\n"
+    "لطفا این اطلاعات را بفرستید:\n"
+    "نام دارو\n"
+    "سن بیمار\n"
+    "پرسش اصلی یا علامت اصلی\n"
+    "آیا حساسیت، بارداری، شیردهی، مصرف برای کودک، یا عارضه جدی وجود دارد؟\n\n"
+    "تصمیم‌های دارویی باید توسط داروساز بررسی شود."
 )
 
 ESCALATION_REPLY = (
-    "Thanks. Your message may need pharmacist review. "
-    "This bot cannot give diagnosis, dosage, interaction, or medication-change advice. "
-    "Please wait for pharmacist review. If symptoms are severe or urgent, seek emergency medical care."
+    "پیام شما دریافت شد و نیاز به بررسی داروساز دارد.\n"
+    "مواردی مثل حساسیت، بارداری، شیردهی، علائم شدید، یا مصرف برای کودک باید با داروساز بررسی شود.\n"
+    "این ربات تشخیص، دوز، تداخل دارویی، یا توصیه برای شروع، قطع، یا تغییر دارو ارائه نمی‌کند.\n"
+    "لطفا منتظر بررسی داروساز بمانید.\n"
+    "اگر علائم شدید یا فوری است، برای دریافت مراقبت پزشکی فوری یا اورژانس اقدام کنید."
 )
 
 

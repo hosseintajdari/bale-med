@@ -170,40 +170,44 @@ class HandlerTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertTrue(result["reply_prepared"])
         self.assertTrue(result["reply_result"]["skipped"])
-        self.assertIn("medicine name", result["reply_result"]["text"])
-        self.assertIn("pharmacist", result["reply_result"]["text"])
+        self.assertIn("نام دارو", result["reply_result"]["text"])
+        self.assertIn("داروساز", result["reply_result"]["text"])
         self.assertEqual(row, ("demo-chat", "123", "Hello pharmacy"))
 
     def test_normal_text_returns_safe_intake_reply(self):
         result = self._route_text_message("I need help with a medicine question")
 
         reply_text = result["reply_result"]["text"]
-        self.assertIn("medicine name", reply_text)
-        self.assertIn("patient age range", reply_text)
-        self.assertIn("pharmacist", reply_text)
+        self.assertIn("نام دارو", reply_text)
+        self.assertIn("سن بیمار", reply_text)
+        self.assertIn("پرسش اصلی", reply_text)
+        self.assertIn("داروساز", reply_text)
         self.assertNotIn("take", reply_text.lower())
 
     def test_high_risk_text_returns_escalation_reply(self):
         result = self._route_text_message("Can I change medication dosage while pregnant?")
 
         reply_text = result["reply_result"]["text"]
-        self.assertIn("pharmacist review", reply_text)
-        self.assertIn("cannot give diagnosis", reply_text)
-        self.assertIn("dosage", reply_text)
+        self.assertIn("بررسی داروساز", reply_text)
+        self.assertIn("تشخیص", reply_text)
+        self.assertIn("دوز", reply_text)
+        self.assertIn("اورژانس", reply_text)
+        self.assertNotIn("take", reply_text.lower())
+        self.assertNotIn("start medication", reply_text.lower())
 
     def test_allergy_text_returns_escalation_reply(self):
         result = self._route_text_message("I have an allergy to this medicine")
 
         reply_text = result["reply_result"]["text"]
-        self.assertIn("pharmacist review", reply_text)
-        self.assertIn("cannot give diagnosis", reply_text)
+        self.assertIn("بررسی داروساز", reply_text)
+        self.assertIn("حساسیت", reply_text)
 
     def test_pregnancy_text_returns_escalation_reply(self):
         result = self._route_text_message("Can I use this during pregnancy?")
 
         reply_text = result["reply_result"]["text"]
-        self.assertIn("pharmacist review", reply_text)
-        self.assertIn("cannot give diagnosis", reply_text)
+        self.assertIn("بررسی داروساز", reply_text)
+        self.assertIn("بارداری", reply_text)
 
     def test_normal_text_stores_no_review_required(self):
         result, row = self._route_text_message_and_fetch_review_row("I need help with a medicine question")
@@ -570,13 +574,16 @@ class HandlerTests(unittest.TestCase):
     def test_start_command_returns_safe_introduction(self):
         result = self._route_text_message("/start")
 
-        self.assertIn("pharmacy message intake assistant", result["reply_result"]["text"])
-        self.assertIn("not a medical advisor", result["reply_result"]["text"])
+        reply_text = result["reply_result"]["text"]
+        self.assertIn("دستیار دریافت پیام داروخانه", reply_text)
+        self.assertIn("جایگزین نظر داروساز یا پزشک نیست", reply_text)
+        self.assertIn("داروساز", reply_text)
 
     def test_help_command_lists_available_commands(self):
         result = self._route_text_message("/help")
 
         reply_text = result["reply_result"]["text"]
+        self.assertIn("دستورهای قابل استفاده", reply_text)
         self.assertIn("/start", reply_text)
         self.assertIn("/help", reply_text)
         self.assertIn("/status", reply_text)
@@ -585,27 +592,40 @@ class HandlerTests(unittest.TestCase):
         result = self._route_text_message("/status")
 
         reply_text = result["reply_result"]["text"]
-        self.assertIn("Bot is running", reply_text)
-        self.assertIn("sending is OFF", reply_text)
-        self.assertIn("dry-run mode", reply_text)
+        self.assertIn("ربات فعال است", reply_text)
+        self.assertIn("ارسال پیام واقعی خاموش است", reply_text)
+        self.assertIn("حالت آزمایشی", reply_text)
         self.assertNotIn("test-token", reply_text)
         self.assertNotIn("test-secret", reply_text)
+        self.assertNotIn("demo-chat", reply_text)
+        self.assertNotIn("BALE_BOT_TOKEN", reply_text)
+        self.assertNotIn("BALE_WEBHOOK_SECRET", reply_text)
 
     def test_status_command_reports_when_sending_is_enabled(self):
         reply_text = get_reply_text("/status", "fallback", bale_enable_sending=True)
 
-        self.assertIn("Bot is running", reply_text)
-        self.assertIn("sending is ON", reply_text)
-        self.assertIn("real Bale replies may be sent", reply_text)
+        self.assertIn("ربات فعال است", reply_text)
+        self.assertIn("ارسال پیام واقعی روشن است", reply_text)
+        self.assertIn("ممکن است پاسخ واقعی در بله ارسال شود", reply_text)
         self.assertNotIn("test-token", reply_text)
         self.assertNotIn("test-secret", reply_text)
+        self.assertNotIn("BALE_BOT_TOKEN", reply_text)
+        self.assertNotIn("BALE_WEBHOOK_SECRET", reply_text)
 
     def test_unknown_text_uses_safe_intake_reply(self):
         result = self._route_text_message("Hello pharmacy")
 
         reply_text = result["reply_result"]["text"]
-        self.assertIn("medicine name", reply_text)
-        self.assertIn("pharmacist", reply_text)
+        self.assertIn("نام دارو", reply_text)
+        self.assertIn("داروساز", reply_text)
+
+    def test_persian_reply_text_is_preserved_as_unicode(self):
+        result = self._route_text_message("برای مصرف دارو سوال دارم")
+
+        reply_text = result["reply_result"]["text"]
+        self.assertIn("پیام شما دریافت شد", reply_text)
+        self.assertIn("نام دارو", reply_text)
+        self.assertIn("؟", reply_text)
 
 
 if __name__ == "__main__":

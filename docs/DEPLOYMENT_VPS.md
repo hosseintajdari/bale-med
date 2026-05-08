@@ -71,7 +71,7 @@ Create `.env` in project root:
 BALE_BOT_TOKEN=...
 BALE_API_BASE_URL=https://tapi.bale.ai
 BALE_ENABLE_SENDING=false
-BALE_REPLY_TEXT=پیام شما دریافت شد. این ربات جایگزین نظر داروساز نیست و در صورت نیاز توسط داروساز بررسی میشود.
+BALE_REPLY_TEXT=پیام شما دریافت شد. این ربات جایگزین نظر داروساز یا پزشک نیست. در صورت نیاز، پیام شما توسط داروساز بررسی می‌شود.
 DATABASE_PATH=/opt/bale-bot/data/bale_bot.db
 BALE_WEBHOOK_SECRET=...
 ```

@@ -1,9 +1,9 @@
 # Project Plan
 
 ## Current Status
-The project has a minimal FastAPI webhook app, SQLite message storage, a cautious Bale API client, secure webhook secret-path handling, dry-run reply behavior, basic safe commands for `/start`, `/help`, and `/status`, a safe pharmacy reply layer, review metadata, a minimal duplicate-delivery guard, local-only pharmacist review status actions, local SQLite backup and restore helpers, and a final deployment readiness checklist.
+The project has a minimal FastAPI webhook app, SQLite message storage, a cautious Bale API client, secure webhook secret-path handling, dry-run reply behavior, Persian user-facing replies for `/start`, `/help`, `/status`, and safe pharmacy intake/escalation flows, review metadata, a minimal duplicate-delivery guard, local-only pharmacist review status actions, local SQLite backup and restore helpers, and a final deployment readiness checklist.
 
-Milestone 7A, Milestone 7B, Milestone 7C, Milestone 7D, and Milestone 7E are done. Real VPS deployment has not started.
+Milestone 7A, Milestone 7B, Milestone 7C, Milestone 7D, Milestone 7E, and Milestone 7F are done. Real VPS deployment has not started.
 
 ## Long-Term Product Vision
 Build a safe pharmacy automation assistant for Bale that supports a real pharmacy workflow from first contact through pharmacist review. The assistant should receive messages, collect structured intake information, avoid clinical decision-making, preserve auditability, and route cases to a pharmacist when judgment is needed.
@@ -25,6 +25,7 @@ The vision and milestone order are living project guidance. They may change as r
    - Milestone 7C: Done - Local SQLite backup and retention safety foundation.
    - Milestone 7D: Done - Final deployment readiness checklist.
    - Milestone 7E: Done - Local SQLite restore rehearsal.
+   - Milestone 7F: Done - Persian and RTL-safe user-facing replies.
 8. Milestone 8: Planned - Real VPS deployment.
 9. Milestone 9: Planned - LLM/AI integration.
 
@@ -291,6 +292,36 @@ The restore command is documented in `README.md` and `docs/DEPLOYMENT_VPS.md`. D
 - No webhook registration.
 - No enabling `BALE_ENABLE_SENDING=true`.
 - No AI, diagnosis, treatment recommendation, or protocol engine.
+
+### Verification
+```powershell
+python -m unittest discover -s tests
+python -m compileall app tests
+git diff --check
+```
+
+## Completed Milestone: Milestone 7F - Persian and RTL-Safe User-Facing Replies
+
+### Goal
+Translate and standardize user-facing bot replies into clear Persian suitable for Bale mobile users.
+
+### Current State
+The `/start`, `/help`, `/status`, normal intake, and pharmacist-review escalation replies are Persian, short, line-broken, and avoid complex formatting. English command names remain isolated as `/start`, `/help`, and `/status`. Internal logs and operational metadata remain in English.
+
+The Persian replies keep the safety boundaries explicit: the bot does not diagnose, prescribe, recommend dosage, advise medication changes, or replace pharmacist or physician judgment. Escalation replies direct medical decisions to pharmacist review and tell users with severe or urgent symptoms to seek urgent medical care.
+
+### Scope OUT
+- No AI or LLM integration.
+- No diagnosis.
+- No treatment advice.
+- No medication recommendation.
+- No protocol engine.
+- No dashboard.
+- No VPS deployment.
+- No webhook registration.
+- No enabling `BALE_ENABLE_SENDING=true`.
+- No database schema change.
+- No workflow redesign.
 
 ### Verification
 ```powershell

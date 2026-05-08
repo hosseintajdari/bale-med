@@ -26,4 +26,4 @@ Review metadata is operational workflow tracking only. It may mark that pharmaci
 - Define retention duration and deletion process before production launch.
 
 ## Safe Reply Style
-Replies should be neutral and operational. Example: "Thanks. Your message was received and will be reviewed by the pharmacy team." Do not include clinical advice until a pharmacist-approved workflow exists.
+Replies should be neutral, operational, and easy to read in Persian mobile chat. Example: "پیام شما دریافت شد. لطفا منتظر بررسی داروساز بمانید." Do not include clinical advice until a pharmacist-approved workflow exists.

@@ -47,7 +47,8 @@ This vision and the milestone order are allowed to change as the pharmacy workfl
   - Milestone 7F: Done - Persian and RTL-safe user-facing replies.
   - Milestone 7G: Done - Optional Bale admin review notifications.
   - Milestone 7I: Done - Repository context and issue alignment.
-- Milestone 8: Planned next - Real VPS deployment.
+- Milestone 8: Started - Real VPS deployment workflow.
+  - Milestone 8A: Started - VPS readiness and GitHub PR workflow; waiting for VPS access.
 - Milestone 9: Planned - LLM/AI integration.
 
 ## MVP Guarantees vs Non-Goals
@@ -57,7 +58,7 @@ This vision and the milestone order are allowed to change as the pharmacy workfl
 | In scope | Secure Bale webhook intake, SQLite message storage, safe Persian replies, duplicate-delivery guard, pharmacist-review metadata/actions, backup/restore helpers, optional admin review notifications |
 | Not in scope | Diagnosis, treatment advice, dosage changes, prescription replacement, autonomous clinical decision-making, Web UI, AI/LLM behavior |
 | Bale outbound API | Available only when explicitly enabled; keep disabled by default |
-| Deployment | Local-first with VPS runbook; real VPS deployment has not started |
+| Deployment | Local-first with VPS runbook; Milestone 8A has started as readiness tracking only |
 | Clinical status | Safety-oriented workflow support only; not clinically validated |
 
 ## Project Structure
@@ -309,12 +310,14 @@ Webhook behavior:
 
 ## Current Limitations and Next Priorities
 
-Real VPS deployment has not started. The next milestone is Milestone 8: execute the deployment checklist safely while keeping `BALE_ENABLE_SENDING=false` at first.
+Milestone 8A has started as a readiness and GitHub workflow step. The project is waiting for confirmed VPS access before any server hardening, DNS, SSL, firewall, production webhook, or real sending work begins.
 
 Before public exposure, verify Bale webhook and `sendMessage` assumptions, configure HTTPS/reverse proxy/firewall rules, protect local-only endpoints, test backup/restore on the deployment host, confirm sanitized logs, and approve a retention/deletion policy.
+
+Future milestone work should use a small branch, draft pull request, review/checks, merge, and local `main` sync before the next submilestone starts. Use branch names like `codex/milestone-8a-vps-readiness`.
 
 AI, Web UI, clinical protocols, diagnosis, autonomous triage, and patient outcome claims remain postponed.
 
 ## VPS Notes
 
-Milestone 7 deployment preparation is complete. Minimal VPS deployment guidance and the final go/no-go checklist are documented in [DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md). Treat Bale webhook assumption verification, HTTPS reverse-proxy setup, firewall planning, local-only endpoint exposure, deployment-host backup/restore proof, rollback planning, sanitized logs, and real sending approval as blockers before public exposure.
+Milestone 7 deployment preparation is complete. Minimal VPS deployment guidance and the final go/no-go checklist are documented in [DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md). Milestone 8A is open only to track VPS readiness and the branch/PR workflow while waiting for VPS access. Treat Bale webhook assumption verification, HTTPS reverse-proxy setup, firewall planning, local-only endpoint exposure, deployment-host backup/restore proof, rollback planning, sanitized logs, and real sending approval as blockers before public exposure.

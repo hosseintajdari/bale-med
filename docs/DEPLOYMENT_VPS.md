@@ -25,6 +25,7 @@ Use this checklist as the final documentation gate before real VPS deployment st
 - Duplicate webhook delivery guard exists for stable update identifiers.
 - Local pharmacist review listing and mark-reviewed action exist.
 - Local SQLite backup helper exists and the backup command is documented.
+- Local SQLite restore helper exists and refuses overwrite by default.
 - Environment values are documented with placeholders, not real secrets.
 - `BALE_ENABLE_SENDING=false` is the required first VPS deployment setting.
 - `BALE_STORE_RAW_UPDATES=false` keeps raw webhook payload storage disabled by default.
@@ -38,7 +39,7 @@ Use this checklist as the final documentation gate before real VPS deployment st
 - Firewall plan must be defined before server exposure: allow SSH and HTTPS only unless a different need is explicitly approved.
 - Local-only endpoints such as `/local/reviews/pending` and `/local/reviews/{message_id}/mark-reviewed` must not be publicly exposed through the reverse proxy.
 - Backup command must be tested on the deployment host after `DATABASE_PATH` is set.
-- Restore process is still a blocker: copy-back restore steps must be documented and tested before broad patient-facing use.
+- Restore command must be tested on the deployment host after `DATABASE_PATH` is set.
 - Bale webhook assumptions still require official verification, including payload schema, retry behavior, duplicate identifiers, and webhook authentication/signature support.
 - Bale send-message assumptions still require verification before `BALE_ENABLE_SENDING=true`.
 - Sanitized logs must be rechecked on the VPS to confirm they do not expose secrets, chat ids, raw payloads, or full patient text.
@@ -123,6 +124,9 @@ WantedBy=multi-user.target
 - Current local helper:
   `python -c "from app.database import create_sqlite_backup; result = create_sqlite_backup(); print(result.backup_path)"`
 - The helper copies only the configured SQLite database file into `backups/` with a timestamped filename. It does not copy `.env`, tokens, logs, or tunnel output.
+- Restore rehearsal helper:
+  `python -c "from app.database import restore_sqlite_backup; result = restore_sqlite_backup('backups/YOUR_BACKUP_FILE.db'); print(result.restored_path)"`
+- Stop the app before restore. The restore helper refuses to overwrite an existing database by default; move the current database aside first, or use `overwrite=True` only after intentionally choosing to replace it.
 - Keep backups outside Git. Do not commit database files, backup files, `.env`, logs, tunnel output, or generated QR output.
 - Keep release snapshots or tagged commits.
 - Roll back by checking out the previous known-good commit and restarting service:

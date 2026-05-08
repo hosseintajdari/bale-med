@@ -25,6 +25,7 @@ This vision and the milestone order are allowed to change as the pharmacy workfl
   - Milestone 7B: Done - Minimal local pharmacist review actions.
   - Milestone 7C: Done - Local SQLite backup and retention safety foundation.
   - Milestone 7D: Done - Final deployment readiness checklist.
+  - Milestone 7E: Done - Local SQLite restore rehearsal.
 - Milestone 8: Planned - Real VPS deployment.
 - Milestone 9: Planned - LLM/AI integration.
 
@@ -154,6 +155,14 @@ python -c "from app.database import create_sqlite_backup; result = create_sqlite
 
 The helper reads `DATABASE_PATH`, creates `backups/` if needed, and copies only the configured SQLite database file to a timestamped backup filename. It does not copy `.env`, tokens, logs, or tunnel output. Backup files are local operational files and should not be committed.
 
+To rehearse a local restore, stop the app first, point to the backup file, and restore into the configured `DATABASE_PATH`:
+
+```powershell
+python -c "from app.database import restore_sqlite_backup; result = restore_sqlite_backup('backups/YOUR_BACKUP_FILE.db'); print(result.restored_path)"
+```
+
+The restore helper refuses to overwrite an existing database by default. For a real restore, first move the current database aside or call the helper with `overwrite=True` only after you intentionally choose to replace the current SQLite file.
+
 ## Data Retention Notes
 
 The local SQLite database stores incoming message metadata, message text, duplicate-delivery identifiers, review status, review reason, timestamps, and raw webhook storage status. Raw webhook payload storage is disabled by default through `BALE_STORE_RAW_UPDATES=false`, so the default database stores `{"raw_update_storage": "disabled"}` instead of the full webhook payload.
@@ -259,4 +268,4 @@ Webhook behavior:
 
 ## VPS Notes
 
-Milestone 7 is deployment preparation only. Minimal VPS deployment guidance and the final go/no-go checklist are documented in [DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md). Treat Bale webhook assumption verification, HTTPS reverse-proxy setup, firewall planning, local-only endpoint exposure, backup/restore proof, rollback planning, sanitized logs, and real sending approval as blockers before public exposure.
+Milestone 7 is deployment preparation only. Minimal VPS deployment guidance and the final go/no-go checklist are documented in [DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md). Treat Bale webhook assumption verification, HTTPS reverse-proxy setup, firewall planning, local-only endpoint exposure, deployment-host backup/restore proof, rollback planning, sanitized logs, and real sending approval as blockers before public exposure.

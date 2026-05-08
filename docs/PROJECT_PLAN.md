@@ -1,9 +1,9 @@
 # Project Plan
 
 ## Current Status
-The project has a minimal FastAPI webhook app, SQLite message storage, a cautious Bale API client, secure webhook secret-path handling, dry-run reply behavior, basic safe commands for `/start`, `/help`, and `/status`, a safe pharmacy reply layer, review metadata, a minimal duplicate-delivery guard, local-only pharmacist review status actions, a local SQLite backup helper, and a final deployment readiness checklist.
+The project has a minimal FastAPI webhook app, SQLite message storage, a cautious Bale API client, secure webhook secret-path handling, dry-run reply behavior, basic safe commands for `/start`, `/help`, and `/status`, a safe pharmacy reply layer, review metadata, a minimal duplicate-delivery guard, local-only pharmacist review status actions, local SQLite backup and restore helpers, and a final deployment readiness checklist.
 
-Milestone 7A, Milestone 7B, Milestone 7C, and Milestone 7D are done. Real VPS deployment has not started.
+Milestone 7A, Milestone 7B, Milestone 7C, Milestone 7D, and Milestone 7E are done. Real VPS deployment has not started.
 
 ## Long-Term Product Vision
 Build a safe pharmacy automation assistant for Bale that supports a real pharmacy workflow from first contact through pharmacist review. The assistant should receive messages, collect structured intake information, avoid clinical decision-making, preserve auditability, and route cases to a pharmacist when judgment is needed.
@@ -24,6 +24,7 @@ The vision and milestone order are living project guidance. They may change as r
    - Milestone 7B: Done - Minimal local pharmacist review actions.
    - Milestone 7C: Done - Local SQLite backup and retention safety foundation.
    - Milestone 7D: Done - Final deployment readiness checklist.
+   - Milestone 7E: Done - Local SQLite restore rehearsal.
 8. Milestone 8: Planned - Real VPS deployment.
 9. Milestone 9: Planned - LLM/AI integration.
 
@@ -267,6 +268,37 @@ python -m compileall app tests
 git diff --check
 ```
 
+## Completed Milestone: Milestone 7E - SQLite Restore Rehearsal
+
+### Goal
+Add a minimal local restore rehearsal so SQLite backup files can be tested before real VPS deployment.
+
+### Current State
+The app has a `restore_sqlite_backup()` helper that copies an explicit backup file into the configured `DATABASE_PATH`. It creates the target parent directory if missing, raises a controlled error when the backup file is missing, and refuses to overwrite an existing database by default.
+
+The restore command is documented in `README.md` and `docs/DEPLOYMENT_VPS.md`. Deployment-host backup and restore tests are still required before broad patient-facing use.
+
+### Scope OUT
+- No cloud backup.
+- No automated restore.
+- No cron.
+- No encryption system yet.
+- No retention deletion automation.
+- No public restore API.
+- No dashboard.
+- No real VPS deployment.
+- No DNS, SSL, firewall, or reverse-proxy changes.
+- No webhook registration.
+- No enabling `BALE_ENABLE_SENDING=true`.
+- No AI, diagnosis, treatment recommendation, or protocol engine.
+
+### Verification
+```powershell
+python -m unittest discover -s tests
+python -m compileall app tests
+git diff --check
+```
+
 ## Known Assumptions and Open Questions
 - Webhook payload shape is treated as Telegram-like for now (`message`, `message.chat.id`, `message.message_id`, `message.text`) with optional top-level `update_id`.
 - Duplicate-delivery handling uses `update_id` if present, otherwise `chat_id + message_id`. The exact Bale uniqueness contract still needs official confirmation.
@@ -281,6 +313,6 @@ git diff --check
 4. Validate VPS runbook end-to-end, including restart and log inspection.
 5. Verify HTTPS, reverse proxy, and firewall plan before public exposure.
 6. Confirm local-only endpoints are not exposed publicly.
-7. Review SQLite storage path, backup command, restore process, and retention strategy for operational safety.
+7. Review SQLite storage path, backup command, restore command, and retention strategy for operational safety.
 8. Keep `BALE_ENABLE_SENDING=false` until the exact Bale behavior is confirmed and real sending is explicitly approved.
 9. Complete Milestone 7 deployment preparation before broad patient-facing use.

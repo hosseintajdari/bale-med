@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from app.database import create_sqlite_backup, init_db
+from app.database import create_sqlite_backup, init_db, restore_sqlite_backup
 
 
 class DatabaseBackupTests(unittest.TestCase):
@@ -82,6 +82,71 @@ class DatabaseBackupTests(unittest.TestCase):
 
         self.assertFalse(Path("backups/.env").exists())
         self.assertEqual(len(list(Path("backups").glob("*"))), 1)
+
+    def test_restore_sqlite_backup_restores_database_from_backup_file(self):
+        init_db()
+        connection = sqlite3.connect("test.db")
+        try:
+            connection.execute(
+                """
+                INSERT INTO incoming_messages (
+                    received_at,
+                    chat_id,
+                    message_id,
+                    text,
+                    raw_update
+                )
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                ("2026-05-08T00:00:00+00:00", "demo-chat", "123", "Hello pharmacy", "{}"),
+            )
+            connection.commit()
+        finally:
+            connection.close()
+
+        backup = create_sqlite_backup()
+        Path("test.db").unlink()
+
+        result = restore_sqlite_backup(backup.backup_path)
+
+        self.assertTrue(result.restored)
+        self.assertEqual(result.backup_path, backup.backup_path)
+        self.assertEqual(result.restored_path, Path("test.db"))
+        connection = sqlite3.connect("test.db")
+        try:
+            row = connection.execute(
+                "SELECT chat_id, message_id, text FROM incoming_messages"
+            ).fetchone()
+        finally:
+            connection.close()
+
+        self.assertEqual(row, ("demo-chat", "123", "Hello pharmacy"))
+
+    def test_restore_sqlite_backup_creates_database_parent_directory(self):
+        init_db()
+        backup = create_sqlite_backup()
+        os.environ["DATABASE_PATH"] = "data/restored.db"
+
+        result = restore_sqlite_backup(backup.backup_path)
+
+        self.assertEqual(result.restored_path, Path("data/restored.db"))
+        self.assertTrue(Path("data").is_dir())
+        self.assertTrue(Path("data/restored.db").exists())
+
+    def test_restore_sqlite_backup_refuses_to_overwrite_existing_database_by_default(self):
+        init_db()
+        backup = create_sqlite_backup()
+
+        with self.assertRaises(FileExistsError) as captured:
+            restore_sqlite_backup(backup.backup_path)
+
+        self.assertIn("Refusing to overwrite existing SQLite database", str(captured.exception))
+
+    def test_restore_sqlite_backup_raises_controlled_error_when_backup_is_missing(self):
+        with self.assertRaises(FileNotFoundError) as captured:
+            restore_sqlite_backup("backups/missing.db")
+
+        self.assertIn("SQLite backup file was not found", str(captured.exception))
 
 
 if __name__ == "__main__":

@@ -23,6 +23,13 @@ class BackupResult:
     created: bool
 
 
+@dataclass(frozen=True)
+class RestoreResult:
+    backup_path: Path
+    restored_path: Path
+    restored: bool
+
+
 def get_connection() -> sqlite3.Connection:
     settings = get_settings()
     db_path = Path(settings.database_path)
@@ -213,3 +220,19 @@ def create_sqlite_backup(backup_dir: str | Path = "backups") -> BackupResult:
     shutil.copy2(source_path, backup_path)
 
     return BackupResult(source_path=source_path, backup_path=backup_path, created=True)
+
+
+def restore_sqlite_backup(backup_path: str | Path, overwrite: bool = False) -> RestoreResult:
+    source_path = Path(backup_path)
+    if not source_path.is_file():
+        raise FileNotFoundError(f"SQLite backup file was not found: {source_path}")
+
+    settings = get_settings()
+    destination_path = Path(settings.database_path)
+    if destination_path.exists() and not overwrite:
+        raise FileExistsError(f"Refusing to overwrite existing SQLite database: {destination_path}")
+
+    destination_path.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source_path, destination_path)
+
+    return RestoreResult(backup_path=source_path, restored_path=destination_path, restored=True)

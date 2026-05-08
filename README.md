@@ -1,10 +1,26 @@
 # Bale Pharmacy Assistant Bot
 
+[![Tests](https://github.com/hosseintajdari/bale-med/actions/workflows/tests.yml/badge.svg)](https://github.com/hosseintajdari/bale-med/actions/workflows/tests.yml)
+
 Local-first FastAPI MVP for a Bale-based pharmacy workflow assistant.
 
 The project supports safe pharmacy message intake, pharmacist review tracking, duplicate webhook handling, SQLite backup/restore, and optional admin review notifications. It is intended for constrained pharmacy workflows, including rural or border healthcare settings where clear handoff to a pharmacist matters.
 
 This is not a deployed production system and not a clinically validated product. The bot does not provide diagnosis, prescriptions, dosage recommendations, autonomous triage, or medication-change advice.
+
+## Table of Contents
+
+- [Long-Term Product Vision](#long-term-product-vision)
+- [Milestone Map](#milestone-map)
+- [MVP Guarantees vs Non-Goals](#mvp-guarantees-vs-non-goals)
+- [Setup on Windows PowerShell](#setup-on-windows-powershell)
+- [Run Locally](#run-locally)
+- [Local Webhook Test](#local-webhook-test)
+- [Local Pending Review List](#local-pending-review-list)
+- [Local SQLite Backup](#local-sqlite-backup)
+- [Run Tests](#run-tests)
+- [Current Limitations and Next Priorities](#current-limitations-and-next-priorities)
+- [VPS Notes](#vps-notes)
 
 ## Long-Term Product Vision
 

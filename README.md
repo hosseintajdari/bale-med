@@ -312,6 +312,8 @@ Webhook behavior:
 
 Milestone 8A has started as a readiness and GitHub workflow step. The project is waiting for confirmed VPS access before any server hardening, DNS, SSL, firewall, production webhook, or real sending work begins.
 
+Before buying or logging in to a VPS, collect the server IP address, SSH username and port, OS version, provider console or rescue link, backup/snapshot option, and confirmation that ports 80 and 443 can be opened.
+
 Before public exposure, verify Bale webhook and `sendMessage` assumptions, configure HTTPS/reverse proxy/firewall rules, protect local-only endpoints, test backup/restore on the deployment host, confirm sanitized logs, and approve a retention/deletion policy.
 
 Future milestone work should use a small branch, draft pull request, review/checks, merge, and local `main` sync before the next submilestone starts. Use branch names like `codex/milestone-8a-vps-readiness`.

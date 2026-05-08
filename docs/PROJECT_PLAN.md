@@ -54,6 +54,7 @@ No VPS access has been confirmed yet. Milestone 8A is open only to track readine
 2. Keep the first Milestone 8A change documentation-only.
 3. Keep `BALE_ENABLE_SENDING=false` as the first deployment safety default.
 4. Wait for confirmed VPS access before server hardening or app deployment.
+5. Define the VPS provider details that must be collected before buying or logging in by SSH.
 
 ### Scope OUT
 - No real VPS deployment.
@@ -83,6 +84,7 @@ Each next submilestone should start from synced `main`, use a branch named like 
 2. A draft PR into `main` is opened.
 3. The PR is merged after checks/review.
 4. Local `main` is synced after merge.
+5. The VPS purchase/access checklist names the exact provider details needed before any server command runs.
 
 ## Completed Milestones
 

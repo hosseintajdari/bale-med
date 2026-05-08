@@ -1,9 +1,9 @@
 # Project Plan
 
 ## Current Status
-The project has a minimal FastAPI webhook app, SQLite message storage, a cautious Bale API client, secure webhook secret-path handling, dry-run reply behavior, Persian user-facing replies for `/start`, `/help`, `/status`, and safe pharmacy intake/escalation flows, review metadata, a minimal duplicate-delivery guard, local-only pharmacist review status actions, optional Bale admin review notifications, local SQLite backup and restore helpers, a final deployment readiness checklist, and repository/issue alignment notes.
+The project has a minimal FastAPI webhook app, SQLite message storage, a cautious Bale API client, secure webhook secret-path handling, dry-run reply behavior, Persian user-facing replies for `/start`, `/help`, `/status`, and safe pharmacy intake/escalation flows, review metadata, a minimal duplicate-delivery guard, local-only pharmacist review status actions, optional Bale admin review notifications, local SQLite backup and restore helpers, a final deployment readiness checklist, a Milestone 8 VPS deployment execution plan, and repository/issue alignment notes.
 
-Milestone 7A, Milestone 7B, Milestone 7C, Milestone 7D, Milestone 7E, Milestone 7F, Milestone 7G, and Milestone 7I are done. Real VPS deployment has not started. The next implementation milestone is Milestone 8.
+Milestone 7A, Milestone 7B, Milestone 7C, Milestone 7D, Milestone 7E, Milestone 7F, Milestone 7G, and Milestone 7I are done. Milestone 8 planning is documented, but real VPS deployment has not started. The next implementation milestone is executing Milestone 8 after VPS purchase.
 
 ## Long-Term Product Vision
 Build a safe pharmacy automation assistant for Bale that supports a real pharmacy workflow from first contact through pharmacist review, especially where pharmacy teams need constrained, auditable tools for rural or border healthcare workflows. The assistant should receive messages, collect structured intake information, avoid clinical decision-making, preserve auditability, and route cases to a pharmacist when judgment is needed.
@@ -28,7 +28,17 @@ The vision and milestone order are living project guidance. They may change as r
    - Milestone 7F: Done - Persian and RTL-safe user-facing replies.
    - Milestone 7G: Done - Bale admin review notifications.
    - Milestone 7I: Done - Repository context and issue alignment.
-8. Milestone 8: Planned next - Real VPS deployment.
+8. Milestone 8: Planned next - Real VPS deployment execution.
+   - Milestone 8A: Planned - VPS base access and hardening checklist.
+   - Milestone 8B: Planned - Install Python, Git, venv, and clone repo.
+   - Milestone 8C: Planned - Configure `.env` with placeholders and keep sending disabled.
+   - Milestone 8D: Planned - Run app manually on `127.0.0.1:8000`.
+   - Milestone 8E: Planned - Add systemd service.
+   - Milestone 8F: Planned - Add reverse proxy and HTTPS.
+   - Milestone 8G: Planned - Run smoke tests.
+   - Milestone 8H: Planned - Register Bale webhook with production URL.
+   - Milestone 8I: Planned - First monitored dry-run operation.
+   - Milestone 8J: Planned - Decide whether to enable real sending later.
 9. Milestone 9: Planned - LLM/AI integration.
 
 ## Completed Milestones

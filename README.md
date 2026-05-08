@@ -27,6 +27,7 @@ This vision and the milestone order are allowed to change as the pharmacy workfl
   - Milestone 7D: Done - Final deployment readiness checklist.
   - Milestone 7E: Done - Local SQLite restore rehearsal.
   - Milestone 7F: Done - Persian and RTL-safe user-facing replies.
+  - Milestone 7G: Done - Optional Bale admin review notifications.
 - Milestone 8: Planned - Real VPS deployment.
 - Milestone 9: Planned - LLM/AI integration.
 

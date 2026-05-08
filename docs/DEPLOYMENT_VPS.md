@@ -74,9 +74,11 @@ BALE_ENABLE_SENDING=false
 BALE_REPLY_TEXT=پیام شما دریافت شد. این ربات جایگزین نظر داروساز یا پزشک نیست. در صورت نیاز، پیام شما توسط داروساز بررسی می‌شود.
 DATABASE_PATH=/opt/bale-bot/data/bale_bot.db
 BALE_WEBHOOK_SECRET=...
+BALE_ADMIN_CHAT_ID=
+BALE_ENABLE_ADMIN_NOTIFICATIONS=false
 ```
 
-Keep `BALE_ENABLE_SENDING=false` until webhook schema, send-message behavior, and pharmacist safety flow are verified.
+Keep `BALE_ENABLE_SENDING=false` and `BALE_ENABLE_ADMIN_NOTIFICATIONS=false` until webhook schema, send-message behavior, the admin chat id, and pharmacist safety flow are verified.
 
 Create data directory:
 ```bash

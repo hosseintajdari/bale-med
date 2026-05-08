@@ -280,6 +280,187 @@ class HandlerTests(unittest.TestCase):
         self.assertIn("needs_review", columns)
         self.assertIn("review_reason", columns)
         self.assertIn("review_status", columns)
+        self.assertIn("external_event_id", columns)
+
+    def test_duplicate_delivery_with_same_stable_identifier_is_not_inserted_twice(self):
+        original_cwd = Path.cwd()
+        original_values = {key: os.environ.get(key) for key in self.ENV_KEYS}
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            try:
+                os.chdir(temp_dir)
+                for key in original_values:
+                    os.environ.pop(key, None)
+
+                Path(".env").write_text(
+                    "\n".join(
+                        [
+                            "BALE_BOT_TOKEN=test-token",
+                            "BALE_API_BASE_URL=https://example.test",
+                            "BALE_ENABLE_SENDING=false",
+                            "DATABASE_PATH=test.db",
+                            "BALE_REPLY_TEXT=سلام حسین جان!",
+                            "BALE_WEBHOOK_SECRET=test-secret",
+                        ]
+                    ),
+                    encoding="utf-8",
+                )
+
+                init_db()
+                payload = {
+                    "update_id": 987,
+                    "message": {
+                        "message_id": 123,
+                        "chat": {"id": "demo-chat"},
+                        "text": "Hello pharmacy",
+                    },
+                }
+                first_result = route_update(payload)
+                duplicate_result = route_update(payload)
+
+                connection = sqlite3.connect("test.db")
+                try:
+                    count = connection.execute("SELECT COUNT(*) FROM incoming_messages").fetchone()[0]
+                    row = connection.execute(
+                        "SELECT external_event_id FROM incoming_messages"
+                    ).fetchone()
+                finally:
+                    connection.close()
+            finally:
+                os.chdir(original_cwd)
+                for key, value in original_values.items():
+                    if value is None:
+                        os.environ.pop(key, None)
+                    else:
+                        os.environ[key] = value
+
+        self.assertTrue(first_result["ok"])
+        self.assertTrue(first_result["message_inserted"])
+        self.assertFalse(first_result["duplicate_delivery"])
+        self.assertTrue(first_result["reply_prepared"])
+        self.assertTrue(duplicate_result["ok"])
+        self.assertFalse(duplicate_result["message_inserted"])
+        self.assertTrue(duplicate_result["duplicate_delivery"])
+        self.assertFalse(duplicate_result["reply_prepared"])
+        self.assertEqual(first_result["stored_message_id"], duplicate_result["stored_message_id"])
+        self.assertEqual(count, 1)
+        self.assertEqual(row, ("update:987",))
+
+    def test_duplicate_delivery_uses_chat_and_message_id_when_update_id_is_missing(self):
+        original_cwd = Path.cwd()
+        original_values = {key: os.environ.get(key) for key in self.ENV_KEYS}
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            try:
+                os.chdir(temp_dir)
+                for key in original_values:
+                    os.environ.pop(key, None)
+
+                Path(".env").write_text(
+                    "\n".join(
+                        [
+                            "BALE_BOT_TOKEN=test-token",
+                            "BALE_API_BASE_URL=https://example.test",
+                            "BALE_ENABLE_SENDING=false",
+                            "DATABASE_PATH=test.db",
+                            "BALE_REPLY_TEXT=سلام حسین جان!",
+                            "BALE_WEBHOOK_SECRET=test-secret",
+                        ]
+                    ),
+                    encoding="utf-8",
+                )
+
+                init_db()
+                payload = {
+                    "message": {
+                        "message_id": 123,
+                        "chat": {"id": "demo-chat"},
+                        "text": "Hello pharmacy",
+                    },
+                }
+                first_result = route_update(payload)
+                duplicate_result = route_update(payload)
+
+                connection = sqlite3.connect("test.db")
+                try:
+                    count = connection.execute("SELECT COUNT(*) FROM incoming_messages").fetchone()[0]
+                    row = connection.execute(
+                        "SELECT external_event_id FROM incoming_messages"
+                    ).fetchone()
+                finally:
+                    connection.close()
+            finally:
+                os.chdir(original_cwd)
+                for key, value in original_values.items():
+                    if value is None:
+                        os.environ.pop(key, None)
+                    else:
+                        os.environ[key] = value
+
+        self.assertTrue(first_result["message_inserted"])
+        self.assertFalse(first_result["duplicate_delivery"])
+        self.assertFalse(duplicate_result["message_inserted"])
+        self.assertTrue(duplicate_result["duplicate_delivery"])
+        self.assertEqual(first_result["stored_message_id"], duplicate_result["stored_message_id"])
+        self.assertEqual(count, 1)
+        self.assertEqual(row, ("message:demo-chat:123",))
+
+    def test_repeated_message_without_stable_identifier_is_still_stored(self):
+        original_cwd = Path.cwd()
+        original_values = {key: os.environ.get(key) for key in self.ENV_KEYS}
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            try:
+                os.chdir(temp_dir)
+                for key in original_values:
+                    os.environ.pop(key, None)
+
+                Path(".env").write_text(
+                    "\n".join(
+                        [
+                            "BALE_BOT_TOKEN=test-token",
+                            "BALE_API_BASE_URL=https://example.test",
+                            "BALE_ENABLE_SENDING=false",
+                            "DATABASE_PATH=test.db",
+                            "BALE_REPLY_TEXT=سلام حسین جان!",
+                            "BALE_WEBHOOK_SECRET=test-secret",
+                        ]
+                    ),
+                    encoding="utf-8",
+                )
+
+                init_db()
+                payload = {
+                    "message": {
+                        "chat": {"id": "demo-chat"},
+                        "text": "Hello pharmacy",
+                    },
+                }
+                first_result = route_update(payload)
+                second_result = route_update(payload)
+
+                connection = sqlite3.connect("test.db")
+                try:
+                    count = connection.execute("SELECT COUNT(*) FROM incoming_messages").fetchone()[0]
+                    external_ids = connection.execute(
+                        "SELECT external_event_id FROM incoming_messages ORDER BY id"
+                    ).fetchall()
+                finally:
+                    connection.close()
+            finally:
+                os.chdir(original_cwd)
+                for key, value in original_values.items():
+                    if value is None:
+                        os.environ.pop(key, None)
+                    else:
+                        os.environ[key] = value
+
+        self.assertTrue(first_result["message_inserted"])
+        self.assertFalse(first_result["duplicate_delivery"])
+        self.assertTrue(second_result["message_inserted"])
+        self.assertFalse(second_result["duplicate_delivery"])
+        self.assertEqual(count, 2)
+        self.assertEqual(external_ids, [(None,), (None,)])
 
     def test_raw_update_storage_is_disabled_by_default(self):
         original_cwd = Path.cwd()

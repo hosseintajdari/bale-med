@@ -1,9 +1,9 @@
 # Project Plan
 
 ## Current Status
-The project has a minimal FastAPI webhook app, SQLite message storage, a cautious Bale API client, secure webhook secret-path handling, dry-run reply behavior, basic safe commands for `/start`, `/help`, and `/status`, and a safe pharmacy reply layer.
+The project has a minimal FastAPI webhook app, SQLite message storage, a cautious Bale API client, secure webhook secret-path handling, dry-run reply behavior, basic safe commands for `/start`, `/help`, and `/status`, a safe pharmacy reply layer, review metadata, and a minimal duplicate-delivery guard.
 
-Milestone 6 is done. Milestone 7 is now the active milestone: prepare the project for VPS deployment without changing production infrastructure yet.
+Milestone 7A is done. The next milestone should stay small and continue preparing the MVP for safe deployment or local pharmacist review without changing production infrastructure yet.
 
 ## Long-Term Product Vision
 Build a safe pharmacy automation assistant for Bale that supports a real pharmacy workflow from first contact through pharmacist review. The assistant should receive messages, collect structured intake information, avoid clinical decision-making, preserve auditability, and route cases to a pharmacist when judgment is needed.
@@ -20,6 +20,7 @@ The vision and milestone order are living project guidance. They may change as r
 5. Milestone 5: Done - Safe pharmacy reply layer.
 6. Milestone 6: Done - Better logging and admin review.
 7. Milestone 7: Current - VPS deployment preparation.
+   - Milestone 7A: Done - Bale webhook duplicate-delivery guard.
 8. Milestone 8: Planned - Real VPS deployment.
 9. Milestone 9: Planned - LLM/AI integration.
 
@@ -83,6 +84,31 @@ python -m compileall app tests
 git diff --check
 ```
 
+## Completed Milestone: Milestone 7A - Bale Webhook Duplicate-Delivery Guard
+
+### Goal
+Add a minimal idempotency foundation so duplicate webhook deliveries do not create duplicate database rows when a stable external identifier is available.
+
+### Current State
+Incoming messages now store a nullable internal `external_event_id`. The app derives this value from top-level `update_id` when present, otherwise from `message.chat.id` plus `message.message_id` when both are present. If no stable identifier can be derived, the message is still stored. Recognized duplicates return the existing stored row id, avoid a second insert, and skip duplicate reply preparation.
+
+### Scope OUT
+- No diagnosis.
+- No protocol engine.
+- No AI or LLM integration.
+- No structured intake workflow.
+- No admin dashboard.
+- No VPS deployment changes.
+- No webhook registration.
+- No enabling real outgoing sends.
+
+### Verification
+```powershell
+python -m unittest discover -s tests
+python -m compileall app tests
+git diff --check
+```
+
 ## Current Milestone: Milestone 7 - VPS Deployment Preparation
 
 ### Goal
@@ -134,7 +160,8 @@ git status --short
    `docs: define milestone 7 deployment prep`
 
 ## Known Assumptions and Open Questions
-- Webhook payload shape is treated as Telegram-like for now (`message`, `message.chat.id`, `message.message_id`, `message.text`).
+- Webhook payload shape is treated as Telegram-like for now (`message`, `message.chat.id`, `message.message_id`, `message.text`) with optional top-level `update_id`.
+- Duplicate-delivery handling uses `update_id` if present, otherwise `chat_id + message_id`. The exact Bale uniqueness contract still needs official confirmation.
 - Bale send-message endpoint, method, headers, and payload contract still need confirmation before production use.
 - Webhook authentication/signature mechanism is unknown beyond the current secret path and must be confirmed before public deployment.
 - Canonical tracker: `docs/ASSUMPTIONS_BALE_API.md`.

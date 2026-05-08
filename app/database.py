@@ -1,11 +1,18 @@
 import json
 import sqlite3
 from contextlib import closing
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
 from .config import get_settings
 from .models import IncomingMessage
+
+
+@dataclass(frozen=True)
+class SaveMessageResult:
+    stored_message_id: int
+    inserted: bool
 
 
 def get_connection() -> sqlite3.Connection:
@@ -24,6 +31,7 @@ def init_db() -> None:
                     received_at TEXT NOT NULL,
                     chat_id TEXT,
                     message_id TEXT,
+                    external_event_id TEXT,
                     text TEXT,
                     raw_update TEXT NOT NULL,
                     needs_review INTEGER NOT NULL DEFAULT 0,
@@ -36,6 +44,8 @@ def init_db() -> None:
                 row[1]
                 for row in connection.execute("PRAGMA table_info(incoming_messages)").fetchall()
             }
+            if "external_event_id" not in existing_columns:
+                connection.execute("ALTER TABLE incoming_messages ADD COLUMN external_event_id TEXT")
             if "needs_review" not in existing_columns:
                 connection.execute("ALTER TABLE incoming_messages ADD COLUMN needs_review INTEGER NOT NULL DEFAULT 0")
             if "review_reason" not in existing_columns:
@@ -44,6 +54,13 @@ def init_db() -> None:
                 connection.execute(
                     "ALTER TABLE incoming_messages ADD COLUMN review_status TEXT NOT NULL DEFAULT 'not_required'"
                 )
+            connection.execute(
+                """
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_incoming_messages_external_event_id
+                ON incoming_messages (external_event_id)
+                WHERE external_event_id IS NOT NULL
+                """
+            )
 
 
 def save_incoming_message(
@@ -51,7 +68,7 @@ def save_incoming_message(
     needs_review: bool = False,
     review_reason: str | None = None,
     review_status: str = "not_required",
-) -> int:
+) -> SaveMessageResult:
     settings = get_settings()
     received_at = datetime.now(timezone.utc).isoformat()
     raw_payload = message.raw_update if settings.bale_store_raw_updates else {"raw_update_storage": "disabled"}
@@ -59,32 +76,53 @@ def save_incoming_message(
 
     with closing(get_connection()) as connection:
         with connection:
-            cursor = connection.execute(
-                """
-                INSERT INTO incoming_messages (
-                    received_at,
-                    chat_id,
-                    message_id,
-                    text,
-                    raw_update,
-                    needs_review,
-                    review_reason,
-                    review_status
+            if message.external_event_id is not None:
+                existing = connection.execute(
+                    "SELECT id FROM incoming_messages WHERE external_event_id = ?",
+                    (message.external_event_id,),
+                ).fetchone()
+                if existing is not None:
+                    return SaveMessageResult(stored_message_id=int(existing[0]), inserted=False)
+
+            try:
+                cursor = connection.execute(
+                    """
+                    INSERT INTO incoming_messages (
+                        received_at,
+                        chat_id,
+                        message_id,
+                        external_event_id,
+                        text,
+                        raw_update,
+                        needs_review,
+                        review_reason,
+                        review_status
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        received_at,
+                        message.chat_id,
+                        message.message_id,
+                        message.external_event_id,
+                        message.text,
+                        raw_update,
+                        int(needs_review),
+                        review_reason,
+                        review_status,
+                    ),
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    received_at,
-                    message.chat_id,
-                    message.message_id,
-                    message.text,
-                    raw_update,
-                    int(needs_review),
-                    review_reason,
-                    review_status,
-                ),
-            )
-            return int(cursor.lastrowid)
+            except sqlite3.IntegrityError:
+                if message.external_event_id is None:
+                    raise
+                existing = connection.execute(
+                    "SELECT id FROM incoming_messages WHERE external_event_id = ?",
+                    (message.external_event_id,),
+                ).fetchone()
+                if existing is None:
+                    raise
+                return SaveMessageResult(stored_message_id=int(existing[0]), inserted=False)
+            return SaveMessageResult(stored_message_id=int(cursor.lastrowid), inserted=True)
 
 
 def list_pending_review_items() -> list[dict[str, str | int | None]]:

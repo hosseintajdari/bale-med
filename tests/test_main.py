@@ -47,10 +47,10 @@ class WebhookRouteTests(unittest.TestCase):
                 os.environ[key] = value
         self.temp_dir.cleanup()
 
-    def _payload(self, text: str = "Hello pharmacy") -> dict:
+    def _payload(self, text: str = "Hello pharmacy", message_id: int = 123) -> dict:
         return {
             "message": {
-                "message_id": 123,
+                "message_id": message_id,
                 "chat": {"id": "demo-chat"},
                 "text": text,
             }
@@ -93,10 +93,10 @@ class WebhookRouteTests(unittest.TestCase):
 
     def test_pending_reviews_endpoint_lists_only_pending_review_items(self):
         with TestClient(self.main_module.app) as client:
-            client.post("/webhook/bale/test-secret", json=self._payload("Hello pharmacy"))
+            client.post("/webhook/bale/test-secret", json=self._payload("Hello pharmacy", message_id=123))
             client.post(
                 "/webhook/bale/test-secret",
-                json=self._payload("Can I use this medicine during pregnancy?"),
+                json=self._payload("Can I use this medicine during pregnancy?", message_id=124),
             )
 
             response = client.get("/local/reviews/pending")
@@ -106,7 +106,7 @@ class WebhookRouteTests(unittest.TestCase):
         self.assertEqual(len(data["pending_reviews"]), 1)
         pending = data["pending_reviews"][0]
         self.assertEqual(pending["chat_id"], "demo-chat")
-        self.assertEqual(pending["message_id"], "123")
+        self.assertEqual(pending["message_id"], "124")
         self.assertEqual(pending["text"], "Can I use this medicine during pregnancy?")
         self.assertEqual(pending["review_reason"], "pharmacist_review_required")
         self.assertEqual(pending["review_status"], "pending")

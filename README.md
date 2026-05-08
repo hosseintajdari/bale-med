@@ -21,6 +21,7 @@ This vision and the milestone order are allowed to change as the pharmacy workfl
 - Milestone 5: Done - Safe pharmacy reply layer.
 - Milestone 6: Done - Better logging and admin review.
 - Milestone 7: Current - VPS deployment preparation.
+  - Milestone 7A: Done - Bale webhook duplicate-delivery guard.
 - Milestone 8: Planned - Real VPS deployment.
 - Milestone 9: Planned - LLM/AI integration.
 
@@ -191,13 +192,14 @@ python -m unittest discover -s tests
 
 Run this before and after changes. These tests currently check:
 - local `.env` loading
-- webhook routing, SQLite storage, review metadata, local pending-review listing, and dry-run reply preparation
+- webhook routing, SQLite storage, duplicate-delivery handling, review metadata, local pending-review listing, and dry-run reply preparation
 - basic command replies
 - safe intake and pharmacist-review escalation replies
 
 ## Bale API Assumptions
 
 Current parsing is intentionally conservative and based on Telegram-like structure:
+- Top-level `update_id` may exist.
 - Top-level `message` object may exist.
 - `message.chat.id` may provide chat identity.
 - `message.message_id` and `message.text` may exist.
@@ -213,7 +215,9 @@ Implemented methods:
 - `getWebhookInfo`
 
 Webhook behavior:
-- Always stores incoming updates.
+- Stores new incoming updates.
+- Recognizes duplicate deliveries when top-level `update_id` exists, or when both `message.chat.id` and `message.message_id` exist. Duplicate deliveries return the existing stored row id, do not insert a second row, and do not prepare another reply.
+- Still stores messages when no stable duplicate key can be derived.
 - Stores basic pharmacist-review metadata for incoming messages.
 - Uses `/webhook/bale/{secret}` and returns 404 for a wrong secret.
 - Supports only `message.text` path for acknowledgement behavior.

@@ -74,27 +74,36 @@ def get_review_metadata(message_text: str | None) -> dict[str, str | bool | None
 def route_update(update: dict[str, Any]) -> dict[str, Any]:
     incoming = IncomingMessage.from_update(update)
     review_metadata = get_review_metadata(incoming.text)
-    saved_id = save_incoming_message(
+    save_result = save_incoming_message(
         incoming,
         needs_review=bool(review_metadata["needs_review"]),
         review_reason=review_metadata["review_reason"],
         review_status=str(review_metadata["review_status"]),
     )
+    saved_id = save_result.stored_message_id
     settings = get_settings()
     has_text = incoming.text is not None
     text_length = len(incoming.text) if incoming.text is not None else 0
 
-    logger.info(
-        "webhook_update_received stored_message_id=%s has_chat_id=%s has_message_id=%s "
-        "has_text=%s text_length=%s needs_review=%s review_status=%s",
-        saved_id,
-        incoming.chat_id is not None,
-        incoming.message_id is not None,
-        has_text,
-        text_length,
-        bool(review_metadata["needs_review"]),
-        review_metadata["review_status"],
-    )
+    if save_result.inserted:
+        logger.info(
+            "webhook_update_received stored_message_id=%s has_chat_id=%s has_message_id=%s "
+            "has_external_event_id=%s has_text=%s text_length=%s needs_review=%s review_status=%s",
+            saved_id,
+            incoming.chat_id is not None,
+            incoming.message_id is not None,
+            incoming.external_event_id is not None,
+            has_text,
+            text_length,
+            bool(review_metadata["needs_review"]),
+            review_metadata["review_status"],
+        )
+    else:
+        logger.info(
+            "duplicate_webhook_update_received stored_message_id=%s has_external_event_id=%s",
+            saved_id,
+            incoming.external_event_id is not None,
+        )
 
     reply_result = None
     can_prepare_reply = incoming.chat_id is not None and incoming.text is not None
@@ -103,6 +112,9 @@ def route_update(update: dict[str, Any]) -> dict[str, Any]:
         settings.bale_reply_text,
         bale_enable_sending=settings.bale_enable_sending,
     )
+
+    if not save_result.inserted:
+        can_prepare_reply = False
 
     if can_prepare_reply and not settings.bale_enable_sending:
         reply_result = {
@@ -144,6 +156,8 @@ def route_update(update: dict[str, Any]) -> dict[str, Any]:
     return {
         "ok": True,
         "stored_message_id": saved_id,
+        "message_inserted": save_result.inserted,
+        "duplicate_delivery": not save_result.inserted,
         "reply_prepared": reply_result is not None,
         "reply_result": reply_result,
     }

@@ -13,7 +13,7 @@ Work through these pieces in order:
 3. Confirm safe environment defaults: `BALE_ENABLE_SENDING=false`, strong `BALE_WEBHOOK_SECRET`, and `DATABASE_PATH=/opt/bale-bot/data/bale_bot.db`.
 4. Confirm app run path: repo files under `/opt/bale-bot`, virtual environment under `/opt/bale-bot/.venv`, and uvicorn bound only to `127.0.0.1:8000`.
 5. Choose reverse proxy approach: Nginx or Caddy terminates HTTPS and forwards requests to `127.0.0.1:8000`.
-6. Confirm storage and backup: SQLite file lives in `/opt/bale-bot/data`, backup location is known, and restore steps are tested before broad use.
+6. Confirm storage and backup: SQLite file lives in `/opt/bale-bot/data`, local backup command is tested, backup location is known, and restore steps are tested before broad use.
 7. Confirm operations commands: restart, status, logs, health check, webhook smoke test, rollback.
 8. Confirm deployment blockers are resolved before Milestone 8 starts.
 
@@ -90,8 +90,18 @@ WantedBy=multi-user.target
 
 ## Backup and Rollback Basics
 - Back up SQLite file regularly: `/opt/bale-bot/data/bale_bot.db`.
+- Current local helper:
+  `python -c "from app.database import create_sqlite_backup; result = create_sqlite_backup(); print(result.backup_path)"`
+- The helper copies only the configured SQLite database file into `backups/` with a timestamped filename. It does not copy `.env`, tokens, logs, or tunnel output.
+- Keep backups outside Git. Do not commit database files, backup files, `.env`, logs, tunnel output, or generated QR output.
 - Keep release snapshots or tagged commits.
 - Roll back by checking out previous commit and restarting service.
+
+## Data Retention Notes
+- Stored local data includes incoming message metadata, message text, duplicate-delivery identifiers, pharmacist-review metadata, timestamps, and raw webhook storage status.
+- Raw webhook payload storage is disabled by default with `BALE_STORE_RAW_UPDATES=false`.
+- Patient and message data should not be kept forever without a pharmacy-approved retention policy.
+- Automatic deletion, retention scheduling, encrypted backups, and cloud backup are postponed until the workflow and deployment environment are clearer.
 
 ## Deployment Blockers Before Public Exposure
 - Confirm Bale webhook authentication/signature validation beyond secret-path protection, if Bale supports it.

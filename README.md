@@ -23,6 +23,7 @@ This vision and the milestone order are allowed to change as the pharmacy workfl
 - Milestone 7: Current - VPS deployment preparation.
   - Milestone 7A: Done - Bale webhook duplicate-delivery guard.
   - Milestone 7B: Done - Minimal local pharmacist review actions.
+  - Milestone 7C: Done - Local SQLite backup and retention safety foundation.
 - Milestone 8: Planned - Real VPS deployment.
 - Milestone 9: Planned - LLM/AI integration.
 
@@ -141,6 +142,22 @@ Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/local/reviews/1/mark-r
 ```
 
 This changes only `pending` items to `reviewed`. Missing items return 404, and already reviewed items return a safe unchanged response.
+
+## Local SQLite Backup
+
+Create a local SQLite backup before risky local operations or before moving toward VPS deployment:
+
+```powershell
+python -c "from app.database import create_sqlite_backup; result = create_sqlite_backup(); print(result.backup_path)"
+```
+
+The helper reads `DATABASE_PATH`, creates `backups/` if needed, and copies only the configured SQLite database file to a timestamped backup filename. It does not copy `.env`, tokens, logs, or tunnel output. Backup files are local operational files and should not be committed.
+
+## Data Retention Notes
+
+The local SQLite database stores incoming message metadata, message text, duplicate-delivery identifiers, review status, review reason, timestamps, and raw webhook storage status. Raw webhook payload storage is disabled by default through `BALE_STORE_RAW_UPDATES=false`, so the default database stores `{"raw_update_storage": "disabled"}` instead of the full webhook payload.
+
+Patient and message data should not be kept forever without a pharmacy-approved retention policy. Automatic deletion, retention scheduling, encrypted backups, and cloud backup are postponed until the workflow and deployment environment are clearer.
 
 ## Local Smoke Test (PowerShell)
 

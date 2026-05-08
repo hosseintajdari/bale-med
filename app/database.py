@@ -1,4 +1,5 @@
 import json
+import shutil
 import sqlite3
 from contextlib import closing
 from dataclasses import dataclass
@@ -13,6 +14,13 @@ from .models import IncomingMessage
 class SaveMessageResult:
     stored_message_id: int
     inserted: bool
+
+
+@dataclass(frozen=True)
+class BackupResult:
+    source_path: Path
+    backup_path: Path
+    created: bool
 
 
 def get_connection() -> sqlite3.Connection:
@@ -188,3 +196,20 @@ def mark_review_item_reviewed(message_id: int) -> dict[str, str | int | bool] | 
                 "review_status": "reviewed",
                 "changed": True,
             }
+
+
+def create_sqlite_backup(backup_dir: str | Path = "backups") -> BackupResult:
+    settings = get_settings()
+    source_path = Path(settings.database_path)
+    if not source_path.is_file():
+        raise FileNotFoundError(f"SQLite database file was not found: {source_path}")
+
+    destination_dir = Path(backup_dir)
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    backup_name = f"{source_path.stem}-{timestamp}{source_path.suffix or '.db'}"
+    backup_path = destination_dir / backup_name
+
+    destination_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source_path, backup_path)
+
+    return BackupResult(source_path=source_path, backup_path=backup_path, created=True)

@@ -83,6 +83,19 @@ Prefer an Iran-based VPS first, unless testing shows Bale webhook delivery or op
 
 Do not buy if ports 80/443 are blocked, SSH is unavailable, the IP changes unexpectedly, or there is no practical backup/snapshot option.
 
+Before purchase or first SSH login, collect these details from the VPS provider:
+
+- Server public IPv4 address.
+- Initial SSH username, usually `root` or a provider-created user.
+- SSH port, usually `22`.
+- Installed OS name and version.
+- Provider console or rescue console URL.
+- Snapshot, backup, or rebuild option and where to find it.
+- Whether ports 80 and 443 are allowed by provider policy.
+- Whether the server IP is stable or can change after reboot/rebuild.
+
+Milestone 8A remains paused until those details are known. Do not change DNS, configure SSL, edit firewall rules, clone the app, register a production webhook, or enable real Bale sending before confirmed VPS access exists.
+
 ### 8A: VPS Base Access and Hardening Checklist
 
 Goal: Get safe SSH access and basic server hardening in place before app deployment.

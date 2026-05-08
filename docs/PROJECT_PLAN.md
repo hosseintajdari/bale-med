@@ -1,9 +1,9 @@
 # Project Plan
 
 ## Current Status
-The project has a minimal FastAPI webhook app, SQLite message storage, a cautious Bale API client, secure webhook secret-path handling, dry-run reply behavior, basic safe commands for `/start`, `/help`, and `/status`, a safe pharmacy reply layer, review metadata, and a minimal duplicate-delivery guard.
+The project has a minimal FastAPI webhook app, SQLite message storage, a cautious Bale API client, secure webhook secret-path handling, dry-run reply behavior, basic safe commands for `/start`, `/help`, and `/status`, a safe pharmacy reply layer, review metadata, a minimal duplicate-delivery guard, and local-only pharmacist review status actions.
 
-Milestone 7A is done. The next milestone should stay small and continue preparing the MVP for safe deployment or local pharmacist review without changing production infrastructure yet.
+Milestone 7A and Milestone 7B are done. The next milestone should stay small and continue preparing the MVP for safe deployment without changing production infrastructure yet.
 
 ## Long-Term Product Vision
 Build a safe pharmacy automation assistant for Bale that supports a real pharmacy workflow from first contact through pharmacist review. The assistant should receive messages, collect structured intake information, avoid clinical decision-making, preserve auditability, and route cases to a pharmacist when judgment is needed.
@@ -21,6 +21,7 @@ The vision and milestone order are living project guidance. They may change as r
 6. Milestone 6: Done - Better logging and admin review.
 7. Milestone 7: Current - VPS deployment preparation.
    - Milestone 7A: Done - Bale webhook duplicate-delivery guard.
+   - Milestone 7B: Done - Minimal local pharmacist review actions.
 8. Milestone 8: Planned - Real VPS deployment.
 9. Milestone 9: Planned - LLM/AI integration.
 
@@ -100,6 +101,32 @@ Incoming messages now store a nullable internal `external_event_id`. The app der
 - No admin dashboard.
 - No VPS deployment changes.
 - No webhook registration.
+- No enabling real outgoing sends.
+
+### Verification
+```powershell
+python -m unittest discover -s tests
+python -m compileall app tests
+git diff --check
+```
+
+## Completed Milestone: Milestone 7B - Minimal Local Pharmacist Review Actions
+
+### Goal
+Add minimal local-only pharmacist review status update behavior without adding a dashboard, public admin API, diagnosis, treatment recommendations, protocol engine, or AI.
+
+### Current State
+Pending pharmacist-review items can be listed through `/local/reviews/pending` and marked reviewed through `POST /local/reviews/{message_id}/mark-reviewed`. The action is local-only, returns 404 for missing items, updates only `pending -> reviewed`, and returns a safe unchanged response when the item is already reviewed or otherwise not pending. Reviewed items no longer appear in the pending review list.
+
+### Scope OUT
+- No dashboard.
+- No authentication system.
+- No public admin API.
+- No diagnosis.
+- No treatment recommendation.
+- No protocol engine.
+- No AI or LLM integration.
+- No VPS deployment changes.
 - No enabling real outgoing sends.
 
 ### Verification

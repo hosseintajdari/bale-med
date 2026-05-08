@@ -22,6 +22,7 @@ This vision and the milestone order are allowed to change as the pharmacy workfl
 - Milestone 6: Done - Better logging and admin review.
 - Milestone 7: Current - VPS deployment preparation.
   - Milestone 7A: Done - Bale webhook duplicate-delivery guard.
+  - Milestone 7B: Done - Minimal local pharmacist review actions.
 - Milestone 8: Planned - Real VPS deployment.
 - Milestone 9: Planned - LLM/AI integration.
 
@@ -133,6 +134,14 @@ Invoke-RestMethod -Method Get -Uri http://127.0.0.1:8000/local/reviews/pending
 
 The endpoint returns only pending review rows and does not include stored raw webhook payloads. It is intended for local inspection, not public deployment.
 
+To mark a pending review item as reviewed locally, use the stored message `id` from the pending list:
+
+```powershell
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/local/reviews/1/mark-reviewed
+```
+
+This changes only `pending` items to `reviewed`. Missing items return 404, and already reviewed items return a safe unchanged response.
+
 ## Local Smoke Test (PowerShell)
 
 ```powershell
@@ -219,6 +228,7 @@ Webhook behavior:
 - Recognizes duplicate deliveries when top-level `update_id` exists, or when both `message.chat.id` and `message.message_id` exist. Duplicate deliveries return the existing stored row id, do not insert a second row, and do not prepare another reply.
 - Still stores messages when no stable duplicate key can be derived.
 - Stores basic pharmacist-review metadata for incoming messages.
+- Supports local-only pharmacist review actions for marking pending review items as reviewed.
 - Uses `/webhook/bale/{secret}` and returns 404 for a wrong secret.
 - Supports only `message.text` path for acknowledgement behavior.
 - Handles `/start`, `/help`, and `/status` with simple, non-medical command replies. `/status` reports whether sending is ON or OFF without exposing secrets.

@@ -146,3 +146,45 @@ def list_pending_review_items() -> list[dict[str, str | int | None]]:
         ).fetchall()
 
     return [dict(row) for row in rows]
+
+
+def mark_review_item_reviewed(message_id: int) -> dict[str, str | int | bool] | None:
+    with closing(get_connection()) as connection:
+        with connection:
+            row = connection.execute(
+                """
+                SELECT id, review_status
+                FROM incoming_messages
+                WHERE id = ?
+                """,
+                (message_id,),
+            ).fetchone()
+
+            if row is None:
+                return None
+
+            current_status = str(row[1])
+            if current_status != "pending":
+                return {
+                    "ok": True,
+                    "message_id": int(row[0]),
+                    "review_status": current_status,
+                    "changed": False,
+                }
+
+            connection.execute(
+                """
+                UPDATE incoming_messages
+                SET review_status = 'reviewed'
+                WHERE id = ?
+                  AND review_status = 'pending'
+                """,
+                (message_id,),
+            )
+
+            return {
+                "ok": True,
+                "message_id": int(row[0]),
+                "review_status": "reviewed",
+                "changed": True,
+            }

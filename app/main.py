@@ -4,7 +4,7 @@ from typing import Any
 from fastapi import FastAPI, HTTPException, Request
 
 from .config import get_settings
-from .database import init_db, list_pending_review_items
+from .database import init_db, list_pending_review_items, mark_review_item_reviewed
 from .handlers import route_update
 
 
@@ -33,6 +33,18 @@ def pending_reviews(request: Request) -> dict[str, list[dict[str, str | int | No
     if client_host not in {"127.0.0.1", "::1", "localhost", "testclient"}:
         raise HTTPException(status_code=404, detail="Not Found")
     return {"pending_reviews": list_pending_review_items()}
+
+
+@app.post("/local/reviews/{message_id}/mark-reviewed")
+def mark_reviewed(request: Request, message_id: int) -> dict[str, str | int | bool]:
+    client_host = request.client.host if request.client else ""
+    if client_host not in {"127.0.0.1", "::1", "localhost", "testclient"}:
+        raise HTTPException(status_code=404, detail="Not Found")
+
+    result = mark_review_item_reviewed(message_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Not Found")
+    return result
 
 
 @app.post("/webhook/bale/{secret}")

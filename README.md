@@ -83,6 +83,8 @@ BALE_ENABLE_SENDING=false
 BALE_REPLY_TEXT=پیام شما دریافت شد. این ربات جایگزین نظر داروساز یا پزشک نیست. در صورت نیاز، پیام شما توسط داروساز بررسی می‌شود.
 DATABASE_PATH=bale_bot.db
 BALE_WEBHOOK_SECRET=...
+BALE_ADMIN_CHAT_ID=
+BALE_ENABLE_ADMIN_NOTIFICATIONS=false
 ```
 
 `BALE_ENABLE_SENDING` defaults to `false` and prevents accidental real sends.
@@ -145,6 +147,21 @@ Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/local/reviews/1/mark-r
 ```
 
 This changes only `pending` items to `reviewed`. Missing items return 404, and already reviewed items return a safe unchanged response.
+
+## Optional Bale Admin Notifications
+
+For MVP pharmacist awareness, the bot can prepare a safe Bale notification when a message needs pharmacist review. This is optional and disabled by default:
+
+```env
+BALE_ADMIN_CHAT_ID=
+BALE_ENABLE_ADMIN_NOTIFICATIONS=false
+```
+
+Keep `BALE_ENABLE_ADMIN_NOTIFICATIONS=false` until you have tested the admin chat id and the send path. Notifications are sent only when both `BALE_ENABLE_ADMIN_NOTIFICATIONS=true` and `BALE_ENABLE_SENDING=true`.
+
+The notification includes the stored message id, review reason, a short sanitized preview, and an instruction to check `/local/reviews/pending`. It must not include raw webhook payloads, secrets, chat ids, or full patient text.
+
+No Web UI is needed for the current MVP. Admin notifications plus the local pending review list are the minimal review-awareness path for now.
 
 ## Local SQLite Backup
 
@@ -232,6 +249,7 @@ Run this before and after changes. These tests currently check:
 - webhook routing, SQLite storage, duplicate-delivery handling, review metadata, local pending-review listing, and dry-run reply preparation
 - basic command replies
 - Persian safe intake and pharmacist-review escalation replies
+- optional admin review notification metadata and safe skip behavior
 
 ## Bale API Assumptions
 
@@ -257,6 +275,7 @@ Webhook behavior:
 - Still stores messages when no stable duplicate key can be derived.
 - Stores basic pharmacist-review metadata for incoming messages.
 - Supports local-only pharmacist review actions for marking pending review items as reviewed.
+- Prepares optional Bale admin notifications for pharmacist-review cases. Notifications are disabled by default and duplicate webhook deliveries do not prepare another admin notification.
 - Uses `/webhook/bale/{secret}` and returns 404 for a wrong secret.
 - Supports only `message.text` path for acknowledgement behavior.
 - Handles `/start`, `/help`, and `/status` with simple Persian, non-medical command replies. `/status` reports whether sending is on or off without exposing secrets.

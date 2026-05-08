@@ -14,6 +14,8 @@ class Settings:
     bale_reply_text: str
     bale_webhook_secret: str
     bale_store_raw_updates: bool
+    bale_admin_chat_id: str
+    bale_enable_admin_notifications: bool
 
 
 def _to_bool(value: str | None, default: bool = False) -> bool:
@@ -39,4 +41,9 @@ def get_settings() -> Settings:
         bale_reply_text=os.getenv("BALE_REPLY_TEXT", default_reply_text),
         bale_webhook_secret=os.getenv("BALE_WEBHOOK_SECRET", ""),
         bale_store_raw_updates=_to_bool(os.getenv("BALE_STORE_RAW_UPDATES"), default=False),
+        bale_admin_chat_id=os.getenv("BALE_ADMIN_CHAT_ID", ""),
+        bale_enable_admin_notifications=_to_bool(
+            os.getenv("BALE_ENABLE_ADMIN_NOTIFICATIONS"),
+            default=False,
+        ),
     )

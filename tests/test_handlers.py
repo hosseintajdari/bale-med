@@ -4,6 +4,7 @@ import sqlite3
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from app.database import init_db
 from app.handlers import get_reply_text, route_update
@@ -18,9 +19,11 @@ class HandlerTests(unittest.TestCase):
         "BALE_REPLY_TEXT",
         "BALE_WEBHOOK_SECRET",
         "BALE_STORE_RAW_UPDATES",
+        "BALE_ADMIN_CHAT_ID",
+        "BALE_ENABLE_ADMIN_NOTIFICATIONS",
     )
 
-    def _route_text_message(self, text: str) -> dict:
+    def _route_text_message(self, text: str, env_overrides: dict[str, str] | None = None) -> dict:
         original_cwd = Path.cwd()
         original_values = {key: os.environ.get(key) for key in self.ENV_KEYS}
 
@@ -43,6 +46,9 @@ class HandlerTests(unittest.TestCase):
                     ),
                     encoding="utf-8",
                 )
+                if env_overrides:
+                    for key, value in env_overrides.items():
+                        os.environ[key] = value
 
                 init_db()
                 return route_update(
@@ -626,6 +632,132 @@ class HandlerTests(unittest.TestCase):
         self.assertIn("پیام شما دریافت شد", reply_text)
         self.assertIn("نام دارو", reply_text)
         self.assertIn("؟", reply_text)
+
+    def test_review_needed_message_prepares_skipped_admin_notification_metadata(self):
+        result = self._route_text_message("Can I use this medicine during pregnancy?")
+
+        self.assertTrue(result["admin_notification_prepared"])
+        notification = result["admin_notification_result"]
+        self.assertTrue(notification["skipped"])
+        self.assertEqual(notification["reason"], "Admin notifications are disabled.")
+        self.assertEqual(notification["stored_message_id"], result["stored_message_id"])
+        self.assertEqual(notification["review_reason"], "pharmacist_review_required")
+        self.assertIn("pending review", notification["text"])
+        self.assertIn("/local/reviews/pending", notification["text"])
+
+    def test_normal_message_does_not_prepare_admin_notification(self):
+        result = self._route_text_message("I need help with a medicine question")
+
+        self.assertFalse(result["admin_notification_prepared"])
+        self.assertIsNone(result["admin_notification_result"])
+
+    def test_duplicate_delivery_does_not_prepare_duplicate_admin_notification(self):
+        original_cwd = Path.cwd()
+        original_values = {key: os.environ.get(key) for key in self.ENV_KEYS}
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            try:
+                os.chdir(temp_dir)
+                for key in original_values:
+                    os.environ.pop(key, None)
+
+                Path(".env").write_text(
+                    "\n".join(
+                        [
+                            "BALE_BOT_TOKEN=test-token",
+                            "BALE_API_BASE_URL=https://example.test",
+                            "BALE_ENABLE_SENDING=false",
+                            "DATABASE_PATH=test.db",
+                            "BALE_REPLY_TEXT=سلام حسین جان!",
+                            "BALE_WEBHOOK_SECRET=test-secret",
+                            "BALE_ENABLE_ADMIN_NOTIFICATIONS=true",
+                            "BALE_ADMIN_CHAT_ID=admin-chat",
+                        ]
+                    ),
+                    encoding="utf-8",
+                )
+
+                init_db()
+                payload = {
+                    "update_id": 987,
+                    "message": {
+                        "message_id": 123,
+                        "chat": {"id": "demo-chat"},
+                        "text": "Can I use this medicine during pregnancy?",
+                    },
+                }
+                first_result = route_update(payload)
+                duplicate_result = route_update(payload)
+            finally:
+                os.chdir(original_cwd)
+                for key, value in original_values.items():
+                    if value is None:
+                        os.environ.pop(key, None)
+                    else:
+                        os.environ[key] = value
+
+        self.assertTrue(first_result["admin_notification_prepared"])
+        self.assertFalse(duplicate_result["admin_notification_prepared"])
+        self.assertIsNone(duplicate_result["admin_notification_result"])
+
+    def test_missing_admin_chat_id_skips_admin_notification_without_crashing(self):
+        result = self._route_text_message(
+            "Can I use this medicine during pregnancy?",
+            env_overrides={"BALE_ENABLE_ADMIN_NOTIFICATIONS": "true"},
+        )
+
+        self.assertTrue(result["admin_notification_prepared"])
+        notification = result["admin_notification_result"]
+        self.assertTrue(notification["skipped"])
+        self.assertEqual(notification["reason"], "BALE_ADMIN_CHAT_ID is not configured.")
+
+    def test_admin_notification_text_does_not_include_secrets_or_full_patient_text(self):
+        message_text = (
+            "Can I use this medicine during pregnancy? "
+            "test-token test-secret demo-chat private patient details should not all appear"
+        )
+        result = self._route_text_message(message_text)
+
+        notification_text = result["admin_notification_result"]["text"]
+        self.assertIn("stored_message_id=", notification_text)
+        self.assertIn("review_reason=pharmacist_review_required", notification_text)
+        self.assertNotIn("test-token", notification_text)
+        self.assertNotIn("test-secret", notification_text)
+        self.assertNotIn("demo-chat", notification_text)
+        self.assertNotIn("private patient details should not all appear", notification_text)
+
+    def test_enabled_admin_notification_sends_when_sending_is_enabled(self):
+        sent_messages = []
+
+        class FakeBaleClient:
+            def __init__(self, settings):
+                self.settings = settings
+
+            def send_message(self, chat_id, text, reply_to_message_id=None):
+                sent_messages.append(
+                    {
+                        "chat_id": chat_id,
+                        "text": text,
+                        "reply_to_message_id": reply_to_message_id,
+                    }
+                )
+                return {"ok": True, "result": {"message_id": 456}}
+
+        with patch("app.handlers.BaleClient", FakeBaleClient):
+            result = self._route_text_message(
+                "Can I use this medicine during pregnancy?",
+                env_overrides={
+                    "BALE_ENABLE_SENDING": "true",
+                    "BALE_ENABLE_ADMIN_NOTIFICATIONS": "true",
+                    "BALE_ADMIN_CHAT_ID": "admin-chat",
+                },
+            )
+
+        self.assertTrue(result["admin_notification_prepared"])
+        self.assertFalse(result["admin_notification_result"]["skipped"])
+        self.assertEqual(len(sent_messages), 2)
+        self.assertEqual(sent_messages[1]["chat_id"], "admin-chat")
+        self.assertIn("/local/reviews/pending", sent_messages[1]["text"])
 
 
 if __name__ == "__main__":

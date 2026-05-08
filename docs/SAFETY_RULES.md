@@ -20,6 +20,8 @@ Store incoming messages only for legitimate workflow needs. Do not log secrets, 
 
 Review metadata is operational workflow tracking only. It may mark that pharmacist review is needed, but it must not be treated as diagnosis, treatment advice, or emergency triage.
 
+Admin review notifications are for operational awareness only. They may include the stored message id, review reason, and a short sanitized text preview. They must not include raw webhook payloads, secrets, chat ids, or full patient text.
+
 ## Data Handling for MVP
 - Store only what is required for auditability and workflow continuity.
 - Keep credentials in environment variables only.

@@ -18,6 +18,8 @@ class SettingsTests(unittest.TestCase):
                 "DATABASE_PATH",
                 "BALE_REPLY_TEXT",
                 "BALE_WEBHOOK_SECRET",
+                "BALE_ADMIN_CHAT_ID",
+                "BALE_ENABLE_ADMIN_NOTIFICATIONS",
             )
         }
 
@@ -36,6 +38,8 @@ class SettingsTests(unittest.TestCase):
                             "DATABASE_PATH=test.db",
                             "BALE_REPLY_TEXT=سلام حسین جان!",
                             "BALE_WEBHOOK_SECRET=test-secret",
+                            "BALE_ADMIN_CHAT_ID=admin-chat",
+                            "BALE_ENABLE_ADMIN_NOTIFICATIONS=true",
                         ]
                     ),
                     encoding="utf-8",
@@ -56,6 +60,8 @@ class SettingsTests(unittest.TestCase):
         self.assertEqual(settings.database_path, "test.db")
         self.assertEqual(settings.bale_reply_text, "سلام حسین جان!")
         self.assertEqual(settings.bale_webhook_secret, "test-secret")
+        self.assertEqual(settings.bale_admin_chat_id, "admin-chat")
+        self.assertTrue(settings.bale_enable_admin_notifications)
 
     def test_get_settings_default_reply_text_is_persian_and_safe(self):
         original_cwd = Path.cwd()
@@ -68,6 +74,8 @@ class SettingsTests(unittest.TestCase):
                 "DATABASE_PATH",
                 "BALE_REPLY_TEXT",
                 "BALE_WEBHOOK_SECRET",
+                "BALE_ADMIN_CHAT_ID",
+                "BALE_ENABLE_ADMIN_NOTIFICATIONS",
             )
         }
 
@@ -89,6 +97,8 @@ class SettingsTests(unittest.TestCase):
         self.assertIn("پیام شما دریافت شد", settings.bale_reply_text)
         self.assertIn("جایگزین نظر داروساز یا پزشک نیست", settings.bale_reply_text)
         self.assertIn("داروساز", settings.bale_reply_text)
+        self.assertEqual(settings.bale_admin_chat_id, "")
+        self.assertFalse(settings.bale_enable_admin_notifications)
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@ import logging
 from typing import Any
 
 from .bale_client import BaleAPIError, BaleClient
-from .config import get_settings
+from .config import Settings, get_settings
 from .database import save_incoming_message
 from .models import IncomingMessage
 from .replies import build_safe_reply, needs_pharmacist_review
@@ -87,6 +87,109 @@ def get_review_metadata(message_text: str | None) -> dict[str, str | bool | None
     }
 
 
+def _redact_known_sensitive_values(text: str, settings: Settings, chat_id: str | None) -> str:
+    redacted = text
+    for value in (
+        settings.bale_bot_token,
+        settings.bale_webhook_secret,
+        settings.bale_admin_chat_id,
+        chat_id,
+    ):
+        if value:
+            redacted = redacted.replace(str(value), "[redacted]")
+    return redacted
+
+
+def _build_text_preview(message_text: str | None, settings: Settings, chat_id: str | None) -> str:
+    if not message_text:
+        return ""
+
+    compact = " ".join(message_text.split())
+    redacted = _redact_known_sensitive_values(compact, settings, chat_id)
+    if len(redacted) > 80:
+        return f"{redacted[:77]}..."
+    return redacted
+
+
+def build_admin_review_notification_text(
+    stored_message_id: int,
+    review_reason: str,
+    message_text: str | None,
+    settings: Settings,
+    chat_id: str | None,
+) -> str:
+    preview = _build_text_preview(message_text, settings, chat_id)
+    lines = [
+        "Pharmacist review needed.",
+        f"stored_message_id={stored_message_id}",
+        f"review_reason={review_reason}",
+    ]
+    if preview:
+        lines.append(f"text_preview={preview}")
+    lines.append("Check local pending review list: /local/reviews/pending")
+    return "\n".join(lines)
+
+
+def prepare_admin_review_notification(
+    stored_message_id: int,
+    review_reason: str,
+    message_text: str | None,
+    settings: Settings,
+    chat_id: str | None,
+) -> dict[str, Any]:
+    notification_text = build_admin_review_notification_text(
+        stored_message_id=stored_message_id,
+        review_reason=review_reason,
+        message_text=message_text,
+        settings=settings,
+        chat_id=chat_id,
+    )
+
+    base_result: dict[str, Any] = {
+        "ok": False,
+        "skipped": True,
+        "stored_message_id": stored_message_id,
+        "review_reason": review_reason,
+        "text": notification_text,
+    }
+
+    if not settings.bale_enable_admin_notifications:
+        return {
+            **base_result,
+            "reason": "Admin notifications are disabled.",
+        }
+    if not settings.bale_admin_chat_id.strip():
+        return {
+            **base_result,
+            "reason": "BALE_ADMIN_CHAT_ID is not configured.",
+        }
+    if not settings.bale_enable_sending:
+        return {
+            **base_result,
+            "reason": "Admin notifications require BALE_ENABLE_SENDING=true.",
+        }
+
+    try:
+        send_result = BaleClient(settings).send_message(
+            chat_id=settings.bale_admin_chat_id,
+            text=notification_text,
+        )
+    except (BaleAPIError, ValueError) as exc:
+        logger.exception("admin_notification_send_failed stored_message_id=%s", stored_message_id)
+        return {
+            **base_result,
+            "skipped": False,
+            "error": str(exc),
+        }
+
+    return {
+        **base_result,
+        "ok": True,
+        "skipped": False,
+        "send_result": send_result,
+    }
+
+
 def route_update(update: dict[str, Any]) -> dict[str, Any]:
     incoming = IncomingMessage.from_update(update)
     review_metadata = get_review_metadata(incoming.text)
@@ -122,6 +225,7 @@ def route_update(update: dict[str, Any]) -> dict[str, Any]:
         )
 
     reply_result = None
+    admin_notification_result = None
     can_prepare_reply = incoming.chat_id is not None and incoming.text is not None
     reply_text = get_reply_text(
         incoming.text,
@@ -169,6 +273,22 @@ def route_update(update: dict[str, Any]) -> dict[str, Any]:
                 "error": str(exc),
             }
 
+    can_prepare_admin_notification = bool(review_metadata["needs_review"]) and save_result.inserted
+    if can_prepare_admin_notification:
+        admin_notification_result = prepare_admin_review_notification(
+            stored_message_id=saved_id,
+            review_reason=str(review_metadata["review_reason"]),
+            message_text=incoming.text,
+            settings=settings,
+            chat_id=incoming.chat_id,
+        )
+        logger.info(
+            "admin_notification_prepared stored_message_id=%s skipped=%s review_status=%s",
+            saved_id,
+            admin_notification_result.get("skipped"),
+            review_metadata["review_status"],
+        )
+
     return {
         "ok": True,
         "stored_message_id": saved_id,
@@ -176,4 +296,6 @@ def route_update(update: dict[str, Any]) -> dict[str, Any]:
         "duplicate_delivery": not save_result.inserted,
         "reply_prepared": reply_result is not None,
         "reply_result": reply_result,
+        "admin_notification_prepared": admin_notification_result is not None,
+        "admin_notification_result": admin_notification_result,
     }

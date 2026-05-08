@@ -1,9 +1,9 @@
 # Project Plan
 
 ## Current Status
-The project has a minimal FastAPI webhook app, SQLite message storage, a cautious Bale API client, secure webhook secret-path handling, dry-run reply behavior, Persian user-facing replies for `/start`, `/help`, `/status`, and safe pharmacy intake/escalation flows, review metadata, a minimal duplicate-delivery guard, local-only pharmacist review status actions, local SQLite backup and restore helpers, and a final deployment readiness checklist.
+The project has a minimal FastAPI webhook app, SQLite message storage, a cautious Bale API client, secure webhook secret-path handling, dry-run reply behavior, Persian user-facing replies for `/start`, `/help`, `/status`, and safe pharmacy intake/escalation flows, review metadata, a minimal duplicate-delivery guard, local-only pharmacist review status actions, optional Bale admin review notifications, local SQLite backup and restore helpers, and a final deployment readiness checklist.
 
-Milestone 7A, Milestone 7B, Milestone 7C, Milestone 7D, Milestone 7E, and Milestone 7F are done. Real VPS deployment has not started.
+Milestone 7A, Milestone 7B, Milestone 7C, Milestone 7D, Milestone 7E, Milestone 7F, and Milestone 7G are done. Real VPS deployment has not started.
 
 ## Long-Term Product Vision
 Build a safe pharmacy automation assistant for Bale that supports a real pharmacy workflow from first contact through pharmacist review. The assistant should receive messages, collect structured intake information, avoid clinical decision-making, preserve auditability, and route cases to a pharmacist when judgment is needed.
@@ -26,6 +26,7 @@ The vision and milestone order are living project guidance. They may change as r
    - Milestone 7D: Done - Final deployment readiness checklist.
    - Milestone 7E: Done - Local SQLite restore rehearsal.
    - Milestone 7F: Done - Persian and RTL-safe user-facing replies.
+   - Milestone 7G: Done - Bale admin review notifications.
 8. Milestone 8: Planned - Real VPS deployment.
 9. Milestone 9: Planned - LLM/AI integration.
 
@@ -322,6 +323,39 @@ The Persian replies keep the safety boundaries explicit: the bot does not diagno
 - No enabling `BALE_ENABLE_SENDING=true`.
 - No database schema change.
 - No workflow redesign.
+
+### Verification
+```powershell
+python -m unittest discover -s tests
+python -m compileall app tests
+git diff --check
+```
+
+## Completed Milestone: Milestone 7G - Bale Admin Review Notifications
+
+### Goal
+Send a safe optional Bale admin notification when an incoming message needs pharmacist review.
+
+### Current State
+The app can prepare admin notification metadata for messages marked `needs_review=true`. Notifications are disabled by default with `BALE_ENABLE_ADMIN_NOTIFICATIONS=false`. If admin notifications are enabled and `BALE_ENABLE_SENDING=true`, the bot sends the notification to `BALE_ADMIN_CHAT_ID`.
+
+Notification text includes the stored message id, review reason, a short sanitized preview, and an instruction to check `/local/reviews/pending`. It does not include raw webhook payloads, secrets, chat ids, or full patient text. Duplicate webhook deliveries do not prepare or send a second admin notification.
+
+This is operational awareness only. It is not a dashboard, not triage, and not a clinical decision system. Web UI and admin dashboard work remain postponed.
+
+### Scope OUT
+- No Web UI.
+- No dashboard.
+- No login or authentication system.
+- No public admin endpoint.
+- No AI or LLM integration.
+- No diagnosis.
+- No treatment recommendation.
+- No protocol engine.
+- No real VPS deployment.
+- No webhook registration.
+- No enabling `BALE_ENABLE_SENDING=true` by default.
+- No database schema change.
 
 ### Verification
 ```powershell

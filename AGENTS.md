@@ -128,3 +128,17 @@ python -m uvicorn app.main:app --host 127.0.0.1 --port 8001
 - Do not expose the Bale bot token, webhook secret, or any other credential.
 - Before committing, run the current verification commands.
 - After committing, confirm `git status` is clean.
+
+## Agent skills
+
+### Issue tracker
+
+Issues for this repo are tracked in GitHub for `hosseintajdari/bale-med`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+This repo uses the default five-label triage vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+This repo is configured as single-context. Skills should look for one root `CONTEXT.md` and `docs/adr/` when they exist. See `docs/agents/domain.md`.

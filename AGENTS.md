@@ -27,23 +27,25 @@ Build a minimal but production-minded MVP for a pharmacy assistant bot.
 - Milestone 3: Done - Secure webhook with secret path.
 - Milestone 4: Done - Basic bot commands.
 - Milestone 5: Done - Safe pharmacy reply layer.
-- Milestone 6: Current - Better logging and admin review.
-- Milestone 7: Planned - VPS deployment preparation.
-- Milestone 8: Planned - Real VPS deployment.
+- Milestone 6: Done - Better logging and admin review.
+- Milestone 7: Done - VPS deployment preparation and repository alignment.
+- Milestone 8: Started - Real VPS deployment workflow.
 - Milestone 9: Planned - LLM/AI integration.
 
-## Current Milestone: Milestone 6
+For the latest milestone breakdown and sub-milestones, see [README.md](README.md).
+
+## Current Milestone: Milestone 8
 
 Goal:
-Add a minimal review-tracking foundation so pharmacist-review cases are visible in stored message metadata and future admin tools can use a reliable audit trail.
+Prepare for real VPS deployment while keeping local development and verification reliable.
+
+Current state:
+Milestones 1-7 are complete. Milestone 8A tracks VPS readiness and the branch/PR workflow while waiting for confirmed VPS access. See [README.md](README.md) and [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) for deployment guidance.
 
 Scope IN:
-1. Store whether each incoming message needs pharmacist review.
-2. Store a simple review reason for escalation-triggering messages.
-3. Store a basic review status for future pharmacist/admin tools.
-4. Keep logging useful without logging secrets or unnecessary sensitive data.
-5. Add tests for normal intake, escalation metadata, existing command behavior, and fresh SQLite initialization.
-6. Update docs if behavior changes.
+1. VPS readiness documentation and workflow alignment.
+2. Agent-friendly local setup and verification docs.
+3. Small, safe fixes that improve local bootstrap without changing pharmacy safety boundaries.
 
 Scope OUT:
 1. No diagnosis.
@@ -53,7 +55,7 @@ Scope OUT:
 5. No autonomous triage decision.
 6. No LLM integration.
 7. No admin dashboard.
-8. No VPS deployment changes.
+8. No production VPS hardening until access is confirmed.
 
 ## Milestone Workflow
 Use this format for each project milestone:
@@ -86,7 +88,7 @@ python -m compileall app tests
 git diff --check
 
 Run command:
-python -m uvicorn app.main:app --host 127.0.0.1 --port 8001
+python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 
 Done when:
 1. Tests pass.
@@ -106,18 +108,22 @@ Important:
 ## Current Verification Commands
 Use `unittest`, not `pytest`, unless the project intentionally changes test frameworks later.
 
-```powershell
-python -m unittest discover -s tests
-python -m compileall app tests
+On Linux and macOS, prefer `python3`. On Windows with an activated virtual environment, `python` is usually fine. You can also run `./scripts/verify.sh` from the repo root.
+
+```bash
+python3 -m unittest discover -s tests
+python3 -m compileall app tests
 git diff --check
 ```
 
 ## Current Local Run Command
-Run the FastAPI app locally on port 8001:
+Run the FastAPI app locally on port 8000:
 
-```powershell
-python -m uvicorn app.main:app --host 127.0.0.1 --port 8001
+```bash
+python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
+
+After activating a virtual environment, `uvicorn app.main:app --host 127.0.0.1 --port 8000` also works.
 
 ## Commit Rules
 - Commit only intended files for the active milestone.

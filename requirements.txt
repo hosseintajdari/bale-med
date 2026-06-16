@@ -1,3 +1,4 @@
+# Requires Python >= 3.12 (see .github/workflows/tests.yml).
 fastapi>=0.115,<1.0
 httpx>=0.28,<1.0
 python-dotenv>=1.0,<2.0

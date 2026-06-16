@@ -10,6 +10,7 @@ This is not a deployed production system and not a clinically validated product.
 
 ## Table of Contents
 
+- [Quick Start (Any OS)](#quick-start-any-os)
 - [Long-Term Product Vision](#long-term-product-vision)
 - [Milestone Map](#milestone-map)
 - [MVP Guarantees vs Non-Goals](#mvp-guarantees-vs-non-goals)
@@ -29,6 +30,35 @@ Build a safe pharmacy automation assistant for Bale that helps a real pharmacy r
 The system is workflow-based, pharmacist-centered, safety-first, local-first, and AI-optional. Later milestones may add real VPS deployment, stronger pharmacist/admin tools, and LLM/AI support. Any AI features must stay inside pharmacist-approved safety boundaries and must not diagnose, prescribe, replace a pharmacist, or recommend medication changes.
 
 This vision and the milestone order are allowed to change as the pharmacy workflow becomes clearer. When direction changes, update the milestone plan before changing implementation.
+
+## Quick Start (Any OS)
+
+Use this path for a cold local bootstrap. Tests pass without a real Bale bot token; only the optional `getMe` connectivity check needs a valid `BALE_BOT_TOKEN`.
+
+```bash
+cd /path/to/bale-med
+python3 -m venv .venv
+source .venv/bin/activate          # Windows: .\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+cp .env.example .env               # Windows: Copy-Item .env.example .env
+python3 -m unittest discover -s tests
+python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+In another terminal:
+
+```bash
+curl http://127.0.0.1:8000/health
+curl -X POST http://127.0.0.1:8000/webhook/bale/CHANGE_ME \
+  -H "Content-Type: application/json" \
+  -d '{"message":{"chat":{"id":"demo-chat"},"text":"Hello pharmacy"}}'
+```
+
+Notes:
+- Prefer `python3 -m uvicorn` if `uvicorn` is not on your PATH.
+- Keep `BALE_ENABLE_SENDING=false` for safe local dry-run behavior.
+- If `BALE_WEBHOOK_SECRET` is unset, the webhook returns HTTP 503 with a configuration message instead of processing the update.
+- Run `./scripts/verify.sh` to execute the standard verification commands from the repo root.
 
 ## Milestone Map
 
@@ -123,9 +153,11 @@ before allowing real users to contact the bot.
 
 ## Run Locally
 
-```powershell
-uvicorn app.main:app --reload
+```bash
+python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
+
+After activating a virtual environment, `uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload` also works.
 
 Open:
 
@@ -133,12 +165,12 @@ Open:
 http://127.0.0.1:8000/health
 ```
 
-## Local getMe Test (PowerShell)
+## Local getMe Test
 
-Use this command to test token connectivity against Bale without sending messages:
+Use this command to test token connectivity against Bale without sending messages. It requires a valid `BALE_BOT_TOKEN` in `.env`; placeholder values return a Bale API error.
 
-```powershell
-python -c "from app.bale_client import BaleClient; import json; print(json.dumps(BaleClient().get_me(), ensure_ascii=False, indent=2))"
+```bash
+python3 -c "from app.bale_client import BaleClient; import json; print(json.dumps(BaleClient().get_me(), ensure_ascii=False, indent=2))"
 ```
 
 ## Local Webhook Test
@@ -211,9 +243,9 @@ Patient and message data should not be kept forever without a pharmacy-approved 
 
 ## Local Smoke Test (PowerShell)
 
-```powershell
+```bash
 # 1) Start server
-uvicorn app.main:app --host 127.0.0.1 --port 8000
+python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
 In another PowerShell window:
@@ -262,11 +294,17 @@ The first number is the auto-increment id and may differ on your machine.
 
 ## Run Tests
 
-```powershell
-python -m unittest discover -s tests
+```bash
+python3 -m unittest discover -s tests
 ```
 
-Run this before and after changes. These tests currently check:
+Or run all standard verification checks:
+
+```bash
+./scripts/verify.sh
+```
+
+Tests pass without a real Bale bot token. Run this before and after changes. These tests currently check:
 - local `.env` loading
 - webhook routing, SQLite storage, duplicate-delivery handling, review metadata, local pending-review listing, and dry-run reply preparation
 - basic command replies

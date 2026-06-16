@@ -128,3 +128,14 @@ python -m uvicorn app.main:app --host 127.0.0.1 --port 8001
 - Do not expose the Bale bot token, webhook secret, or any other credential.
 - Before committing, run the current verification commands.
 - After committing, confirm `git status` is clean.
+
+## Cursor Cloud specific instructions
+
+The Cloud VM is Linux/bash, but the README/milestone commands above are written for Windows PowerShell. Translate them to bash and use the project virtualenv.
+
+- Dependencies install into `.venv` (created by the startup update script). Activate it first: `source .venv/bin/activate`. If `.venv` is missing, recreate with `python3 -m venv .venv` then `pip install -r requirements.txt` (the OS needs the `python3-venv` package).
+- Verify: `python -m unittest discover -s tests` (49 tests; uses `unittest`, not `pytest`), `python -m compileall app tests`, `git diff --check`.
+- Run the app (dev): `python -m uvicorn app.main:app --host 127.0.0.1 --port 8001` (or `--reload`). Health: `GET /health`.
+- The webhook route requires a non-empty `BALE_WEBHOOK_SECRET`. Copy `.env.example` to `.env` and set it before calling `/webhook/bale/{secret}`; otherwise the route raises a 500. `.env` is gitignored — never commit it. Real Bale sending stays off by default (`BALE_ENABLE_SENDING=false`), so webhook tests are dry-run and need no real token.
+- Escalation keywords in `app/replies.py` are English (e.g. `chest pain`, `severe allergy`). To exercise the pharmacist-review path locally, send a message containing one of them, then inspect `GET /local/reviews/pending`.
+- The `/local/reviews/*` endpoints only respond to localhost clients (127.0.0.1/::1/localhost); remote hosts get 404 by design.

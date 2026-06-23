@@ -51,7 +51,10 @@ def mark_reviewed(request: Request, message_id: int) -> dict[str, str | int | bo
 async def bale_webhook(secret: str, request: Request) -> dict[str, Any]:
     settings = get_settings()
     if not settings.bale_webhook_secret:
-        raise RuntimeError("BALE_WEBHOOK_SECRET is required for /webhook/bale/{secret}")
+        raise HTTPException(
+            status_code=503,
+            detail="BALE_WEBHOOK_SECRET is not configured. Copy .env.example to .env and set a webhook secret.",
+        )
     if secret != settings.bale_webhook_secret:
         raise HTTPException(status_code=404, detail="Not Found")
     update = await request.json()

@@ -11,6 +11,18 @@ This repository is a pharmacy workflow automation MVP connected to Bale messenge
 
 ## Local Setup
 
+Linux/macOS:
+
+```bash
+cd /path/to/bale-med
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+```
+
+Windows PowerShell:
+
 ```powershell
 cd C:\Users\Maryam-pc\projects\bale
 python -m venv .venv
@@ -23,11 +35,11 @@ Edit `.env` with local values only. Do not commit `.env`.
 
 ## Verification
 
-Run these before committing:
+Run these before committing. On Linux/macOS, prefer `python3`. You can also run `./scripts/verify.sh`.
 
-```powershell
-python -m unittest discover -s tests
-python -m compileall app tests
+```bash
+python3 -m unittest discover -s tests
+python3 -m compileall app tests
 git diff --check
 ```
 

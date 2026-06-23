@@ -215,6 +215,13 @@ class HandlerTests(unittest.TestCase):
         self.assertIn("بررسی داروساز", reply_text)
         self.assertIn("بارداری", reply_text)
 
+    def test_persian_high_risk_text_returns_escalation_reply(self):
+        result = self._route_text_message("در بارداری برای کودک با این دارو حساسیت دارم")
+
+        reply_text = result["reply_result"]["text"]
+        self.assertIn("بررسی داروساز", reply_text)
+        self.assertIn("بارداری", reply_text)
+
     def test_normal_text_stores_no_review_required(self):
         result, row = self._route_text_message_and_fetch_review_row("I need help with a medicine question")
 
@@ -736,6 +743,26 @@ class HandlerTests(unittest.TestCase):
         self.assertNotIn("test-secret", notification_text)
         self.assertNotIn("demo-chat", notification_text)
         self.assertNotIn("private patient details should not all appear", notification_text)
+
+    def test_admin_notification_text_preview_does_not_return_full_short_message(self):
+        notification_text = build_admin_review_notification_text(
+            stored_message_id=123,
+            review_reason="pharmacist_review_required",
+            message_text="Can I use this during pregnancy?",
+            settings=type(
+                "SettingsStub",
+                (),
+                {
+                    "bale_bot_token": "test-token",
+                    "bale_webhook_secret": "test-secret",
+                    "bale_admin_chat_id": "admin-chat",
+                },
+            )(),
+            chat_id="demo-chat",
+        )
+
+        self.assertIn("text_preview=[redacted message:", notification_text)
+        self.assertNotIn("Can I use this during pregnancy?", notification_text)
 
     def test_enabled_admin_notification_sends_when_sending_is_enabled(self):
         sent_messages = []

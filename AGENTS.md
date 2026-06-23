@@ -134,3 +134,21 @@ After activating a virtual environment, `uvicorn app.main:app --host 127.0.0.1 -
 - Do not expose the Bale bot token, webhook secret, or any other credential.
 - Before committing, run the current verification commands.
 - After committing, confirm `git status` is clean.
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues on `hosseintajdari/bale-med` via `gh` CLI; external PRs are a triage surface. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Canonical five-role vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`); create missing labels in GitHub when needed. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context — `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+
+### Getting started
+
+Practical guide and exercises for using skills in a new Cursor agent session. See `docs/agents/GETTING-STARTED.md`.

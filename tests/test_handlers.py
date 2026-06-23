@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from app.database import init_db
-from app.handlers import get_reply_text, route_update
+from app.handlers import build_admin_review_notification_text, get_reply_text, route_update
 
 
 class HandlerTests(unittest.TestCase):
@@ -642,8 +642,7 @@ class HandlerTests(unittest.TestCase):
         self.assertEqual(notification["reason"], "Admin notifications are disabled.")
         self.assertEqual(notification["stored_message_id"], result["stored_message_id"])
         self.assertEqual(notification["review_reason"], "pharmacist_review_required")
-        self.assertIn("pending review", notification["text"])
-        self.assertIn("/local/reviews/pending", notification["text"])
+        self.assertNotIn("text", notification)
 
     def test_normal_message_does_not_prepare_admin_notification(self):
         result = self._route_text_message("I need help with a medicine question")
@@ -716,9 +715,21 @@ class HandlerTests(unittest.TestCase):
             "Can I use this medicine during pregnancy? "
             "test-token test-secret demo-chat private patient details should not all appear"
         )
-        result = self._route_text_message(message_text)
-
-        notification_text = result["admin_notification_result"]["text"]
+        notification_text = build_admin_review_notification_text(
+            stored_message_id=123,
+            review_reason="pharmacist_review_required",
+            message_text=message_text,
+            settings=type(
+                "SettingsStub",
+                (),
+                {
+                    "bale_bot_token": "test-token",
+                    "bale_webhook_secret": "test-secret",
+                    "bale_admin_chat_id": "admin-chat",
+                },
+            )(),
+            chat_id="demo-chat",
+        )
         self.assertIn("stored_message_id=", notification_text)
         self.assertIn("review_reason=pharmacist_review_required", notification_text)
         self.assertNotIn("test-token", notification_text)

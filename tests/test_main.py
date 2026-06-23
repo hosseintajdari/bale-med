@@ -76,6 +76,25 @@ class WebhookRouteTests(unittest.TestCase):
 
         self.assertEqual(row, ("demo-chat", "123", "Hello pharmacy"))
 
+    def test_webhook_response_does_not_include_admin_notification_text(self):
+        os.environ["BALE_ENABLE_ADMIN_NOTIFICATIONS"] = "true"
+        os.environ["BALE_ADMIN_CHAT_ID"] = "admin-chat"
+
+        import app.main as main_module
+
+        self.main_module = importlib.reload(main_module)
+
+        with TestClient(self.main_module.app) as client:
+            response = client.post(
+                "/webhook/bale/test-secret",
+                json=self._payload("Can I use this during pregnancy?", message_id=124),
+            )
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data["admin_notification_prepared"])
+        self.assertNotIn("text", data["admin_notification_result"])
+
     def test_webhook_rejects_wrong_secret(self):
         with TestClient(self.main_module.app) as client:
             response = client.post("/webhook/bale/wrong-secret", json=self._payload())

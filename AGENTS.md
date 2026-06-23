@@ -148,3 +148,7 @@ Canonical five-role vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`,
 ### Domain docs
 
 Single-context — `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+
+### Getting started
+
+Practical guide and exercises for using skills in a new Cursor agent session. See `docs/agents/GETTING-STARTED.md`.

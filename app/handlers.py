@@ -106,9 +106,7 @@ def _build_text_preview(message_text: str | None, settings: Settings, chat_id: s
 
     compact = " ".join(message_text.split())
     redacted = _redact_known_sensitive_values(compact, settings, chat_id)
-    if len(redacted) > 80:
-        return f"{redacted[:77]}..."
-    return redacted
+    return f"[redacted message: {len(redacted)} chars]"
 
 
 def build_admin_review_notification_text(

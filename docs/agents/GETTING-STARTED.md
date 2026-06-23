@@ -2,6 +2,40 @@
 
 این راهنما برای پروژه **bale-med** (ربات داروخانه روی Bale) نوشته شده است.
 
+> **مهم:** منظور **skill** (اسکیل) است — فایل‌های راهنمای agent در `.cursor/skills/`، نه Microsoft Excel.
+
+## چرا skill «خودکار» اجرا نمی‌شود؟
+
+بیشتر skillهای workflow این مجموعه (مثل `/ask-matt`، `/grill-with-docs`، `/triage`) عمداً **فقط با تایپ `/`** فعال می‌شوند — Cursor آن‌ها را خودکار در context نمی‌گذارد.
+
+| نوع | رفتار | مثال |
+|-----|--------|------|
+| **User-invoked** | باید `/name` بنویسید | `/ask-matt`، `/triage` |
+| **Model-invoked** | agent در صورت مناسب بودن task خودش انتخاب می‌کند | `tdd`، `diagnosing-bugs` |
+
+**اولین قدم پیشنهادی:** در یک Chat جدید بنویسید:
+
+```text
+/ask-matt
+
+نمی‌دانم از کدام skill شروع کنم.
+```
+
+---
+
+## نصب روی Cursor (چک‌لیست ۳ دقیقه‌ای)
+
+1. **Branch درست:** skillها روی branch `cursor/install-mattpocock-skills-74e7` هستند (یا `main` بعد از merge [PR #29](https://github.com/hosseintajdari/bale-med/pull/29)).
+2. **Pull:** `git fetch origin` سپس `git checkout cursor/install-mattpocock-skills-74e7` و `git pull`.
+3. **پوشه skills:** باید `.cursor/skills/ask-matt/SKILL.md` وجود داشته باشد.
+4. **Reload Cursor:** Command Palette → `Developer: Reload Window` (یا Cursor را ببندید و دوباره پروژه را باز کنید).
+5. **Customize → Skills:** skillهای پروژه (مثلاً `ask-matt`) را ببینید.
+6. **تست:** در Agent chat تایپ `/` — لیست skillها باید بیاید.
+
+اگر `/` skill نشان نداد، workspace root باید همان پوشه‌ای باشد که `.cursor/skills/` داخل آن است (نه زیرپوشه دیگر).
+
+---
+
 ## آیا در ایجنت جدید قابل استفاده است؟
 
 **بله** — به شرطی که:
@@ -145,9 +179,12 @@ bot نباید دوز پیشنهاد دهد و باید به داروساز ار
 
 | مشکل | راه‌حل |
 |------|--------|
-| `/skill-name` کار نمی‌کند | مطمئن شوید `.cursor/skills/<name>/SKILL.md` وجود دارد و workspace درست است |
+| skill اصلاً در Cursor نیست | PR #29 merge نشده یا branch قدیمی است؛ `git pull` + Reload Window |
+| `/` skill نشان نمی‌دهد | root پروژه را باز کنید؛ `.cursor/skills/` باید در root باشد |
+| `/skill-name` کار نمی‌کند | مطمئن شوید `.cursor/skills/<name>/SKILL.md` وجود دارد؛ نام دقیق (مثلاً `ask-matt` نه `ask_matt`) |
+| انتظار اجرای خودکار دارم | skillهای `/`-only خودکار نیستند — `/ask-matt` بزنید یا از model-invoked مثل `tdd` استفاده کنید |
 | `/triage` خطای `gh` می‌دهد | `gh auth login` و دسترسی به `hosseintajdari/bale-med` |
-| agent skill را نمی‌شناسد | نام را دقیق بنویسید یا بگویید: «skill diagnosing-bugs را بخوان و اجرا کن» |
+| agent skill را نمی‌شناسد | بنویسید: «فایل `.cursor/skills/diagnosing-bugs/SKILL.md` را بخوان و اجرا کن» |
 | label در GitHub نیست | agent با `gh label create` می‌سازد (طبق `triage-labels.md`) |
 
 ---

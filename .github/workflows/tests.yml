@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Use local repository checkout
         run: |
-          $source = "C:\Users\hosse\bale-med"
+          $source = "C:\Users\hosse\Documents\Codex\bale-med"
           if (!(Test-Path $source)) {
             throw "Local repository checkout was not found at $source"
           }
@@ -26,26 +26,26 @@ jobs:
 
       - name: Show runner Python
         run: |
-          Set-Location "C:\Users\hosse\bale-med"
+          Set-Location "C:\Users\hosse\Documents\Codex\bale-med"
           python --version
 
       - name: Install dependencies
         run: |
-          Set-Location "C:\Users\hosse\bale-med"
+          Set-Location "C:\Users\hosse\Documents\Codex\bale-med"
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
       - name: Run unittest
         run: |
-          Set-Location "C:\Users\hosse\bale-med"
+          Set-Location "C:\Users\hosse\Documents\Codex\bale-med"
           python -m unittest discover -s tests
 
       - name: Run compileall
         run: |
-          Set-Location "C:\Users\hosse\bale-med"
+          Set-Location "C:\Users\hosse\Documents\Codex\bale-med"
           python -m compileall app tests
 
       - name: Check whitespace
         run: |
-          Set-Location "C:\Users\hosse\bale-med"
+          Set-Location "C:\Users\hosse\Documents\Codex\bale-med"
           git diff --check

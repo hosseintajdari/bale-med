@@ -43,7 +43,7 @@ jobs:
       - name: Run compileall
         run: |
           Set-Location "C:\Users\hosse\Documents\Codex\bale-med"
-          python -m compileall app tests
+          python -c "from pathlib import Path; [compile(path.read_text(encoding='utf-8'), str(path), 'exec') for root in ('app','tests') for path in Path(root).glob('*.py')]"
 
       - name: Check whitespace
         run: |

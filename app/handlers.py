@@ -2,6 +2,7 @@ import logging
 from typing import Any
 
 from .bale_client import BaleAPIError, BaleClient
+from .bidi import format_mixed_direction_text
 from .config import Settings, get_settings
 from .database import save_incoming_message
 from .models import IncomingMessage
@@ -46,15 +47,15 @@ def get_reply_text(
     bale_enable_sending: bool = False,
 ) -> str:
     if message_text is None:
-        return default_reply_text
+        return format_mixed_direction_text(default_reply_text)
 
     command = message_text.strip().split(maxsplit=1)[0].lower()
     if command == "/status":
-        return get_status_reply(bale_enable_sending)
+        return format_mixed_direction_text(get_status_reply(bale_enable_sending))
     if command in COMMAND_REPLIES:
-        return COMMAND_REPLIES[command]
+        return format_mixed_direction_text(COMMAND_REPLIES[command])
 
-    return build_safe_reply(message_text, default_reply_text)
+    return format_mixed_direction_text(build_safe_reply(message_text, default_reply_text))
 
 
 def get_review_metadata(message_text: str | None) -> dict[str, str | bool | None]:

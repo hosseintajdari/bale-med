@@ -145,6 +145,16 @@ class WebhookRouteTests(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()["detail"], "Not Found")
 
+    def test_pending_reviews_endpoint_rejects_forwarded_public_client(self):
+        with TestClient(self.main_module.app) as client:
+            response = client.get(
+                "/local/reviews/pending",
+                headers={"X-Forwarded-For": "203.0.113.10"},
+            )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()["detail"], "Not Found")
+
     def test_pending_review_item_can_be_marked_reviewed(self):
         with TestClient(self.main_module.app) as client:
             webhook_response = client.post(
@@ -197,6 +207,33 @@ class WebhookRouteTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()["detail"], "Not Found")
+
+    def test_mark_reviewed_endpoint_rejects_forwarded_public_client(self):
+        with TestClient(self.main_module.app) as client:
+            webhook_response = client.post(
+                "/webhook/bale/test-secret",
+                json=self._payload("Can I use this medicine during pregnancy?", message_id=124),
+            )
+            stored_message_id = webhook_response.json()["stored_message_id"]
+
+            response = client.post(
+                f"/local/reviews/{stored_message_id}/mark-reviewed",
+                headers={"X-Forwarded-For": "203.0.113.10"},
+            )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()["detail"], "Not Found")
+
+        connection = sqlite3.connect("test.db")
+        try:
+            row = connection.execute(
+                "SELECT review_status FROM incoming_messages WHERE id = ?",
+                (stored_message_id,),
+            ).fetchone()
+        finally:
+            connection.close()
+
+        self.assertEqual(row, ("pending",))
 
     def test_mark_reviewed_endpoint_returns_404_for_missing_item(self):
         with TestClient(self.main_module.app) as client:

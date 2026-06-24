@@ -7,6 +7,18 @@ from .config import get_settings
 from .database import init_db, list_pending_review_items, mark_review_item_reviewed
 from .handlers import route_update
 
+LOCAL_REVIEW_CLIENT_HOSTS = {"127.0.0.1", "::1", "localhost", "testclient"}
+FORWARDED_CLIENT_HEADERS = {"forwarded", "x-forwarded-for", "x-real-ip"}
+
+
+def require_local_review_request(request: Request) -> None:
+    client_host = request.client.host if request.client else ""
+    # Reverse proxies connect from loopback, so forwarded client headers mean
+    # the request is not a direct local operator request.
+    has_forwarded_client = any(request.headers.get(header) for header in FORWARDED_CLIENT_HEADERS)
+    if has_forwarded_client or client_host not in LOCAL_REVIEW_CLIENT_HOSTS:
+        raise HTTPException(status_code=404, detail="Not Found")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -29,17 +41,13 @@ def health_check() -> dict[str, str]:
 
 @app.get("/local/reviews/pending")
 def pending_reviews(request: Request) -> dict[str, list[dict[str, str | int | None]]]:
-    client_host = request.client.host if request.client else ""
-    if client_host not in {"127.0.0.1", "::1", "localhost", "testclient"}:
-        raise HTTPException(status_code=404, detail="Not Found")
+    require_local_review_request(request)
     return {"pending_reviews": list_pending_review_items()}
 
 
 @app.post("/local/reviews/{message_id}/mark-reviewed")
 def mark_reviewed(request: Request, message_id: int) -> dict[str, str | int | bool]:
-    client_host = request.client.host if request.client else ""
-    if client_host not in {"127.0.0.1", "::1", "localhost", "testclient"}:
-        raise HTTPException(status_code=404, detail="Not Found")
+    require_local_review_request(request)
 
     result = mark_review_item_reviewed(message_id)
     if result is None:

@@ -4,8 +4,6 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
 
 permissions:
   contents: read
@@ -18,29 +16,36 @@ jobs:
         shell: powershell
 
     steps:
-      - name: Check out repository
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Use local repository checkout
         run: |
-          git init .
-          git remote add origin "https://x-access-token:$env:GH_TOKEN@github.com/$env:GITHUB_REPOSITORY.git"
-          git fetch --depth 1 origin $env:GITHUB_SHA
-          git checkout --force FETCH_HEAD
-          git remote remove origin
+          $source = "C:\Users\hosse\bale-med"
+          if (!(Test-Path $source)) {
+            throw "Local repository checkout was not found at $source"
+          }
+          Set-Location $source
 
       - name: Show runner Python
-        run: python --version
+        run: |
+          Set-Location "C:\Users\hosse\bale-med"
+          python --version
 
       - name: Install dependencies
         run: |
+          Set-Location "C:\Users\hosse\bale-med"
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
       - name: Run unittest
-        run: python -m unittest discover -s tests
+        run: |
+          Set-Location "C:\Users\hosse\bale-med"
+          python -m unittest discover -s tests
 
       - name: Run compileall
-        run: python -m compileall app tests
+        run: |
+          Set-Location "C:\Users\hosse\bale-med"
+          python -m compileall app tests
 
       - name: Check whitespace
-        run: git diff --check
+        run: |
+          Set-Location "C:\Users\hosse\bale-med"
+          git diff --check

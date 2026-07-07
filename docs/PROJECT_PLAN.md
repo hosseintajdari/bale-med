@@ -29,7 +29,7 @@ The vision and milestone order are living project guidance. They may change as r
    - Milestone 7G: Done - Bale admin review notifications.
    - Milestone 7I: Done - Repository context and issue alignment.
 8. Milestone 8: Started - Real VPS deployment workflow.
-   - Milestone 8A: Started - VPS readiness and GitHub PR workflow; waiting for VPS access.
+   - Milestone 8A: In progress - Iran VPS purchased; `deploy/` scripts and checklist added.
    - Milestone 8B: Planned - Install Python, Git, venv, and clone repo.
    - Milestone 8C: Planned - Configure `.env` with placeholders and keep sending disabled.
    - Milestone 8D: Planned - Run app manually on `127.0.0.1:8000`.
@@ -41,50 +41,41 @@ The vision and milestone order are living project guidance. They may change as r
    - Milestone 8J: Planned - Decide whether to enable real sending later.
 9. Milestone 9: Planned - LLM/AI integration.
 
-## Active Milestone: Milestone 8A - VPS Readiness and GitHub PR Workflow
+## Active Milestone: Milestone 8 — Real VPS Deployment
 
 ### Goal
-Start Milestone 8 with a professional branch, pull request, and merge workflow while waiting for real VPS access.
+Deploy the bot to an Iran-based Ubuntu VPS in dry-run mode (`BALE_ENABLE_SENDING=false`), following sub-milestones 8A–8I.
 
 ### Current State
-No VPS access has been confirmed yet. Milestone 8A is open only to track readiness and GitHub workflow discipline before server-side work begins.
+An Iran-based VPS has been purchased. Repository now includes executable deployment scripts under `deploy/` (preflight, hardening, bootstrap, env, systemd, Caddy, smoke tests, webhook registration, dry-run monitoring). Server-side execution is performed on the VPS via SSH using [deploy/README.md](../deploy/README.md).
 
 ### Scope IN
-1. Use one branch and pull request per Milestone 8 submilestone.
-2. Keep the first Milestone 8A change documentation-only.
-3. Keep `BALE_ENABLE_SENDING=false` as the first deployment safety default.
-4. Wait for confirmed VPS access before server hardening or app deployment.
-5. Define the VPS provider details that must be collected before buying or logging in by SSH.
+1. Use one branch and pull request per Milestone 8 submilestone where repo changes are needed.
+2. Keep `BALE_ENABLE_SENDING=false` as the first deployment safety default.
+3. Run 8A–8E without a domain; require DNS before 8F–8H.
+4. Use `deploy/scripts/` on the server after SSH access works.
 
 ### Scope OUT
-- No real VPS deployment.
-- No DNS, SSL, firewall, Caddy, Nginx, or systemd changes on a server.
-- No production webhook registration.
-- No enabling `BALE_ENABLE_SENDING=true`.
+- No `BALE_ENABLE_SENDING=true` in initial Milestone 8.
 - No secrets in Git.
-- No app behavior changes.
+- No diagnosis or clinical logic changes.
 
 ### Verification
-```powershell
+```bash
+python3 -m unittest discover -s tests
+python3 -m compileall app tests
 git diff --check
 ```
 
-For any later Milestone 8 code or config change, also run:
-
-```powershell
-python -m unittest discover -s tests
-python -m compileall app tests
+On the VPS after clone:
+```bash
+bash deploy/scripts/00-preflight.sh
 ```
 
-### GitHub Workflow
-Each next submilestone should start from synced `main`, use a branch named like `codex/milestone-8x-short-name`, open a draft PR, pass review/checks, merge to `main`, and sync local `main` before the next branch starts.
-
-### Done When
-1. The Milestone 8A branch is pushed.
-2. A draft PR into `main` is opened.
-3. The PR is merged after checks/review.
-4. Local `main` is synced after merge.
-5. The VPS purchase/access checklist names the exact provider details needed before any server command runs.
+### Done When (8A repo deliverables)
+1. `deploy/` scripts and templates exist and match [DEPLOYMENT_VPS.md](DEPLOYMENT_VPS.md).
+2. Server info checklist documents required provider fields.
+3. README and project plan reference the deployment path.
 
 ## Completed Milestones
 

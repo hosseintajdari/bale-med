@@ -1,0 +1,14 @@
+[Unit]
+Description=Bale Pharmacy Bot
+After=network.target
+
+[Service]
+User=deploy
+WorkingDirectory=/opt/bale-bot
+EnvironmentFile=/opt/bale-bot/.env
+ExecStart=/opt/bale-bot/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

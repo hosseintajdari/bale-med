@@ -1,0 +1,7 @@
+# Replace YOUR_DOMAIN with your production domain before use.
+# Caddy obtains and renews HTTPS certificates automatically.
+
+YOUR_DOMAIN {
+    respond /local/* 404
+    reverse_proxy 127.0.0.1:8000
+}

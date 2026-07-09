@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Milestone 8H — register Bale production webhook (sending still disabled).
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=common.sh
+source "$SCRIPT_DIR/common.sh"
+
+DOMAIN="${DOMAIN:-}"
+
+[[ -n "$DOMAIN" ]] || die "Set DOMAIN env var."
+
+load_env_if_present
+assert_sending_disabled
+[[ -n "${BALE_WEBHOOK_SECRET:-}" ]] || die "BALE_WEBHOOK_SECRET required"
+[[ "${BALE_BOT_TOKEN:-}" != "REAL_TOKEN_ON_SERVER_ONLY" ]] || die "Set real BALE_BOT_TOKEN in .env"
+
+WEBHOOK_URL="https://${DOMAIN}/webhook/bale/${BALE_WEBHOOK_SECRET}"
+
+log "Milestone 8H — register Bale webhook"
+log "URL: $WEBHOOK_URL (secret path not printed in logs beyond this step)"
+
+cd "$DEPLOY_ROOT"
+# shellcheck disable=SC1091
+source .venv/bin/activate
+
+python -c "
+from app.bale_client import BaleClient
+import json
+client = BaleClient()
+print('setWebhook:')
+print(json.dumps(client.set_webhook('${WEBHOOK_URL}'), ensure_ascii=False, indent=2))
+print('getWebhookInfo:')
+print(json.dumps(client.get_webhook_info(), ensure_ascii=False, indent=2))
+"
+
+log "Send one controlled test message to the bot in Bale, then verify a database row."
+log "Bot must NOT send an outgoing reply while BALE_ENABLE_SENDING=false."
+log "Next: bash deploy/scripts/09-monitor-dry-run.sh"

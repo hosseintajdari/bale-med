@@ -78,7 +78,7 @@ Notes:
   - Milestone 7G: Done - Optional Bale admin review notifications.
   - Milestone 7I: Done - Repository context and issue alignment.
 - Milestone 8: Started - Real VPS deployment workflow.
-  - Milestone 8A: Started - VPS readiness and GitHub PR workflow; waiting for VPS access.
+  - Milestone 8A: In progress - VPS purchased (Iran); deployment scripts in `deploy/`.
 - Milestone 9: Planned - LLM/AI integration.
 
 ## MVP Guarantees vs Non-Goals
@@ -88,7 +88,7 @@ Notes:
 | In scope | Secure Bale webhook intake, SQLite message storage, safe Persian replies, duplicate-delivery guard, pharmacist-review metadata/actions, backup/restore helpers, optional admin review notifications |
 | Not in scope | Diagnosis, treatment advice, dosage changes, prescription replacement, autonomous clinical decision-making, Web UI, AI/LLM behavior |
 | Bale outbound API | Available only when explicitly enabled; keep disabled by default |
-| Deployment | Local-first with VPS runbook; Milestone 8A has started as readiness tracking only |
+| Deployment | Local-first; VPS runbook in `docs/DEPLOYMENT_VPS.md` and scripts in `deploy/` |
 | Clinical status | Safety-oriented workflow support only; not clinically validated |
 
 ## Project Structure
@@ -348,9 +348,9 @@ Webhook behavior:
 
 ## Current Limitations and Next Priorities
 
-Milestone 8A has started as a readiness and GitHub workflow step. The project is waiting for confirmed VPS access before any server hardening, DNS, SSL, firewall, production webhook, or real sending work begins.
+Milestone 8 deployment is in progress. An Iran-based VPS has been purchased. Use [deploy/README.md](deploy/README.md) and [deploy/server-info-checklist.md](deploy/server-info-checklist.md) on the server after SSH works. Steps 8A–8E do not require a domain; 8F–8H require DNS and HTTPS.
 
-Before buying or logging in to a VPS, collect the server IP address, SSH username and port, OS version, provider console or rescue link, backup/snapshot option, and confirmation that ports 80 and 443 can be opened.
+Before running server commands, collect the server IP address, SSH username and port, OS version, provider console or rescue link, backup/snapshot option, and confirmation that ports 80 and 443 can be opened.
 
 Before public exposure, verify Bale webhook and `sendMessage` assumptions, configure HTTPS/reverse proxy/firewall rules, protect local-only endpoints, test backup/restore on the deployment host, confirm sanitized logs, and approve a retention/deletion policy.
 
@@ -360,4 +360,4 @@ AI, Web UI, clinical protocols, diagnosis, autonomous triage, and patient outcom
 
 ## VPS Notes
 
-Milestone 7 deployment preparation is complete. Minimal VPS deployment guidance and the final go/no-go checklist are documented in [DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md). Milestone 8A is open only to track VPS readiness and the branch/PR workflow while waiting for VPS access. Treat Bale webhook assumption verification, HTTPS reverse-proxy setup, firewall planning, local-only endpoint exposure, deployment-host backup/restore proof, rollback planning, sanitized logs, and real sending approval as blockers before public exposure.
+Milestone 7 deployment preparation is complete. VPS guidance is in [DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md). Executable scripts and templates are in [deploy/](deploy/). Treat Bale webhook assumption verification, HTTPS reverse-proxy setup, firewall planning, local-only endpoint exposure, deployment-host backup/restore proof, rollback planning, sanitized logs, and real sending approval as blockers before public exposure.

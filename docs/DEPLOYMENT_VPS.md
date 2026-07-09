@@ -2,6 +2,8 @@
 
 This runbook is for the current MVP only. It does not replace production security hardening.
 
+**Executable scripts:** After cloning the repo on the server, use [deploy/README.md](../deploy/README.md) and `deploy/scripts/install.sh` for steps 8A–8I. Templates live in `deploy/templates/`.
+
 ## Milestone 7 Checklist
 
 Milestone 7 preparation is complete. Do not deploy to a real VPS, change DNS, configure SSL, edit firewall rules, register a production webhook, or enable real outgoing Bale messages until Milestone 8 is explicitly approved.
@@ -100,7 +102,7 @@ Milestone 8A remains paused until those details are known. Do not change DNS, co
 
 Goal: Get safe SSH access and basic server hardening in place before app deployment.
 
-Status: Started for readiness tracking and GitHub workflow only. Waiting for confirmed VPS access before running server commands.
+Status: In progress. Iran VPS purchased; run `deploy/scripts/00-preflight.sh` after first SSH login, then `01-hardening.sh` through `09-monitor-dry-run.sh` per [deploy/README.md](../deploy/README.md).
 
 Scope IN:
 - Confirm SSH access.

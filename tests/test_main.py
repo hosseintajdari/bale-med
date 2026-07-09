@@ -65,6 +65,7 @@ class WebhookRouteTests(unittest.TestCase):
         self.assertTrue(data["ok"])
         self.assertTrue(data["reply_prepared"])
         self.assertTrue(data["reply_result"]["skipped"])
+        self.assertNotIn("chat_id", data["reply_result"])
 
         connection = sqlite3.connect("test.db")
         try:

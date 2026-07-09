@@ -7,6 +7,7 @@ Full runbook: [docs/DEPLOYMENT_VPS.md](../docs/DEPLOYMENT_VPS.md).
 ## Before You Start
 
 1. Complete [server-info-checklist.md](server-info-checklist.md) from your provider panel (keep it local).
+2. Read [SECURITY-CHECKLIST.md](SECURITY-CHECKLIST.md) — keep tokens and secrets off Git and chat.
 2. Confirm SSH: `ssh root@YOUR_SERVER_IP`
 3. Have a **domain** with DNS A record to the server IP before steps 8F–8H.
 4. Prepare `BALE_BOT_TOKEN` and `BALE_WEBHOOK_SECRET` — set only in `/opt/bale-bot/.env` on the server.

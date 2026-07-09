@@ -12,6 +12,9 @@ DEPLOY = REPO_ROOT / "deploy"
 
 
 class DeployAssetsTests(unittest.TestCase):
+    def test_security_checklist_exists(self) -> None:
+        self.assertTrue((DEPLOY / "SECURITY-CHECKLIST.md").is_file())
+
     def test_deploy_readme_exists(self) -> None:
         self.assertTrue((DEPLOY / "README.md").is_file())
 

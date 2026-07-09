@@ -188,6 +188,23 @@ def prepare_admin_review_notification(
     }
 
 
+def build_public_reply_result(reply_result: dict[str, Any] | None) -> dict[str, Any] | None:
+    if reply_result is None:
+        return None
+
+    public_result: dict[str, Any] = {
+        "ok": reply_result.get("ok", False),
+        "skipped": reply_result.get("skipped", False),
+    }
+    if "reason" in reply_result:
+        public_result["reason"] = reply_result["reason"]
+    if "error" in reply_result:
+        public_result["error"] = reply_result["error"]
+    if "text" in reply_result:
+        public_result["text"] = reply_result["text"]
+    return public_result
+
+
 def build_public_admin_notification_result(notification_result: dict[str, Any] | None) -> dict[str, Any] | None:
     if notification_result is None:
         return None
@@ -310,7 +327,7 @@ def route_update(update: dict[str, Any]) -> dict[str, Any]:
         "message_inserted": save_result.inserted,
         "duplicate_delivery": not save_result.inserted,
         "reply_prepared": reply_result is not None,
-        "reply_result": reply_result,
+        "reply_result": build_public_reply_result(reply_result),
         "admin_notification_prepared": admin_notification_result is not None,
         "admin_notification_result": build_public_admin_notification_result(admin_notification_result),
     }

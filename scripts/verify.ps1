@@ -4,21 +4,30 @@ $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
 Set-Location $Root
 
+function Test-Python3 {
+    param([string]$Command)
+
+    & $Command -c "import sys; raise SystemExit(0 if sys.version_info >= (3, 0) else 1)" 2>$null
+    return $LASTEXITCODE -eq 0
+}
+
 function Get-PythonCommand {
     if ($env:PYTHON) {
-        return $env:PYTHON
+        if (Test-Python3 $env:PYTHON) {
+            return $env:PYTHON
+        }
+        throw "error: PYTHON must be a Python 3 interpreter"
     }
-    foreach ($candidate in @("python", "python3")) {
+    foreach ($candidate in @("python3", "python")) {
         $cmd = Get-Command $candidate -ErrorAction SilentlyContinue
         if (-not $cmd) {
             continue
         }
-        & $candidate -c "import sys" 2>$null
-        if ($LASTEXITCODE -eq 0) {
+        if (Test-Python3 $candidate) {
             return $candidate
         }
     }
-    throw "error: no working python or python3 found in PATH"
+    throw "error: no working Python 3 found in PATH (set PYTHON to a Python 3 interpreter)"
 }
 
 $Python = Get-PythonCommand

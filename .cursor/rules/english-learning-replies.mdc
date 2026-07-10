@@ -1,8 +1,7 @@
 ﻿---
 description: When the user writes in English, reply in simple learning-friendly English.
-alwaysApply: true
+alwaysApply: false
 ---
-
 # English replies (learning mode)
 
 Apply this rule when the user's message is mainly in English.

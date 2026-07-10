@@ -6,9 +6,9 @@ cd "$ROOT"
 
 pick_python() {
   local candidate
-  for candidate in ${PYTHON:+"$PYTHON"} python python3; do
+  for candidate in ${PYTHON:+"$PYTHON"} python3 python; do
     if command -v "$candidate" >/dev/null 2>&1 \
-      && "$candidate" -c "import sys" >/dev/null 2>&1; then
+      && "$candidate" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 0) else 1)' >/dev/null 2>&1; then
       echo "$candidate"
       return 0
     fi
@@ -17,7 +17,7 @@ pick_python() {
 }
 
 if ! PYTHON="$(pick_python)"; then
-  echo "error: no working python or python3 found in PATH" >&2
+  echo "error: no working Python 3 found in PATH (set PYTHON to a Python 3 interpreter)" >&2
   exit 1
 fi
 

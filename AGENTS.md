@@ -3,7 +3,6 @@
 We are building a pharmacy automation chatbot connected to Bale messenger. Bale Bot API is similar to Telegram Bot API, but exact fields must be verified before production use.
 
 ## Goal
-whats is my
 
 Build a minimal but production-minded MVP for a pharmacy assistant bot.
 

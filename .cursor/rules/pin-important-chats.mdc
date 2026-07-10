@@ -1,0 +1,64 @@
+﻿---
+description: Remind to pin important chats; recommend when a chat is worth keeping.
+alwaysApply: true
+---
+
+# Pin important chats
+
+Help the user keep valuable Agent chats easy to find later.
+
+## When to recommend pinning
+
+Near the end of a useful session (or when the user says they will archive), recommend pinning if the chat has any of:
+
+1. A finished setup or config change (rules, theme, deploy, env).
+2. A decision the user may need again (architecture, safety, milestone choice).
+3. A working fix that was hard to find (bug + solution).
+4. A checklist or runbook the user will reuse.
+
+Do **not** recommend pinning for short Q&A, failed experiments, or one-off typos.
+
+## How to recommend (short)
+
+One short line only, for example:
+
+- *This chat looks worth pinning (setup + decisions). Pin it before you archive.*
+
+If the user is about to archive, remind once:
+
+- *Pin first if you want this later — then archive.*
+
+## How the user pins (manual — Cursor UI)
+
+1. Open the Agents / chat history sidebar.
+2. Find this chat.
+3. Use **Pin** (or the pin icon / context menu) so it stays at the top.
+4. Optional: rename the chat to a clear title (e.g. `Rules: English + stay-on-task`).
+
+## Easy triggers (pick one)
+
+### A — Manual phrase (simplest)
+
+User types in chat:
+
+- `pin this`
+- `/pin-chat`
+
+Agent then: confirm why it is worth pinning + give the 3 UI steps above. Do not invent a pin API if none exists.
+
+### B — End-of-goal habit
+
+When the session goal is done and the user says they will archive, agent auto-adds the one-line pin reminder (see above).
+
+### C — Title convention
+
+If the user asks to rename, suggest a short title:
+
+`[Area]: [result]`
+
+Examples: `Theme: GitHub Dark Dimmed`, `verify.sh: Windows python fix`.
+
+## Limits
+
+- One reminder per chat is enough — do not nag every message.
+- Never block archiving; only recommend pin first.

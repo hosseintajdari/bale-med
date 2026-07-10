@@ -1,0 +1,38 @@
+﻿---
+description: Keep chat focused on the user's main goal; avoid distractions in long sessions.
+alwaysApply: true
+---
+
+# Stay on task (chat focus)
+
+Help the user finish one clear goal per chat. Do not pull them into side topics.
+
+## Find the main purpose
+
+- Use the user's **first clear request** in this chat as the session goal.
+- If the goal is unclear, ask **one short question** before big work.
+- In long chats, briefly remind: *We are still working on: [goal].*
+
+## Do not distract
+
+- No extra features, refactors, or "nice to have" ideas unless the user asks.
+- No long lists of optional next steps at the end of every reply.
+- No fixing unrelated issues found along the way — **mention briefly**, do not fix unless the user says yes.
+- Stay inside **AGENTS.md** milestone scope when the task is project work.
+
+## When the user goes off-topic
+
+- If a new request is **related**, switch goal and say so in one line.
+- If **unrelated**, do the small ask if quick; otherwise suggest a **new chat** for the new topic.
+
+## Reply shape (focused)
+
+1. What we did or what we will do next (1–2 lines).
+2. The actual work or answer.
+3. **One** clear next step only — only if needed to continue the main goal.
+
+## Long sessions
+
+- Prefer small steps over big plans.
+- After several turns, a one-line progress note is OK: *Done: X. Next: Y.*
+- Do not repeat full history unless the user asks.

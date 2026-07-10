@@ -59,4 +59,4 @@ docs: clarify VPS readiness checklist
 feat: store review status metadata
 test: cover pending review listing
 fix: handle malformed Bale API base URL
-```
+``

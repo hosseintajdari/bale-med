@@ -19,6 +19,10 @@ log "Milestone 8G — smoke tests for https://$DOMAIN"
 
 curl -sf "https://${DOMAIN}/health" | grep -q '"status":"ok"' || die "Health check failed."
 
+local_status="$(curl -s -o /dev/null -w '%{http_code}' "https://${DOMAIN}/local/reviews/pending")"
+[[ "$local_status" == "404" ]] || die "Expected /local/* to return 404 publicly, got HTTP $local_status"
+log "/local/* blocked at reverse proxy (HTTP $local_status)."
+
 webhook_url="https://${DOMAIN}/webhook/bale/${BALE_WEBHOOK_SECRET}"
 response="$(curl -sf -X POST "$webhook_url" \
   -H "Content-Type: application/json" \

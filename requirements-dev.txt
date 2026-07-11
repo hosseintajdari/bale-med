@@ -1,0 +1,2 @@
+# Dev tools for local validate (ruff). Install: pip install -r requirements-dev.txt
+ruff>=0.9,<1.0

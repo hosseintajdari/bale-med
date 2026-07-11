@@ -37,6 +37,8 @@ class DeployAssetsTests(unittest.TestCase):
             "07-smoke-tests.sh",
             "08-register-webhook.sh",
             "09-monitor-dry-run.sh",
+            "fix-env-reply-text.py",
+            "normalize-deploy-scripts.py",
             "install.sh",
         ]
         for name in names:
@@ -60,6 +62,14 @@ class DeployAssetsTests(unittest.TestCase):
         text = (DEPLOY / "scripts" / "07-smoke-tests.sh").read_text(encoding="utf-8")
         self.assertIn("/local/reviews/pending", text)
         self.assertIn('[[ "$local_status" == "404" ]]', text)
+
+    def test_configure_env_script_quotes_reply_text_for_bash(self) -> None:
+        text = (DEPLOY / "scripts" / "03-configure-env.sh").read_text(encoding="utf-8")
+        self.assertIn("fix-env-reply-text.py", text)
+
+    def test_install_script_normalizes_crlf_before_running_steps(self) -> None:
+        text = (DEPLOY / "scripts" / "install.sh").read_text(encoding="utf-8")
+        self.assertIn("normalize-deploy-scripts.py", text)
 
 
 if __name__ == "__main__":

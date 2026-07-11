@@ -5,6 +5,12 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+normalize_deploy_scripts() {
+  if command -v python3 &>/dev/null; then
+    python3 "$SCRIPT_DIR/normalize-deploy-scripts.py" "$SCRIPT_DIR"
+  fi
+}
+
 usage() {
   cat <<'EOF'
 Usage: install.sh <step|all|through-N>
@@ -65,6 +71,11 @@ STEP="${1:-}"
 
 case "$STEP" in
   -h|--help|help) usage; exit 0 ;;
+esac
+
+normalize_deploy_scripts
+
+case "$STEP" in
   all|through-8i)
     run_step preflight
     run_step 8a

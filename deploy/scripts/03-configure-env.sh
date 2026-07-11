@@ -43,6 +43,8 @@ fi
 perm="$(stat -c '%a' "$ENV_FILE")"
 [[ "$perm" == "600" ]] || chmod 600 "$ENV_FILE"
 
+python3 "$SCRIPT_DIR/fix-env-reply-text.py" "$ENV_FILE"
+
 if [[ -d "$DEPLOY_ROOT/.git" ]]; then
   if git -C "$DEPLOY_ROOT" status --short -- .env 2>/dev/null | grep -q .; then
     die ".env must not be tracked by git."

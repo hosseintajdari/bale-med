@@ -44,6 +44,16 @@ if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
 
+Write-Host "==> ruff"
+& $Python -m ruff --version 2>$null
+if ($LASTEXITCODE -ne 0) {
+    & $Python -m pip install -q -r requirements-dev.txt
+}
+& $Python -m ruff check app tests
+if ($LASTEXITCODE -ne 0) {
+    exit $LASTEXITCODE
+}
+
 Write-Host "==> git diff --check"
 git diff --check
 if ($LASTEXITCODE -ne 0) {

@@ -27,6 +27,12 @@ echo "==> unittest"
 echo "==> compileall"
 "$PYTHON" -m compileall app tests
 
+echo "==> ruff"
+if ! "$PYTHON" -m ruff --version >/dev/null 2>&1; then
+  "$PYTHON" -m pip install -q -r requirements-dev.txt
+fi
+"$PYTHON" -m ruff check app tests
+
 echo "==> git diff --check"
 git diff --check
 

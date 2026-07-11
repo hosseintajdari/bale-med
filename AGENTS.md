@@ -1,5 +1,13 @@
 # Repository Guidelines
 
+## Agent quick reference
+
+- **Validate:** `make validate`, `./scripts/verify.sh`, or `scripts/verify.ps1`
+- **Lint:** `make lint` (ruff check + format check)
+- **Run locally:** `python -m uvicorn app.main:app --host 127.0.0.1 --port 8000`
+- **Safety:** No diagnosis, dosage, or prescription replacement — see `docs/SAFETY_RULES.md`
+- **Milestone:** 8 — VPS dry-run deploy; details in [README.md](README.md) and [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md)
+
 We are building a pharmacy automation chatbot connected to Bale messenger. Bale Bot API is similar to Telegram Bot API, but exact fields must be verified before production use.
 
 ## Goal
@@ -176,6 +184,10 @@ Single-context — `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agen
 ### Getting started
 
 Practical guide and exercises for using skills in a new Cursor agent session. See `docs/agents/GETTING-STARTED.md`.
+
+Lean project skills (nine): `ask-matt`, `grilling`, `triage`, `to-issues`, `tdd`, `diagnosing-bugs`, `domain-modeling`, `codebase-design`, `resolving-merge-conflicts`. List: `.cursor/skills/README.md`.
+
+Recommended Cursor marketplace plugins: `agent-compatibility`, `github`.
 
 ## User language (agents)
 

@@ -185,7 +185,7 @@ Single-context — `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agen
 
 Practical guide and exercises for using skills in a new Cursor agent session. See `docs/agents/GETTING-STARTED.md`.
 
-Lean project skills (nine): `ask-matt`, `grilling`, `triage`, `to-issues`, `tdd`, `diagnosing-bugs`, `domain-modeling`, `codebase-design`, `resolving-merge-conflicts`. List: `.cursor/skills/README.md`.
+Lean project skills (ten): `ask-matt`, `grilling`, `triage`, `to-issues`, `tdd`, `diagnosing-bugs`, `domain-modeling`, `codebase-design`, `resolving-merge-conflicts`, `devops-agent`. Auto-routing: `.cursor/rules/auto-skill-routing.mdc`.
 
 Recommended Cursor marketplace plugins: `agent-compatibility`, `github`.
 

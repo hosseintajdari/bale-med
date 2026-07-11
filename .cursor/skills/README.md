@@ -1,6 +1,6 @@
 # BaleMed project skills (lean set)
 
-Nine skills ship with this repo for pharmacy-bot workflow without duplicating your global Codex/Cursor install.
+Ten skills ship with this repo for pharmacy-bot workflow without duplicating your global Codex/Cursor install.
 
 ## Included
 
@@ -32,3 +32,7 @@ Duplicates or wrong stack for BaleMed were removed. Use /grilling + domain-model
 
 - docs/agents/GETTING-STARTED.md
 - AGENTS.md
+
+## Auto routing
+
+See `.cursor/rules/auto-skill-routing.mdc` — agents pick skills from context without `/skill-name`.

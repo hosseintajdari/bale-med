@@ -1,0 +1,32 @@
+﻿---
+description: Auto-select and run the best project skill from context without waiting for /skill-name
+alwaysApply: true
+---
+
+# Auto skill routing (no /command required)
+
+When the user message matches a row below, **immediately read and follow** that skill file before other work. Do not ask them to type `/skill-name`.
+
+| If the user is about to… | Read and follow |
+|--------------------------|-----------------|
+| Deploy, VPS, SSH, systemd, Caddy, webhook on server, dry-run, rollback, `scp`, CRLF scripts | `.cursor/skills/devops-agent/SKILL.md` |
+| Fix a bug, failing test, error, crash, slow, "diagnose", "debug" | `.cursor/skills/diagnosing-bugs/SKILL.md` |
+| Build or fix with tests first, `/tdd`, red-green-refactor | `.cursor/skills/tdd/SKILL.md` |
+| Stress-test a plan, new feature, milestone design | `.cursor/skills/grilling/SKILL.md` |
+| Domain terms, CONTEXT.md, glossary, ADR | `.cursor/skills/domain-modeling/SKILL.md` |
+| Module design, seams, testability | `.cursor/skills/codebase-design/SKILL.md` |
+| GitHub issue triage, external PR | `.cursor/skills/triage/SKILL.md` |
+| Split plan into issues | `.cursor/skills/to-issues/SKILL.md` |
+| Merge/rebase conflict | `.cursor/skills/resolving-merge-conflicts/SKILL.md` |
+| Unclear which workflow fits | `.cursor/skills/ask-matt/SKILL.md` |
+
+## How to apply
+
+1. Match the **best single** row (if two fit, pick the more urgent: bug > deploy > design).
+2. `Read` the skill path, then execute its workflow.
+3. Stay on one goal per chat (see `stay-on-task` rule).
+4. Pharmacy safety: never bypass `docs/SAFETY_RULES.md`.
+
+## DevOps default
+
+For BaleMed server work, prefer **devops-agent** skill. Always run `make validate` before commit unless user says otherwise.

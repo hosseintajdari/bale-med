@@ -40,6 +40,7 @@ class DeployAssetsTests(unittest.TestCase):
             "07-smoke-tests.sh",
             "08-register-webhook.sh",
             "09-monitor-dry-run.sh",
+            "10-shadow-llm-verify.sh",
             "fix-env-reply-text.py",
             "normalize-deploy-scripts.py",
             "install.sh",

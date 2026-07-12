@@ -8,9 +8,20 @@ Full runbook: [docs/DEPLOYMENT_VPS.md](../docs/DEPLOYMENT_VPS.md).
 
 1. Complete [server-info-checklist.md](server-info-checklist.md) from your provider panel (keep it local).
 2. Read [SECURITY-CHECKLIST.md](SECURITY-CHECKLIST.md) — keep tokens and secrets off Git and chat.
-2. Confirm SSH: `ssh root@YOUR_SERVER_IP`
-3. Have a **domain** with DNS A record to the server IP before steps 8F–8H.
-4. Prepare `BALE_BOT_TOKEN` and `BALE_WEBHOOK_SECRET` — set only in `/opt/bale-bot/.env` on the server.
+3. Confirm SSH to the production host: `ssh balemed` (local SSH alias only — see `deploy/servers/balemed.md`, gitignored) or `ssh root@YOUR_SERVER_IP`.
+4. Server profile: [servers/balemed.md](servers/balemed.md) (local, gitignored).
+5. Have a **domain** with DNS A record to the server IP before steps 8F–8H.
+6. Prepare `BALE_BOT_TOKEN` and `BALE_WEBHOOK_SECRET` — set only in `/opt/bale-bot/.env` on the server.
+
+### Copy from Windows (`scp`)
+
+If you copy `deploy/` from Windows, shell scripts may have CRLF line endings and fail on Linux (`pipefail\r: invalid option`). On the server, run **before** any `bash deploy/scripts/*.sh`:
+
+```bash
+python3 deploy/scripts/normalize-deploy-scripts.py deploy/scripts
+```
+
+Then run `install.sh` as usual. `install.sh` also normalizes `*.sh` in `deploy/scripts/` on each run (when `python3` is available).
 
 ## Quick Path
 

@@ -7,6 +7,9 @@ __pycache__/
 *.sqlite
 *.log
 backups/
+deploy/servers/*.local.md
+deploy/servers/*.local.json
+deploy/servers/balemed.md
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/

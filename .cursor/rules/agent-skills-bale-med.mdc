@@ -7,10 +7,14 @@ alwaysApply: true
 
 This repo ships project skills under `.cursor/skills/`. Setup for issue tracker, triage labels, and domain docs is in `docs/agents/` and `AGENTS.md`.
 
+## Auto routing (default)
+
+Follow `.cursor/rules/auto-skill-routing.mdc`. When context matches, read the matching `.cursor/skills/*/SKILL.md` and run it — no `/skill-name` required.
+
 ## When the user asks about skills, setup, or workflow
 
 1. Read `docs/agents/GETTING-STARTED.md` if you need the full guide (Persian + English).
-2. Tell the user that **most workflow skills do not auto-run** — they must type `/skill-name` in Agent chat (e.g. `/ask-matt`, `/grill-with-docs`, `/triage`).
+2. Tell the user that **most workflow skills do not auto-run** — they must type `/skill-name` in Agent chat (e.g. `/ask-matt`, `/grilling`, `/triage`).
 3. Skills that **can** auto-apply when relevant: `tdd`, `diagnosing-bugs`, `domain-modeling`, `grilling`, `codebase-design`, and similar skills **without** `disable-model-invocation: true`.
 4. If skills are missing, the user likely needs branch `cursor/install-mattpocock-skills-74e7` or `main` after [PR #29](https://github.com/hosseintajdari/bale-med/pull/29) is merged, then **Developer: Reload Window** in Cursor.
 5. Verify discovery: Cursor sidebar → **Customize → Skills** — project skills from `.cursor/skills/` should appear.

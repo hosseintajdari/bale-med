@@ -6,7 +6,7 @@
 
 ## چرا skill «خودکار» اجرا نمی‌شود؟
 
-بیشتر skillهای workflow این مجموعه (مثل `/ask-matt`، `/grill-with-docs`، `/triage`) عمداً **فقط با تایپ `/`** فعال می‌شوند — Cursor آن‌ها را خودکار در context نمی‌گذارد.
+بیشتر skillهای workflow این مجموعه (مثل `/ask-matt`، `/grilling`، `/triage`) عمداً **فقط با تایپ `/`** فعال می‌شوند — Cursor آن‌ها را خودکار در context نمی‌گذارد.
 
 | نوع | رفتار | مثال |
 |-----|--------|------|
@@ -50,7 +50,7 @@
 
 | نوع | نحوه فراخوانی | مثال |
 |-----|---------------|------|
-| **User-invoked** | شما در چت تایپ می‌کنید | `/grill-with-docs`، `/triage`، `/ask-matt` |
+| **User-invoked** | شما در چت تایپ می‌کنید | `/grilling`، `/triage`، `/ask-matt` |
 | **Model-invoked** | agent خودش در صورت مناسب بودن task انتخاب می‌کند | `tdd`، `diagnosing-bugs`، `domain-modeling` |
 
 برای model-invoked می‌توانید صریح هم بگویید: «با TDD این باگ را درست کن» یا «این باگ را diagnose کن».
@@ -61,17 +61,15 @@
 
 ```
 نمی‌دانید از کجا شروع کنید     →  /ask-matt
-ایده / فیچر جدید (با کدبیس)    →  /grill-with-docs
+ایده / فیچر جدید                →  /grilling (+ domain-modeling برای CONTEXT.md)
 باگ سخت یا رفتار عجیب           →  diagnosing-bugs (یا بگویید «diagnose کن»)
 issue / PR جدید از بیرون        →  /triage
-فیچر کوچک در یک session         →  /implement (بعد از grill)
-فیچر بزرگ / چند session         →  /grill-with-docs → /to-prd → /to-issues
+برنامه را به issue بشکنید       →  /to-issues
 تست قبل از کد                   →  tdd
-نگهداری معماری کدبیس            →  /improve-codebase-architecture
-پایان session / ادامه در agent دیگر →  /handoff
+نگهداری معماری کدبیس            →  codebase-design
 ```
 
-جریان کامل در `.cursor/skills/ask-matt/SKILL.md` توضیح داده شده است.
+جریان کامل در `.cursor/skills/ask-matt/SKILL.md` و `.cursor/skills/README.md` است.
 
 ---
 
@@ -79,12 +77,12 @@ issue / PR جدید از بیرون        →  /triage
 
 | اولویت | کار | skill پیشنهادی |
 |--------|-----|----------------|
-| 1 | ساخت `CONTEXT.md` — واژگان دامنه داروخانه (مثلاً «نیاز به بررسی داروساز»، «پیام ورودی»، «لایه پاسخ امن») | `/grill-with-docs` |
-| 2 | triage کردن issueهای باز GitHub و آماده‌سازی برای agent | `/triage` |
-| 3 | شروع Milestone 9 (LLM) با مرزهای ایمنی داروخانه | `/grill-with-docs` سپس `/to-prd` |
-| 4 | هر چند روز یک‌بار — بررسی عمق ماژول‌ها | `/improve-codebase-architecture` |
+| 1 | ساخت `CONTEXT.md` — واژگان دامنه داروخانه | `/grilling` + `domain-modeling` |
+| 2 | triage کردن issueهای باز GitHub | `/triage` |
+| 3 | شروع Milestone 9 (LLM) با مرزهای ایمنی | `/grilling` سپس `/to-issues` |
+| 4 | deploy و تست روی VPS | `docs/DEPLOYMENT_VPS.md` و `tdd` |
 
-**هنوز لازم نیست:** `/setup-matt-pocock-skills` — یک‌بار انجام شده است.
+**پلاگین پیشنهادی Cursor Marketplace:** `/add-plugin agent-compatibility` و `/add-plugin github` (بعد از نصب: Reload Window).
 
 ---
 
@@ -102,21 +100,21 @@ issue / PR جدید از بیرون        →  /triage
 از کدام skill شروع کنم؟
 ```
 
-**انتظار:** agent مسیر `/grill-with-docs` → `/to-prd` → `/to-issues` را پیشنهاد دهد.
+**انتظار:** agent مسیر `/grilling` → `domain-modeling` → `/to-issues` را پیشنهاد دهد.
 
 ---
 
-### تمرین ۲ — زبان دامنه (`/grill-with-docs`)
+### تمرین ۲ — زبان دامنه (`/grilling` + `domain-modeling`)
 
 ```
-/grill-with-docs
+/grilling
 
 می‌خواهیم CONTEXT.md بسازیم. سه اصطلاح مهم این پروژه:
 - webhook امن Bale
 - لایه پاسخ امن (safe reply layer)
 - صف بررسی داروساز (pharmacist review queue)
 
-سوالاتت را بپرس تا اصطلاحات را دقیق کنیم.
+سوالاتت را بپرس تا اصطلاحات را دقیق کنیم. از domain-modeling برای ثبت glossary استفاده کن.
 ```
 
 **انتظار:** مصاحبه کوتاه و پیش‌نویس `CONTEXT.md` (یا پیشنهاد ساخت آن).
@@ -149,29 +147,11 @@ bot نباید دوز پیشنهاد دهد و باید به داروساز ار
 
 ---
 
-### تمرین ۵ — handoff بین sessionها (`/handoff`)
-
-```
-/handoff
-
-خلاصه کن: setup skillها انجام شد، CONTEXT.md هنوز نیست،
-قدم بعدی grill-with-docs برای Milestone 9 است.
-```
-
-**انتظار:** فایل handoff markdown. در Chat بعدی:
-
-```
-این handoff را ادامه بده: [مسیر فایل]
-```
-
----
-
 ## نکات مهم برای bale-med
 
-1. **ایمنی داروخانه** — skillها تشخیص یا دوز پیشنهاد نمی‌دهند؛ `/grill-with-docs` برای Milestone 9 مرزها را صریح نگه می‌دارد.
-2. **Context window** — grilling + PRD + issues را در **یک session** نگه دارید؛ بعد از `/to-issues` برای هر issue session تازه باز کنید.
+1. **ایمنی داروخانه** — skillها تشخیص یا دوز پیشنهاد نمی‌دهند؛ `/grilling` برای Milestone 9 مرزها را صریح نگه می‌دارد.
+2. **Skillهای lean** — فقط ۹ skill در `.cursor/skills/`؛ بقیه در نصب global شما ممکن است باشد (`.cursor/skills/README.md`).
 3. **فایل‌های مرجع** — `docs/agents/issue-tracker.md`، `triage-labels.md`، `domain.md`
-4. **ویرایش بعدی** — `docs/agents/*.md` را مستقیم ویرایش کنید؛ فقط برای عوض کردن issue tracker دوباره setup لازم است.
 
 ---
 

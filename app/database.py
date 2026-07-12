@@ -3,7 +3,7 @@ import shutil
 import sqlite3
 from contextlib import closing
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from .config import get_settings
@@ -85,7 +85,7 @@ def save_incoming_message(
     review_status: str = "not_required",
 ) -> SaveMessageResult:
     settings = get_settings()
-    received_at = datetime.now(timezone.utc).isoformat()
+    received_at = datetime.now(UTC).isoformat()
     raw_payload = message.raw_update if settings.bale_store_raw_updates else {"raw_update_storage": "disabled"}
     raw_update = json.dumps(raw_payload, ensure_ascii=False)
 
@@ -212,7 +212,7 @@ def create_sqlite_backup(backup_dir: str | Path = "backups") -> BackupResult:
         raise FileNotFoundError(f"SQLite database file was not found: {source_path}")
 
     destination_dir = Path(backup_dir)
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    timestamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     backup_name = f"{source_path.stem}-{timestamp}{source_path.suffix or '.db'}"
     backup_path = destination_dir / backup_name
 

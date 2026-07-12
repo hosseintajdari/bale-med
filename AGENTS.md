@@ -46,7 +46,7 @@ Build a minimal but production-minded MVP for a pharmacy assistant bot.
 - Milestone 6: Done - Better logging and admin review.
 - Milestone 7: Done - VPS deployment preparation and repository alignment.
 - Milestone 8: Started - Real VPS deployment workflow.
-- Milestone 9: Planned - LLM/AI integration.
+- Milestone 9: Started - LLM/AI integration (optional classification layer; shadow default).
 
 For the latest milestone breakdown and sub-milestones, see [README.md](README.md).
 

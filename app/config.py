@@ -16,12 +16,33 @@ class Settings:
     bale_store_raw_updates: bool
     bale_admin_chat_id: str
     bale_enable_admin_notifications: bool
+    bale_enable_llm: bool
+    bale_llm_mode: str
+    bale_llm_api_base_url: str
+    bale_llm_api_key: str
+    bale_llm_model: str
+    bale_llm_timeout_seconds: float
 
 
 def _to_bool(value: str | None, default: bool = False) -> bool:
     if value is None:
         return default
     return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _to_float(value: str | None, default: float) -> float:
+    if value is None or not value.strip():
+        return default
+    return float(value.strip())
+
+
+def _normalize_llm_mode(value: str | None) -> str:
+    if value is None:
+        return "shadow"
+    normalized = value.strip().lower()
+    if normalized not in {"shadow", "live"}:
+        return "shadow"
+    return normalized
 
 
 def get_settings() -> Settings:
@@ -46,4 +67,10 @@ def get_settings() -> Settings:
             os.getenv("BALE_ENABLE_ADMIN_NOTIFICATIONS"),
             default=False,
         ),
+        bale_enable_llm=_to_bool(os.getenv("BALE_ENABLE_LLM"), default=False),
+        bale_llm_mode=_normalize_llm_mode(os.getenv("BALE_LLM_MODE")),
+        bale_llm_api_base_url=os.getenv("BALE_LLM_API_BASE_URL", ""),
+        bale_llm_api_key=os.getenv("BALE_LLM_API_KEY", ""),
+        bale_llm_model=os.getenv("BALE_LLM_MODEL", "gpt-4o-mini"),
+        bale_llm_timeout_seconds=_to_float(os.getenv("BALE_LLM_TIMEOUT_SECONDS"), default=10.0),
     )

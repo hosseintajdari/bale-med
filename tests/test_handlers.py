@@ -223,13 +223,17 @@ class HandlerTests(unittest.TestCase):
         self.assertIn("بارداری", reply_text)
 
     def test_normal_text_stores_no_review_required(self):
-        result, row = self._route_text_message_and_fetch_review_row("I need help with a medicine question")
+        result, row = self._route_text_message_and_fetch_review_row(
+            "I need help with a medicine question"
+        )
 
         self.assertTrue(result["ok"])
         self.assertEqual(row, (0, None, "not_required"))
 
     def test_escalation_text_stores_pending_review_metadata(self):
-        result, row = self._route_text_message_and_fetch_review_row("Can I use this during pregnancy?")
+        result, row = self._route_text_message_and_fetch_review_row(
+            "Can I use this during pregnancy?"
+        )
 
         self.assertTrue(result["ok"])
         self.assertEqual(row, (1, "pharmacist_review_required", "pending"))
@@ -282,7 +286,9 @@ class HandlerTests(unittest.TestCase):
                 try:
                     columns = {
                         row[1]
-                        for row in connection.execute("PRAGMA table_info(incoming_messages)").fetchall()
+                        for row in connection.execute(
+                            "PRAGMA table_info(incoming_messages)"
+                        ).fetchall()
                     }
                 finally:
                     connection.close()
@@ -337,7 +343,9 @@ class HandlerTests(unittest.TestCase):
 
                 connection = sqlite3.connect("test.db")
                 try:
-                    count = connection.execute("SELECT COUNT(*) FROM incoming_messages").fetchone()[0]
+                    count = connection.execute("SELECT COUNT(*) FROM incoming_messages").fetchone()[
+                        0
+                    ]
                     row = connection.execute(
                         "SELECT external_event_id FROM incoming_messages"
                     ).fetchone()
@@ -400,7 +408,9 @@ class HandlerTests(unittest.TestCase):
 
                 connection = sqlite3.connect("test.db")
                 try:
-                    count = connection.execute("SELECT COUNT(*) FROM incoming_messages").fetchone()[0]
+                    count = connection.execute("SELECT COUNT(*) FROM incoming_messages").fetchone()[
+                        0
+                    ]
                     row = connection.execute(
                         "SELECT external_event_id FROM incoming_messages"
                     ).fetchone()
@@ -458,7 +468,9 @@ class HandlerTests(unittest.TestCase):
 
                 connection = sqlite3.connect("test.db")
                 try:
-                    count = connection.execute("SELECT COUNT(*) FROM incoming_messages").fetchone()[0]
+                    count = connection.execute("SELECT COUNT(*) FROM incoming_messages").fetchone()[
+                        0
+                    ]
                     external_ids = connection.execute(
                         "SELECT external_event_id FROM incoming_messages ORDER BY id"
                     ).fetchall()
@@ -517,7 +529,9 @@ class HandlerTests(unittest.TestCase):
 
                 connection = sqlite3.connect("test.db")
                 try:
-                    raw_update = connection.execute("SELECT raw_update FROM incoming_messages").fetchone()[0]
+                    raw_update = connection.execute(
+                        "SELECT raw_update FROM incoming_messages"
+                    ).fetchone()[0]
                 finally:
                     connection.close()
             finally:
@@ -569,7 +583,9 @@ class HandlerTests(unittest.TestCase):
 
                 connection = sqlite3.connect("test.db")
                 try:
-                    raw_update = connection.execute("SELECT raw_update FROM incoming_messages").fetchone()[0]
+                    raw_update = connection.execute(
+                        "SELECT raw_update FROM incoming_messages"
+                    ).fetchone()[0]
                 finally:
                     connection.close()
             finally:

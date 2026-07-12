@@ -79,14 +79,14 @@ Notes:
   - Milestone 7I: Done - Repository context and issue alignment.
 - Milestone 8: Started - Real VPS deployment workflow.
   - Milestone 8A: In progress - VPS purchased (Iran); deployment scripts in `deploy/`.
-- Milestone 9: Planned - LLM/AI integration.
+- Milestone 9: Started - LLM/AI integration (optional classification layer; shadow default).
 
 ## MVP Guarantees vs Non-Goals
 
 | Area | Current MVP |
 | --- | --- |
-| In scope | Secure Bale webhook intake, SQLite message storage, safe Persian replies, duplicate-delivery guard, pharmacist-review metadata/actions, backup/restore helpers, optional admin review notifications |
-| Not in scope | Diagnosis, treatment advice, dosage changes, prescription replacement, autonomous clinical decision-making, Web UI, AI/LLM behavior |
+| In scope | Secure Bale webhook intake, SQLite message storage, safe Persian replies, duplicate-delivery guard, pharmacist-review metadata/actions, backup/restore helpers, optional admin review notifications, optional LLM classification (internal only, shadow default) |
+| Not in scope | Diagnosis, treatment advice, dosage changes, prescription replacement, autonomous clinical decision-making, Web UI, patient-facing LLM replies |
 | Bale outbound API | Available only when explicitly enabled; keep disabled by default |
 | Deployment | Local-first; VPS runbook in `docs/DEPLOYMENT_VPS.md` and scripts in `deploy/` |
 | Clinical status | Safety-oriented workflow support only; not clinically validated |

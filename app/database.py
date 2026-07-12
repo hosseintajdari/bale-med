@@ -17,6 +17,15 @@ class SaveMessageResult:
 
 
 @dataclass(frozen=True)
+class LLMStorageFields:
+    extracted_json: str | None = None
+    model_id: str | None = None
+    latency_ms: int | None = None
+    validation_pass: bool | None = None
+    status: str | None = None
+
+
+@dataclass(frozen=True)
 class BackupResult:
     source_path: Path
     backup_path: Path
@@ -60,15 +69,31 @@ def init_db() -> None:
                 for row in connection.execute("PRAGMA table_info(incoming_messages)").fetchall()
             }
             if "external_event_id" not in existing_columns:
-                connection.execute("ALTER TABLE incoming_messages ADD COLUMN external_event_id TEXT")
+                connection.execute(
+                    "ALTER TABLE incoming_messages ADD COLUMN external_event_id TEXT"
+                )
             if "needs_review" not in existing_columns:
-                connection.execute("ALTER TABLE incoming_messages ADD COLUMN needs_review INTEGER NOT NULL DEFAULT 0")
+                connection.execute(
+                    "ALTER TABLE incoming_messages ADD COLUMN needs_review INTEGER NOT NULL DEFAULT 0"
+                )
             if "review_reason" not in existing_columns:
                 connection.execute("ALTER TABLE incoming_messages ADD COLUMN review_reason TEXT")
             if "review_status" not in existing_columns:
                 connection.execute(
                     "ALTER TABLE incoming_messages ADD COLUMN review_status TEXT NOT NULL DEFAULT 'not_required'"
                 )
+            llm_columns = {
+                "llm_extracted_json": "TEXT",
+                "llm_model_id": "TEXT",
+                "llm_latency_ms": "INTEGER",
+                "llm_validation_pass": "INTEGER",
+                "llm_status": "TEXT",
+            }
+            for column_name, column_type in llm_columns.items():
+                if column_name not in existing_columns:
+                    connection.execute(
+                        f"ALTER TABLE incoming_messages ADD COLUMN {column_name} {column_type}"
+                    )
             connection.execute(
                 """
                 CREATE UNIQUE INDEX IF NOT EXISTS idx_incoming_messages_external_event_id
@@ -83,11 +108,20 @@ def save_incoming_message(
     needs_review: bool = False,
     review_reason: str | None = None,
     review_status: str = "not_required",
+    llm_fields: LLMStorageFields | None = None,
 ) -> SaveMessageResult:
     settings = get_settings()
     received_at = datetime.now(UTC).isoformat()
-    raw_payload = message.raw_update if settings.bale_store_raw_updates else {"raw_update_storage": "disabled"}
+    raw_payload = (
+        message.raw_update
+        if settings.bale_store_raw_updates
+        else {"raw_update_storage": "disabled"}
+    )
     raw_update = json.dumps(raw_payload, ensure_ascii=False)
+    llm_storage = llm_fields or LLMStorageFields()
+    validation_pass_value = None
+    if llm_storage.validation_pass is not None:
+        validation_pass_value = int(llm_storage.validation_pass)
 
     with closing(get_connection()) as connection:
         with connection:
@@ -111,9 +145,14 @@ def save_incoming_message(
                         raw_update,
                         needs_review,
                         review_reason,
-                        review_status
+                        review_status,
+                        llm_extracted_json,
+                        llm_model_id,
+                        llm_latency_ms,
+                        llm_validation_pass,
+                        llm_status
                     )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         received_at,
@@ -125,6 +164,11 @@ def save_incoming_message(
                         int(needs_review),
                         review_reason,
                         review_status,
+                        llm_storage.extracted_json,
+                        llm_storage.model_id,
+                        llm_storage.latency_ms,
+                        validation_pass_value,
+                        llm_storage.status,
                     ),
                 )
             except sqlite3.IntegrityError:
@@ -140,7 +184,22 @@ def save_incoming_message(
             return SaveMessageResult(stored_message_id=int(cursor.lastrowid), inserted=True)
 
 
-def list_pending_review_items() -> list[dict[str, str | int | None]]:
+def _build_review_item_dict(row: sqlite3.Row) -> dict[str, str | int | None | bool | dict]:
+    item = dict(row)
+    extracted_json = item.pop("llm_extracted_json", None)
+    item["llm_model_id"] = item.pop("llm_model_id", None)
+    item["llm_latency_ms"] = item.pop("llm_latency_ms", None)
+    validation_pass = item.pop("llm_validation_pass", None)
+    item["llm_validation_pass"] = None if validation_pass is None else bool(validation_pass)
+    item["llm_status"] = item.pop("llm_status", None)
+    if extracted_json:
+        item["llm_extracted"] = json.loads(extracted_json)
+    else:
+        item["llm_extracted"] = None
+    return item
+
+
+def list_pending_review_items() -> list[dict[str, str | int | None | bool | dict]]:
     with closing(get_connection()) as connection:
         connection.row_factory = sqlite3.Row
         rows = connection.execute(
@@ -152,7 +211,12 @@ def list_pending_review_items() -> list[dict[str, str | int | None]]:
                 message_id,
                 text,
                 review_reason,
-                review_status
+                review_status,
+                llm_extracted_json,
+                llm_model_id,
+                llm_latency_ms,
+                llm_validation_pass,
+                llm_status
             FROM incoming_messages
             WHERE needs_review = 1
               AND review_status = 'pending'
@@ -160,7 +224,7 @@ def list_pending_review_items() -> list[dict[str, str | int | None]]:
             """
         ).fetchall()
 
-    return [dict(row) for row in rows]
+    return [_build_review_item_dict(row) for row in rows]
 
 
 def mark_review_item_reviewed(message_id: int) -> dict[str, str | int | bool] | None:

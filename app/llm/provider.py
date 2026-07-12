@@ -18,14 +18,16 @@ class OpenAICompatibleLLMClient:
     def classify_message(self, snippet: str) -> dict[str, Any]:
         if not self.settings.bale_llm_api_base_url.strip():
             raise ValueError("BALE_LLM_API_BASE_URL is not configured")
-        if not self.settings.bale_llm_api_key.strip():
-            raise ValueError("BALE_LLM_API_KEY is not configured")
 
         url = f"{self.settings.bale_llm_api_base_url.rstrip('/')}/chat/completions"
         headers = {
-            "Authorization": f"Bearer {self.settings.bale_llm_api_key}",
             "Content-Type": "application/json",
         }
+        # Some gateways (e.g. Arvan URL-token) embed auth in the base URL.
+        # Skip Bearer when key is empty or a local placeholder.
+        api_key = self.settings.bale_llm_api_key.strip()
+        if api_key and api_key.lower() not in {"arvan", "none", "-"}:
+            headers["Authorization"] = f"Bearer {api_key}"
         body = {
             "model": self.settings.bale_llm_model,
             "temperature": 0,

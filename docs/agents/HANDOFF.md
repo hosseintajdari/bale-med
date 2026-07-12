@@ -1,88 +1,137 @@
 # Handoff — BaleMed (new Agent chat)
 
-**Date:** 2026-07-12  
-**Branch:** `main` (Milestone 9 merged)
-**Merged PR:** https://github.com/hosseintajdari/bale-med/pull/38
-**Milestone:** 9 merged → **VPS shadow deploy + verify pending reviews** (owner runs on server)
+**Date:** 2026-07-13  
+**Branch:** `main`  
+**Merged PR:** https://github.com/hosseintajdari/bale-med/pull/38  
+**Issue #9:** closed after merge  
+**Milestone:** 9 shadow LLM **live on VPS** (Arvan) → **verify `shadow_ok` on bot traffic**, then owner review
 
 Copy this file into a new chat, or say: *Read `docs/agents/HANDOFF.md` and continue.*
 
 ---
 
-## Done from Cursor web (cloud agent)
+## Current status (2026-07-13)
 
-| Step | Status |
+| Item | Status |
 |------|--------|
-| Milestone 9 LLM layer coded | ✅ merged to `main` |
-| `make validate` (88 tests) | ✅ |
-| PR #38 merged | ✅ |
-| VPS SSH / HTTPS from cloud | ❌ blocked (Iran VPS resets US cloud connections) |
+| Milestone 9 code on `main` | ✅ |
+| VPS `/opt/bale-bot` has `app/llm/` (deployed via scp) | ✅ |
+| LLM provider: **Arvan Cloud AI** (DeepSeek-V3.2) | ✅ `test-llm-provider.py` → **200** |
+| `BALE_LLM_MODE=shadow` | ✅ configured on VPS |
+| Bot template replies to patients | ✅ unchanged (expected) |
+| `shadow_ok` on real `@embednebot` messages | ⏳ confirm next |
 
-**Cloud agents cannot SSH to `balemed` or curl `embednet.systems` from Cursor web.** Deploy must run on your laptop/desktop with `ssh balemed`.
+**VPS deploy note:** `/opt/bale-bot` has no working `git pull` (no GitHub auth). Updates so far via **scp from laptop**. Optional: attach git (see below).
+
+**Security:** If Arvan gateway URL/key was pasted in chat, **rotate** in Arvan panel and update `/opt/bale-bot/.env` only.
 
 ---
 
-## Your next step (P1 — VPS shadow deploy)
+## Paste this in new Agent chat
 
-### 1. Add LLM env on VPS
+```text
+Read docs/agents/HANDOFF.md.
+
+Arvan LLM test returns 200 on VPS. Help me confirm shadow_ok on real @embednebot messages and review /local/reviews/pending output.
+```
+
+---
+
+## P1 — Confirm shadow on real bot traffic
+
+On VPS:
 
 ```bash
 ssh balemed
-sudo nano /opt/bale-bot/.env
+sudo systemctl restart bale-bot   # if .env changed recently
 ```
 
-Add (real key only on server):
-
-```env
-BALE_ENABLE_LLM=true
-BALE_LLM_MODE=shadow
-BALE_LLM_API_BASE_URL=https://YOUR_PROVIDER/v1
-BALE_LLM_API_KEY=YOUR_KEY
-BALE_LLM_MODEL=gpt-4o-mini
-```
-
-Keep `BALE_ENABLE_SENDING=false` unless 8J owner approval exists.
-
-### 2. Pull `main` and run verify script
+1. Send **3–5 new messages** to `@embednebot` (not repeats of old text).
+2. Check:
 
 ```bash
-cd /opt/bale-bot
-git fetch origin && git checkout main && git pull origin main
-DOMAIN=embednet.systems bash deploy/scripts/10-shadow-llm-verify.sh
-```
-
-Or: `bash deploy/scripts/install.sh 9a`
-
-### 3. Send test messages + confirm pending reviews
-
-Send 5–10 messages to `@embednebot`, then on VPS:
-
-```bash
+cd /opt/bale-bot && . .venv/bin/activate
+python3 deploy/scripts/vps-quick-check.py
+sudo journalctl -u bale-bot -n 30 --no-pager | grep -i llm
 curl -s http://127.0.0.1:8000/local/reviews/pending | python3 -m json.tool
-sudo journalctl -u bale-bot -n 50 --no-pager | grep llm_status
 ```
 
-**Expect:** template replies only; `llm_extracted` / `llm_status` (e.g. `shadow_ok`) on pending items; public `https://embednet.systems/local/reviews/pending` → **404**.
-
-Paste JSON output in Agent chat to confirm shadow mode.
+**Expect:** recent rows with `llm_status=shadow_ok` and `llm_extracted` populated; patients still get template replies only.
 
 ---
 
 ## P2 — Human go-live gate (before `BALE_LLM_MODE=live`)
 
-Owner must approve and review 20–50 shadow messages before setting `BALE_LLM_MODE=live`.
+Owner must:
+
+1. Approve LLM live mode explicitly.
+2. Review **20–50 shadow messages** (extracted fields vs pharmacist judgment).
+3. Run `make validate` / `scripts/verify.ps1`.
+
+Then only on VPS `.env`:
+
+```env
+BALE_LLM_MODE=live
+```
+
+Live mode: LLM `needs_review` unions with keywords; failures → `llm_fail_safe`.
 
 ---
 
-## Env reference (Milestone 9)
+## Arvan Cloud AI env (working on Iran VPS)
 
-| Variable | Default | Meaning |
-|----------|---------|---------|
-| `BALE_ENABLE_LLM` | `false` | Master switch |
-| `BALE_LLM_MODE` | `shadow` | `shadow` = store only; `live` = union escalation |
-| `BALE_LLM_API_BASE_URL` | empty | OpenAI-compatible base URL |
-| `BALE_LLM_API_KEY` | empty | Never commit |
-| `BALE_LLM_MODEL` | `gpt-4o-mini` | Model id for audit |
+In `/opt/bale-bot/.env` (secrets **only on server**):
+
+```env
+BALE_ENABLE_LLM=true
+BALE_LLM_MODE=shadow
+BALE_LLM_API_BASE_URL=https://arvancloudai.ir/gateway/models/DeepSeek-V3.2/<token-from-panel>/v1
+BALE_LLM_API_KEY=<api-key-from-panel>
+BALE_LLM_MODEL=DeepSeek-V3.2
+BALE_LLM_TIMEOUT_SECONDS=90
+```
+
+- **One `=` per line** — `BALE_LLM_MODEL=DeepSeek-V3.2` (not `==`)
+- Test: `python3 deploy/scripts/test-llm-provider.py` → `status=200`
+
+### Provider notes (from VPS tests)
+
+| Provider | Iran VPS |
+|----------|----------|
+| **Arvan Cloud AI** | ✅ Works |
+| Groq | ✅ Works with valid key (`401` = bad key) |
+| Ollama Cloud | ❌ 403 blocked from VPS IP |
+| Local Ollama on VPS | ⚠️ Possible but tight on 2 vCPU / 4 GB RAM |
+
+---
+
+## VPS helpers (in repo)
+
+| Script | Purpose |
+|--------|---------|
+| `deploy/scripts/test-llm-provider.py` | Test LLM API (no secrets printed) |
+| `deploy/scripts/ensure-llm-env.py` | Add missing LLM env keys |
+| `deploy/scripts/check-env-safe.py` | Safe `.env` health check |
+| `deploy/scripts/vps-quick-check.py` | Sending + recent messages + LLM status |
+| `deploy/scripts/10-shadow-llm-verify.sh` | Full shadow deploy verify |
+
+---
+
+## Optional — attach git on VPS
+
+```bash
+ssh balemed
+cp /opt/bale-bot/.env /tmp/bale-bot.env.backup
+cd /opt/bale-bot
+git init
+git remote add origin https://github.com/hosseintajdari/bale-med.git
+git fetch origin
+git checkout -B main origin/main
+cp /tmp/bale-bot.env.backup .env
+chmod 600 .env
+```
+
+Then `git pull` works for future deploys (or keep using scp).
 
 ---
 
@@ -90,9 +139,10 @@ Owner must approve and review 20–50 shadow messages before setting `BALE_LLM_M
 
 | Purpose | Path |
 |---------|------|
+| LLM provider | `app/llm/provider.py` |
 | LLM service | `app/llm/service.py` |
 | VPS shadow verify | `deploy/scripts/10-shadow-llm-verify.sh` |
 | Safety rules | `docs/SAFETY_RULES.md` |
 | Deploy runbook | `docs/DEPLOYMENT_VPS.md` |
 
-**Pin this chat** before archive — Milestone 9 merge + VPS shadow checklist.
+**Pin this chat** before archive — Arvan shadow LLM deploy + verify checklist.

@@ -14,7 +14,9 @@ class WebhookSecurityTests(unittest.TestCase):
             sys.path.insert(0, str(project_root))
 
         original_cwd = Path.cwd()
-        original_values = {key: os.environ.get(key) for key in ("DATABASE_PATH", "BALE_WEBHOOK_SECRET")}
+        original_values = {
+            key: os.environ.get(key) for key in ("DATABASE_PATH", "BALE_WEBHOOK_SECRET")
+        }
 
         with tempfile.TemporaryDirectory() as temp_dir:
             try:
@@ -58,7 +60,9 @@ class WebhookSecurityTests(unittest.TestCase):
             sys.path.insert(0, str(project_root))
 
         original_cwd = Path.cwd()
-        original_values = {key: os.environ.get(key) for key in ("DATABASE_PATH", "BALE_WEBHOOK_SECRET")}
+        original_values = {
+            key: os.environ.get(key) for key in ("DATABASE_PATH", "BALE_WEBHOOK_SECRET")
+        }
 
         with tempfile.TemporaryDirectory() as temp_dir:
             try:
@@ -101,7 +105,9 @@ class WebhookSecurityTests(unittest.TestCase):
             sys.path.insert(0, str(project_root))
 
         original_cwd = Path.cwd()
-        original_values = {key: os.environ.get(key) for key in ("DATABASE_PATH", "BALE_WEBHOOK_SECRET")}
+        original_values = {
+            key: os.environ.get(key) for key in ("DATABASE_PATH", "BALE_WEBHOOK_SECRET")
+        }
 
         with tempfile.TemporaryDirectory() as temp_dir:
             try:

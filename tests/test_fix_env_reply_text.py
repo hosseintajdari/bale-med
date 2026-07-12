@@ -80,14 +80,17 @@ class FixEnvReplyTextTests(unittest.TestCase):
     def test_other_env_lines_are_preserved(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             env_path = Path(temp_dir) / ".env"
-            original = "\n".join(
-                [
-                    "BALE_BOT_TOKEN=secret-token",
-                    "BALE_REPLY_TEXT=پیام تست",
-                    "BALE_ENABLE_SENDING=false",
-                    "DATABASE_PATH=/opt/bale-bot/data/bale_bot.db",
-                ]
-            ) + "\n"
+            original = (
+                "\n".join(
+                    [
+                        "BALE_BOT_TOKEN=secret-token",
+                        "BALE_REPLY_TEXT=پیام تست",
+                        "BALE_ENABLE_SENDING=false",
+                        "DATABASE_PATH=/opt/bale-bot/data/bale_bot.db",
+                    ]
+                )
+                + "\n"
+            )
             env_path.write_text(original, encoding="utf-8")
 
             subprocess.run(

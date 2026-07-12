@@ -113,7 +113,9 @@ class WebhookRouteTests(unittest.TestCase):
 
     def test_pending_reviews_endpoint_lists_only_pending_review_items(self):
         with TestClient(self.main_module.app) as client:
-            client.post("/webhook/bale/test-secret", json=self._payload("Hello pharmacy", message_id=123))
+            client.post(
+                "/webhook/bale/test-secret", json=self._payload("Hello pharmacy", message_id=123)
+            )
             client.post(
                 "/webhook/bale/test-secret",
                 json=self._payload("Can I use this medicine during pregnancy?", message_id=124),
@@ -130,6 +132,8 @@ class WebhookRouteTests(unittest.TestCase):
         self.assertEqual(pending["text"], "Can I use this medicine during pregnancy?")
         self.assertEqual(pending["review_reason"], "pharmacist_review_required")
         self.assertEqual(pending["review_status"], "pending")
+        self.assertIn("llm_extracted", pending)
+        self.assertIn("llm_status", pending)
         self.assertNotIn("raw_update", pending)
 
     def test_pending_reviews_endpoint_returns_empty_list_for_fresh_database(self):

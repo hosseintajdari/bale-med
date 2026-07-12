@@ -62,6 +62,8 @@ class SettingsTests(unittest.TestCase):
         self.assertEqual(settings.bale_webhook_secret, "test-secret")
         self.assertEqual(settings.bale_admin_chat_id, "admin-chat")
         self.assertTrue(settings.bale_enable_admin_notifications)
+        self.assertFalse(settings.bale_enable_llm)
+        self.assertEqual(settings.bale_llm_mode, "shadow")
 
     def test_get_settings_default_reply_text_is_persian_and_safe(self):
         original_cwd = Path.cwd()
@@ -99,6 +101,8 @@ class SettingsTests(unittest.TestCase):
         self.assertIn("داروساز", settings.bale_reply_text)
         self.assertEqual(settings.bale_admin_chat_id, "")
         self.assertFalse(settings.bale_enable_admin_notifications)
+        self.assertFalse(settings.bale_enable_llm)
+        self.assertEqual(settings.bale_llm_mode, "shadow")
 
 
 if __name__ == "__main__":

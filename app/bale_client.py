@@ -30,7 +30,9 @@ class BaleClient:
             )
         return f"{base}/bot{token}/{method_name}"
 
-    def _request_json(self, method_name: str, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+    def _request_json(
+        self, method_name: str, payload: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         url = self._method_url(method_name)
         body = json.dumps(payload or {}).encode("utf-8")
         try:
@@ -64,7 +66,9 @@ class BaleClient:
             raise BaleAPIError(None, "Unexpected Bale API response format.")
 
         if data.get("ok") is False:
-            raise BaleAPIError(data.get("error_code"), str(data.get("description", "Unknown Bale API error.")))
+            raise BaleAPIError(
+                data.get("error_code"), str(data.get("description", "Unknown Bale API error."))
+            )
 
         return data
 

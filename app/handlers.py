@@ -3,7 +3,9 @@ from typing import Any
 
 from .bale_client import BaleAPIError, BaleClient
 from .config import Settings, get_settings
-from .database import save_incoming_message
+from .database import LLMStorageFields, save_incoming_message
+from .llm import classify_message_text, merge_review_metadata
+from .llm.service import should_run_llm_for_message
 from .models import IncomingMessage
 from .replies import build_safe_reply, needs_pharmacist_review
 
@@ -28,16 +30,8 @@ COMMAND_REPLIES = {
 
 def get_status_reply(bale_enable_sending: bool) -> str:
     if bale_enable_sending:
-        return (
-            "ربات فعال است.\n"
-            "ارسال پیام واقعی روشن است.\n"
-            "ممکن است پاسخ واقعی در بله ارسال شود."
-        )
-    return (
-        "ربات فعال است.\n"
-        "ارسال پیام واقعی خاموش است.\n"
-        "ربات در حالت آزمایشی کار می‌کند."
-    )
+        return "ربات فعال است.\nارسال پیام واقعی روشن است.\nممکن است پاسخ واقعی در بله ارسال شود."
+    return "ربات فعال است.\nارسال پیام واقعی خاموش است.\nربات در حالت آزمایشی کار می‌کند."
 
 
 def get_reply_text(
@@ -205,7 +199,9 @@ def build_public_reply_result(reply_result: dict[str, Any] | None) -> dict[str, 
     return public_result
 
 
-def build_public_admin_notification_result(notification_result: dict[str, Any] | None) -> dict[str, Any] | None:
+def build_public_admin_notification_result(
+    notification_result: dict[str, Any] | None,
+) -> dict[str, Any] | None:
     if notification_result is None:
         return None
 
@@ -222,24 +218,53 @@ def build_public_admin_notification_result(notification_result: dict[str, Any] |
     return public_result
 
 
+def build_llm_storage_fields(llm_result) -> LLMStorageFields | None:
+    if llm_result.audit.status == "disabled":
+        return None
+    return LLMStorageFields(
+        extracted_json=llm_result.extracted_json,
+        model_id=llm_result.audit.model_id,
+        latency_ms=llm_result.audit.latency_ms,
+        validation_pass=llm_result.audit.validation_pass,
+        status=llm_result.audit.status,
+    )
+
+
 def route_update(update: dict[str, Any]) -> dict[str, Any]:
     incoming = IncomingMessage.from_update(update)
-    review_metadata = get_review_metadata(incoming.text)
+    settings = get_settings()
+    keyword_review_metadata = get_review_metadata(incoming.text)
+
+    llm_result = None
+    if settings.bale_enable_llm and should_run_llm_for_message(incoming.text):
+        llm_result = classify_message_text(
+            incoming.text or "",
+            settings,
+            incoming.chat_id,
+        )
+
+    review_metadata = (
+        merge_review_metadata(keyword_review_metadata, llm_result, settings)
+        if llm_result is not None
+        else keyword_review_metadata
+    )
+
     save_result = save_incoming_message(
         incoming,
         needs_review=bool(review_metadata["needs_review"]),
         review_reason=review_metadata["review_reason"],
         review_status=str(review_metadata["review_status"]),
+        llm_fields=build_llm_storage_fields(llm_result) if llm_result is not None else None,
     )
     saved_id = save_result.stored_message_id
-    settings = get_settings()
     has_text = incoming.text is not None
     text_length = len(incoming.text) if incoming.text is not None else 0
 
     if save_result.inserted:
         logger.info(
             "webhook_update_received stored_message_id=%s has_chat_id=%s has_message_id=%s "
-            "has_external_event_id=%s has_text=%s text_length=%s needs_review=%s review_status=%s",
+            "has_external_event_id=%s has_text=%s text_length=%s needs_review=%s review_status=%s "
+            "llm_enabled=%s llm_mode=%s llm_status=%s",
             saved_id,
             incoming.chat_id is not None,
             incoming.message_id is not None,
@@ -248,6 +273,9 @@ def route_update(update: dict[str, Any]) -> dict[str, Any]:
             text_length,
             bool(review_metadata["needs_review"]),
             review_metadata["review_status"],
+            settings.bale_enable_llm,
+            settings.bale_llm_mode if settings.bale_enable_llm else "off",
+            llm_result.audit.status if llm_result is not None else "not_run",
         )
     else:
         logger.info(
@@ -329,5 +357,7 @@ def route_update(update: dict[str, Any]) -> dict[str, Any]:
         "reply_prepared": reply_result is not None,
         "reply_result": build_public_reply_result(reply_result),
         "admin_notification_prepared": admin_notification_result is not None,
-        "admin_notification_result": build_public_admin_notification_result(admin_notification_result),
+        "admin_notification_result": build_public_admin_notification_result(
+            admin_notification_result
+        ),
     }

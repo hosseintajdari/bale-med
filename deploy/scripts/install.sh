@@ -26,6 +26,7 @@ Steps:
   8g          07 — smoke tests (requires DOMAIN)
   8h          08 — Bale webhook (requires DOMAIN)
   8i          09 — dry-run monitoring
+  9a|10       10 — Milestone 9 shadow LLM pull + verify
 
 Examples:
   sudo bash deploy/scripts/install.sh preflight
@@ -57,6 +58,7 @@ run_step() {
     8g|07) bash "$SCRIPT_DIR/07-smoke-tests.sh" ;;
     8h|08) bash "$SCRIPT_DIR/08-register-webhook.sh" ;;
     8i|09) bash "$SCRIPT_DIR/09-monitor-dry-run.sh" ;;
+    9a|10) bash "$SCRIPT_DIR/10-shadow-llm-verify.sh" ;;
     *) die "Unknown step: $step" ;;
   esac
 }

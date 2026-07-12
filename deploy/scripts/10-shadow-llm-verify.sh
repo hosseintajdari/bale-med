@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=common.sh
 source "$SCRIPT_DIR/common.sh"
 
-GIT_REF="${GIT_REF:-origin/cursor/vps-iran-deployment-39a7}"
+GIT_REF="${GIT_REF:-origin/main}"
 RESTART_SERVICE="${RESTART_SERVICE:-true}"
 
 log "Milestone 9 — shadow LLM deploy + verify"

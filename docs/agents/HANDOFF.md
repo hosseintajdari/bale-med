@@ -1,59 +1,37 @@
 # Handoff — BaleMed (new Agent chat)
 
 **Date:** 2026-07-12  
-**Branch:** `cursor/vps-iran-deployment-39a7` (local; commit Milestone 9 before push)  
-**Open PR:** https://github.com/hosseintajdari/bale-med/pull/37  
-**GitHub issue:** https://github.com/hosseintajdari/bale-med/issues/9  
-**Milestone:** 9 MVP coded locally → **shadow deploy + owner review** next
+**Branch:** `main` (Milestone 9 merged)
+**Merged PR:** https://github.com/hosseintajdari/bale-med/pull/38
+**Milestone:** 9 merged → **VPS shadow deploy + verify pending reviews** (owner runs on server)
 
 Copy this file into a new chat, or say: *Read `docs/agents/HANDOFF.md` and continue.*
 
-Works from **Cursor desktop, web, or mobile** — same repo path and issue #9 brief.
+---
+
+## Done from Cursor web (cloud agent)
+
+| Step | Status |
+|------|--------|
+| Milestone 9 LLM layer coded | ✅ merged to `main` |
+| `make validate` (88 tests) | ✅ |
+| PR #38 merged | ✅ |
+| VPS SSH / HTTPS from cloud | ❌ blocked (Iran VPS resets US cloud connections) |
+
+**Cloud agents cannot SSH to `balemed` or curl `embednet.systems` from Cursor web.** Deploy must run on your laptop/desktop with `ssh balemed`.
 
 ---
 
-## What was just finished (this session)
+## Your next step (P1 — VPS shadow deploy)
 
-Milestone 9 **LLM safety layer MVP** implemented per issue #9 agent brief:
-
-| Piece | Path / note |
-|-------|-------------|
-| LLM module | `app/llm/` — client, validator, redaction, service |
-| Wiring | `app/handlers.py` — shadow/live behind env flags |
-| DB columns | `incoming_messages`: `llm_extracted_json`, `llm_model_id`, `llm_latency_ms`, `llm_validation_pass`, `llm_status` |
-| Local review | `/local/reviews/pending` returns `llm_extracted`, `llm_status`, etc. |
-| Safety docs | `docs/SAFETY_RULES.md` — LLM section |
-| Env templates | `.env.example`, `deploy/templates/env.production.example` |
-| Tests | `tests/test_llm.py` + updates; **88 tests pass** |
-
-**Safety defaults (unchanged behavior until you opt in):**
-- `BALE_ENABLE_LLM=false`
-- `BALE_LLM_MODE=shadow`
-- Patients still get **template replies only** (`app/replies.py`)
-- LLM never sends text to patients
-- Keyword escalation **cannot** be downgraded by LLM in live mode
-
----
-
-## Priority order (do in this sequence)
-
-### P1 — Commit + push Milestone 9 (if not done yet)
+### 1. Add LLM env on VPS
 
 ```bash
-git status
-make validate          # or: scripts/verify.ps1 on Windows
-git add app/llm/ tests/test_llm.py app/config.py app/database.py app/handlers.py \
-  .env.example deploy/templates/env.production.example docs/SAFETY_RULES.md \
-  AGENTS.md README.md tests/test_config.py tests/test_main.py docs/agents/HANDOFF.md
-git commit -m "feat: Milestone 9 LLM classification layer (shadow default)"
-git push -u origin HEAD
+ssh balemed
+sudo nano /opt/bale-bot/.env
 ```
 
-Open or update PR; link **closes #9** when ready.
-
-### P2 — VPS shadow test (recommended before live)
-
-On VPS (`ssh balemed`), add to `/opt/bale-bot/.env` (never commit real key):
+Add (real key only on server):
 
 ```env
 BALE_ENABLE_LLM=true
@@ -63,49 +41,36 @@ BALE_LLM_API_KEY=YOUR_KEY
 BALE_LLM_MODEL=gpt-4o-mini
 ```
 
-Deploy updated code, restart:
+Keep `BALE_ENABLE_SENDING=false` unless 8J owner approval exists.
+
+### 2. Pull `main` and run verify script
 
 ```bash
-sudo systemctl restart bale-bot
+cd /opt/bale-bot
+git fetch origin && git checkout main && git pull origin main
+DOMAIN=embednet.systems bash deploy/scripts/10-shadow-llm-verify.sh
 ```
 
-Send **5–10 test messages** to `@embednebot`. Confirm:
+Or: `bash deploy/scripts/install.sh 9a`
 
-1. Replies unchanged (templates only; `BALE_ENABLE_SENDING` still your choice).
-2. From VPS loopback only:
-   ```bash
-   curl -s http://127.0.0.1:8000/local/reviews/pending | python3 -m json.tool
-   ```
-3. Pending items show `llm_extracted` / `llm_status` when LLM ran.
-4. Logs show `llm_status=shadow_ok` (no prompt/response text in logs).
+### 3. Send test messages + confirm pending reviews
 
-### P3 — Human go-live gate (before `BALE_LLM_MODE=live`)
+Send 5–10 messages to `@embednebot`, then on VPS:
 
-**Do not automate.** Owner must:
-
-1. Approve LLM live mode explicitly.
-2. Review **20–50 real shadow messages** (extracted fields vs pharmacist judgment).
-3. Run `make validate` / `scripts/verify.ps1`.
-
-Then only:
-
-```env
-BALE_LLM_MODE=live
+```bash
+curl -s http://127.0.0.1:8000/local/reviews/pending | python3 -m json.tool
+sudo journalctl -u bale-bot -n 50 --no-pager | grep llm_status
 ```
 
-Live mode: LLM `needs_review` **unions** with keywords; failures → `llm_fail_safe` escalation.
+**Expect:** template replies only; `llm_extracted` / `llm_status` (e.g. `shadow_ok`) on pending items; public `https://embednet.systems/local/reviews/pending` → **404**.
 
-### P4 — Milestone 8 carry-over (if still open)
+Paste JSON output in Agent chat to confirm shadow mode.
 
-- PR #37 merge after verify.
-- `BALE_ENABLE_SENDING=true` only with **pharmacy owner approval** (8J).
-- Dry-run monitor: `bash /opt/bale-bot/deploy/scripts/09-monitor-dry-run.sh`
+---
 
-### P5 — Later (out of MVP scope)
+## P2 — Human go-live gate (before `BALE_LLM_MODE=live`)
 
-- Multi-provider LLM
-- Pharmacist draft summaries from LLM
-- `CONTEXT.md` / domain glossary (`domain-modeling` skill)
+Owner must approve and review 20–50 shadow messages before setting `BALE_LLM_MODE=live`.
 
 ---
 
@@ -118,7 +83,6 @@ Live mode: LLM `needs_review` **unions** with keywords; failures → `llm_fail_s
 | `BALE_LLM_API_BASE_URL` | empty | OpenAI-compatible base URL |
 | `BALE_LLM_API_KEY` | empty | Never commit |
 | `BALE_LLM_MODEL` | `gpt-4o-mini` | Model id for audit |
-| `BALE_LLM_TIMEOUT_SECONDS` | `10` | Fail-safe timeout |
 
 ---
 
@@ -126,42 +90,9 @@ Live mode: LLM `needs_review` **unions** with keywords; failures → `llm_fail_s
 
 | Purpose | Path |
 |---------|------|
-| Agent brief (source) | GitHub issue #9 |
 | LLM service | `app/llm/service.py` |
-| Validator (banned advice) | `app/llm/validator.py` |
-| Routing seam | `app/handlers.py` → `route_update` |
-| Template replies (unchanged) | `app/replies.py` |
+| VPS shadow verify | `deploy/scripts/10-shadow-llm-verify.sh` |
 | Safety rules | `docs/SAFETY_RULES.md` |
 | Deploy runbook | `docs/DEPLOYMENT_VPS.md` |
-| Verify | `Makefile`, `scripts/verify.ps1` |
 
----
-
-## Pharmacy safety (always)
-
-- No diagnosis, dosage advice, or prescription replacement.
-- LLM output is **internal only**; validator rejects clinical advice in string fields.
-- Admin Bale notifications must **not** include LLM extracted fields.
-
----
-
-## Suggested first message in new chat (web / mobile)
-
-```text
-Read docs/agents/HANDOFF.md.
-
-Continue Milestone 9: push the LLM shadow layer, deploy to VPS with BALE_ENABLE_LLM=true and BALE_LLM_MODE=shadow, then help me verify extracted fields on /local/reviews/pending.
-```
-
----
-
-## Verification checklist
-
-```bash
-python -m unittest discover -s tests
-python -m compileall app tests
-python -m ruff check app tests
-git diff --check
-```
-
-**Pin this chat** before archive — Milestone 9 implementation + shadow go-live steps.
+**Pin this chat** before archive — Milestone 9 merge + VPS shadow checklist.

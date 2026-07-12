@@ -7,10 +7,11 @@ Full runbook: [docs/DEPLOYMENT_VPS.md](../docs/DEPLOYMENT_VPS.md).
 ## Before You Start
 
 1. Complete [server-info-checklist.md](server-info-checklist.md) from your provider panel (keep it local).
-2. Confirm SSH to the production host: `ssh balemed` (local SSH alias only — see `deploy/servers/balemed.md`, gitignored).
-3. Server profile: [servers/balemed.md](servers/balemed.md).
-4. Have a **domain** with DNS A record to the server IP before steps 8F–8H.
-5. Prepare `BALE_BOT_TOKEN` and `BALE_WEBHOOK_SECRET` — set only in `/opt/bale-bot/.env` on the server.
+2. Read [SECURITY-CHECKLIST.md](SECURITY-CHECKLIST.md) — keep tokens and secrets off Git and chat.
+3. Confirm SSH to the production host: `ssh balemed` (local SSH alias only — see `deploy/servers/balemed.md`, gitignored) or `ssh root@YOUR_SERVER_IP`.
+4. Server profile: [servers/balemed.md](servers/balemed.md) (local, gitignored).
+5. Have a **domain** with DNS A record to the server IP before steps 8F–8H.
+6. Prepare `BALE_BOT_TOKEN` and `BALE_WEBHOOK_SECRET` — set only in `/opt/bale-bot/.env` on the server.
 
 ### Copy from Windows (`scp`)
 

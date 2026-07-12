@@ -17,21 +17,34 @@ assert_sending_disabled
 
 WEBHOOK_URL="https://${DOMAIN}/webhook/bale/${BALE_WEBHOOK_SECRET}"
 
-log "Milestone 8H — register Bale webhook"
-log "URL: $WEBHOOK_URL (secret path not printed in logs beyond this step)"
+log "Milestone 8H — register Bale webhook for domain: ${DOMAIN}"
+log "Webhook URL includes a secret path — not printed here."
 
 cd "$DEPLOY_ROOT"
 # shellcheck disable=SC1091
 source .venv/bin/activate
 
-python -c "
+WEBHOOK_URL="$WEBHOOK_URL" python -c "
 from app.bale_client import BaleClient
 import json
+import os
+
+def redact_webhook_info(data):
+    if not isinstance(data, dict):
+        return data
+    result = data.get('result')
+    if isinstance(result, dict) and 'url' in result:
+        copy = dict(data)
+        copy['result'] = dict(result)
+        copy['result']['url'] = '[redacted]'
+        return copy
+    return data
+
 client = BaleClient()
 print('setWebhook:')
-print(json.dumps(client.set_webhook('${WEBHOOK_URL}'), ensure_ascii=False, indent=2))
+print(json.dumps(client.set_webhook(os.environ['WEBHOOK_URL']), ensure_ascii=False, indent=2))
 print('getWebhookInfo:')
-print(json.dumps(client.get_webhook_info(), ensure_ascii=False, indent=2))
+print(json.dumps(redact_webhook_info(client.get_webhook_info()), ensure_ascii=False, indent=2))
 "
 
 log "Send one controlled test message to the bot in Bale, then verify a database row."

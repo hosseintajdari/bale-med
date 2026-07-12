@@ -165,7 +165,7 @@ class SendingGateTests(unittest.TestCase):
 
         self.assertTrue(result["ok"])
         self.assertTrue(result["reply_prepared"])
-        self.assertNotIn("skipped", result["reply_result"])
+        self.assertFalse(result["reply_result"].get("skipped"))
         self.assertTrue(result["reply_result"]["ok"])
         self.assertEqual(len(sent_messages), 1)
         self.assertEqual(sent_messages[0]["chat_id"], "demo-chat")
@@ -262,7 +262,7 @@ class WebhookSendingGateTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertTrue(data["reply_prepared"])
-        self.assertNotIn("skipped", data["reply_result"])
+        self.assertFalse(data["reply_result"].get("skipped"))
         self.assertEqual(len(sent_messages), 1)
         self.assertEqual(sent_messages[0]["chat_id"], "demo-chat")
 

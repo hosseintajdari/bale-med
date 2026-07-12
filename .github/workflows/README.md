@@ -1,6 +1,12 @@
-# CI (local and VPS)
+# CI (local and GitHub Actions)
 
-GitHub Actions **tests workflow is disabled** — previous self-hosted runs failed at startup (runner/path mismatch; no GitHub-hosted minutes needed).
+## GitHub Actions
+
+[validate.yml](validate.yml) runs on every push to `main` and on pull requests:
+
+- `unittest`
+- `compileall`
+- `ruff check`
 
 ## On your laptop (before push)
 
@@ -8,6 +14,8 @@ GitHub Actions **tests workflow is disabled** — previous self-hosted runs fail
 make validate
 # or: ./scripts/verify.sh  |  scripts/verify.ps1
 ```
+
+On Windows without Git Bash, use `scripts\verify.ps1` instead of `make validate`.
 
 ## On the VPS (after deploy, safe dry-run)
 
@@ -18,6 +26,4 @@ bash deploy/scripts/09-monitor-dry-run.sh
 
 This checks `BALE_ENABLE_SENDING=false`, recent DB rows (text length only), backup, and service logs — no real Bale sends.
 
-## Re-enable GitHub Actions later
-
-Only if you add a working self-hosted runner or paid GitHub-hosted runners. Until then, use local `make validate`.
+For Milestone 9 shadow LLM checks, see [docs/agents/HANDOFF.md](../../docs/agents/HANDOFF.md) and `deploy/scripts/10-shadow-llm-verify.sh`.

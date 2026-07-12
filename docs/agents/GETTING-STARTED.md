@@ -25,12 +25,11 @@
 
 ## نصب روی Cursor (چک‌لیست ۳ دقیقه‌ای)
 
-1. **Branch درست:** skillها روی branch `cursor/install-mattpocock-skills-74e7` هستند (یا `main` بعد از merge [PR #29](https://github.com/hosseintajdari/bale-med/pull/29)).
-2. **Pull:** `git fetch origin` سپس `git checkout cursor/install-mattpocock-skills-74e7` و `git pull`.
-3. **پوشه skills:** باید `.cursor/skills/ask-matt/SKILL.md` وجود داشته باشد.
-4. **Reload Cursor:** Command Palette → `Developer: Reload Window` (یا Cursor را ببندید و دوباره پروژه را باز کنید).
-5. **Customize → Skills:** skillهای پروژه (مثلاً `ask-matt`) را ببینید.
-6. **تست:** در Agent chat تایپ `/` — لیست skillها باید بیاید.
+1. **Branch:** skillها روی `main` هستند — `git checkout main` و `git pull`.
+2. **پوشه skills:** باید `.cursor/skills/ask-matt/SKILL.md` وجود داشته باشد.
+3. **Reload Cursor:** Command Palette → `Developer: Reload Window` (یا Cursor را ببندید و دوباره پروژه را باز کنید).
+4. **Customize → Skills:** skillهای پروژه (مثلاً `ask-matt`) را ببینید.
+5. **تست:** در Agent chat تایپ `/` — لیست skillها باید بیاید.
 
 اگر `/` skill نشان نداد، workspace root باید همان پوشه‌ای باشد که `.cursor/skills/` داخل آن است (نه زیرپوشه دیگر).
 
@@ -41,8 +40,8 @@
 **بله** — به شرطی که:
 
 1. این ریپو را در Cursor باز کرده باشید (skillها در `.cursor/skills/` سطح **پروژه** هستند).
-2. branch حاوی skillها و setup را checkout کرده باشید (فعلاً [PR #29](https://github.com/hosseintajdari/bale-med/pull/29) یا `main` بعد از merge).
-3. setup انجام شده باشد (`docs/agents/` موجود باشد — الان انجام شده است).
+2. branch `main` را checkout کرده باشید (`git pull`).
+3. setup انجام شده باشد (`docs/agents/` و `CONTEXT.md` موجود باشند).
 
 هر **Chat جدید** یا **Cloud Agent جدید** روی همین workspace، skillها را می‌بیند. نیازی به نصب مجدد در هر session نیست.
 

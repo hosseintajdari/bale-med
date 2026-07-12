@@ -4,7 +4,7 @@ This repository is a pharmacy workflow automation MVP connected to Bale messenge
 
 ## Before You Change Code
 
-1. Read [README.md](README.md), [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md), and [docs/SAFETY_RULES.md](docs/SAFETY_RULES.md).
+1. Read [README.md](README.md), [docs/agents/HANDOFF.md](docs/agents/HANDOFF.md), [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md), and [docs/SAFETY_RULES.md](docs/SAFETY_RULES.md).
 2. Confirm the change fits the current milestone.
 3. Keep real secrets out of Git. Use `.env` locally and `.env.example` for placeholders.
 4. Do not enable real outgoing Bale messages unless that is explicitly approved.
@@ -24,7 +24,7 @@ cp .env.example .env
 Windows PowerShell:
 
 ```powershell
-cd C:\Users\Maryam-pc\projects\bale
+cd C:\path\to\bale-med
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
@@ -35,13 +35,17 @@ Edit `.env` with local values only. Do not commit `.env`.
 
 ## Verification
 
-Run these before committing. On Linux/macOS, prefer `python3`. You can also run `./scripts/verify.sh`.
+Run these before committing. On Linux/macOS, prefer `python3`. You can also run `./scripts/verify.sh` or `scripts\verify.ps1` on Windows.
 
 ```bash
+make validate
+# or manually:
 python3 -m unittest discover -s tests
 python3 -m compileall app tests
 git diff --check
 ```
+
+GitHub Actions runs the same checks on every pull request (see `.github/workflows/validate.yml`).
 
 ## Safety Rules for Contributions
 

@@ -20,8 +20,6 @@
 
 ## Verification
 
-- [ ] `python -m unittest discover -s tests`
-- [ ] `python -m compileall app tests`
-- [ ] `git diff --check`
+- [ ] `make validate` or `scripts/verify.ps1` (Windows) — or wait for GitHub Actions on the PR
 
 ## Notes

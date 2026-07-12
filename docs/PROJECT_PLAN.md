@@ -39,9 +39,47 @@ The vision and milestone order are living project guidance. They may change as r
    - Milestone 8H: Planned - Register Bale webhook with production URL.
    - Milestone 8I: Planned - First monitored dry-run operation.
    - Milestone 8J: Planned - Decide whether to enable real sending later.
-9. Milestone 9: Planned - LLM/AI integration.
+9. Milestone 9: Started - LLM/AI integration (shadow on VPS; P2 owner review before live).
 
-## Active Milestone: Milestone 8 — Real VPS Deployment
+## Active Milestone: Milestone 9 — LLM Shadow Classification
+
+### Goal
+Run LLM classification in shadow mode on the production VPS, then gate `BALE_LLM_MODE=live` behind pharmacy owner review of 20–50 real shadow messages.
+
+### Current State
+Milestone 8 VPS dry-run deploy is operational at `/opt/bale-bot`. Shadow LLM (P1) is confirmed on real `@embednebot` traffic with Arvan Cloud AI. Patient template replies are unchanged. Next step: P2 owner review via `deploy/scripts/list-shadow-reviews.py`. See [docs/agents/HANDOFF.md](agents/HANDOFF.md).
+
+### Scope IN
+1. Shadow LLM verification scripts and owner review checklist.
+2. Documentation and repo structure aligned with current VPS state.
+3. GitHub Actions validate workflow for every PR.
+4. Safe fixes that preserve pharmacy safety boundaries.
+
+### Scope OUT
+- No patient-facing LLM replies.
+- No `BALE_LLM_MODE=live` without explicit pharmacy owner approval.
+- No diagnosis or clinical logic changes.
+- No secrets in Git.
+
+### Verification
+```bash
+python3 -m unittest discover -s tests
+python3 -m compileall app tests
+git diff --check
+```
+
+On the VPS:
+```bash
+python3 deploy/scripts/vps-quick-check.py
+python3 deploy/scripts/list-shadow-reviews.py 50
+```
+
+### Done When (P2 gate)
+1. Owner reviews 20–50 `shadow_ok` rows and approves live mode explicitly.
+2. `BALE_LLM_MODE=live` set only on VPS `.env` after approval.
+3. HANDOFF.md updated with review outcome.
+
+## Previous Milestone: Milestone 8 — Real VPS Deployment
 
 ### Goal
 Deploy the bot to an Iran-based Ubuntu VPS in dry-run mode (`BALE_ENABLE_SENDING=false`), following sub-milestones 8A–8I.

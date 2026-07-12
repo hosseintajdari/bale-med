@@ -1,8 +1,8 @@
-# VPS Deployment (Milestone 8)
+# VPS Deployment (Milestone 8–9)
 
-Scripts and templates for deploying the Bale pharmacy bot to an Iran-based Ubuntu VPS in **dry-run mode** (`BALE_ENABLE_SENDING=false`).
+Scripts and templates for deploying the Bale pharmacy bot to an Iran-based Ubuntu VPS in **dry-run mode** (`BALE_ENABLE_SENDING=false`). Milestone 9 adds optional shadow LLM verification on the same host.
 
-Full runbook: [docs/DEPLOYMENT_VPS.md](../docs/DEPLOYMENT_VPS.md).
+Full runbook: [docs/DEPLOYMENT_VPS.md](../docs/DEPLOYMENT_VPS.md). Current VPS status: [docs/agents/HANDOFF.md](../docs/agents/HANDOFF.md).
 
 ## Before You Start
 
@@ -72,9 +72,40 @@ deploy/
     Caddyfile
     env.production.example
   scripts/
-    00-preflight.sh … 09-monitor-dry-run.sh
+    00-preflight.sh … 10-shadow-llm-verify.sh
     install.sh
+    test-llm-provider.py
+    test-shadow-classify.py
+    post-shadow-test-webhooks.py
+    list-shadow-reviews.py
+    vps-quick-check.py
+    dedupe-env-keys.py
+    check-env-safe.py
 ```
+
+## Updating code on the VPS
+
+**Preferred:** `git pull` from `/opt/bale-bot` after attaching the repo (see [HANDOFF.md](../docs/agents/HANDOFF.md) — “attach git on VPS”).
+
+**Fallback:** `scp` changed files from your laptop, then `sudo systemctl restart bale-bot`.
+
+After any code or `.env` change:
+
+```bash
+cd /opt/bale-bot && . .venv/bin/activate
+python3 deploy/scripts/check-env-safe.py
+python3 deploy/scripts/vps-quick-check.py
+```
+
+## Milestone 9 shadow LLM helpers
+
+| Script | Purpose |
+| --- | --- |
+| `test-llm-provider.py` | Test LLM API connectivity (no secrets printed) |
+| `test-shadow-classify.py` | One-shot classify via app LLM service |
+| `post-shadow-test-webhooks.py` | Loopback webhooks to exercise shadow path |
+| `list-shadow-reviews.py` | P2 — list `shadow_ok` rows for owner review |
+| `10-shadow-llm-verify.sh` | Full shadow deploy verification |
 
 ## Safety Defaults
 

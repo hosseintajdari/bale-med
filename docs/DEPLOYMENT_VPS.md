@@ -6,7 +6,7 @@ This runbook is for the current MVP only. It does not replace production securit
 
 ## Milestone 7 Checklist
 
-Milestone 7 preparation is complete. Do not deploy to a real VPS, change DNS, configure SSL, edit firewall rules, register a production webhook, or enable real outgoing Bale messages until Milestone 8 is explicitly approved.
+Milestone 7 preparation is complete. Milestone 8 VPS deployment has started on an Iran-based host. For current VPS and LLM shadow status, see [docs/agents/HANDOFF.md](agents/HANDOFF.md).
 
 Work through these pieces in order:
 

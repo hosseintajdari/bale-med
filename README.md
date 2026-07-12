@@ -8,6 +8,12 @@ The project supports safe pharmacy message intake, pharmacist review tracking, d
 
 This is not a deployed production system and not a clinically validated product. The bot does not provide diagnosis, prescriptions, dosage recommendations, autonomous triage, or medication-change advice.
 
+## Current Status
+
+**Active milestone:** 9 — LLM shadow classification on VPS (P1 shadow confirmed; P2 owner review before live mode).
+
+Latest deploy state and next steps: [docs/agents/HANDOFF.md](docs/agents/HANDOFF.md).
+
 ## Table of Contents
 
 - [Quick Start (Any OS)](#quick-start-any-os)
@@ -77,8 +83,8 @@ Notes:
   - Milestone 7F: Done - Persian and RTL-safe user-facing replies.
   - Milestone 7G: Done - Optional Bale admin review notifications.
   - Milestone 7I: Done - Repository context and issue alignment.
-- Milestone 8: Started - Real VPS deployment workflow.
-  - Milestone 8A: In progress - VPS purchased (Iran); deployment scripts in `deploy/`.
+- Milestone 8: In progress - Real VPS deployment workflow.
+  - Milestone 8A–8I: VPS deployed dry-run on Iran host; see [HANDOFF.md](docs/agents/HANDOFF.md).
 - Milestone 9: Started - LLM/AI integration (optional classification layer; shadow default).
 
 ## MVP Guarantees vs Non-Goals
@@ -98,27 +104,43 @@ app/
   main.py          FastAPI app and routes
   config.py        Environment-based settings
   bale_client.py   Cautious Bale API client
-  handlers.py      Basic update router
-  models.py        Simple data models
+  handlers.py      Update router and reply logic
+  replies.py       Safe Persian reply templates
+  models.py        Data models
   database.py      SQLite setup and storage helpers
+  llm/             Optional LLM classification (Milestone 9)
+deploy/
+  scripts/         VPS install, verify, and shadow LLM helpers
+  templates/       systemd, Caddy, production .env template
 docs/
-  PROJECT_PLAN.md  MVP plan and next milestones
-  SAFETY_RULES.md  Pharmacy safety boundaries
-  ASSUMPTIONS_BALE_API.md  Canonical Bale API assumptions
-  DEPLOYMENT_VPS.md        Minimal VPS deployment runbook
+  agents/HANDOFF.md        Current milestone status (start here for agents)
+  PROJECT_PLAN.md            MVP plan and milestones
+  SAFETY_RULES.md            Pharmacy safety boundaries
+  ASSUMPTIONS_BALE_API.md    Canonical Bale API assumptions
+  DEPLOYMENT_VPS.md          VPS deployment runbook
+  adr/                       Architecture decision records
+CONTEXT.md         Domain glossary (pharmacy workflow terms)
+scripts/           verify.sh and verify.ps1
 ```
 
 ## Repository Standards
 
-- [CONTRIBUTING.md](CONTRIBUTING.md) explains safe local setup, verification, and commit expectations.
-- [SECURITY.md](SECURITY.md) explains how to handle secrets, sensitive data, and security reports.
+| Doc | Purpose |
+| --- | --- |
+| [HANDOFF.md](docs/agents/HANDOFF.md) | Current milestone status and VPS next steps |
+| [CONTEXT.md](CONTEXT.md) | Domain glossary |
+| [SAFETY_RULES.md](docs/SAFETY_RULES.md) | Pharmacy safety boundaries |
+| [DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) | VPS runbook |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Local setup and commit rules |
+| [SECURITY.md](SECURITY.md) | Secrets and sensitive data handling |
+
 - GitHub issue and pull request templates are in [.github/](.github/).
 - Keep changes small, milestone-aligned, and safe for a real pharmacy workflow.
 
 ## Setup on Windows PowerShell
 
 ```powershell
-cd C:\Users\Maryam-pc\projects\bale
+cd C:\path\to\bale-med
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
@@ -216,6 +238,24 @@ Keep `BALE_ENABLE_ADMIN_NOTIFICATIONS=false` until you have tested the admin cha
 The notification includes the stored message id, review reason, a short sanitized preview, and an instruction to check `/local/reviews/pending`. It must not include raw webhook payloads, secrets, chat ids, or full patient text.
 
 No Web UI is needed for the current MVP. Admin notifications plus the local pending review list are the minimal review-awareness path for now.
+
+## Optional LLM Classification (Milestone 9)
+
+The LLM layer is **disabled by default** and never sends generated text to patients. See [docs/SAFETY_RULES.md](docs/SAFETY_RULES.md) and [docs/adr/0001-llm-shadow-mode.md](docs/adr/0001-llm-shadow-mode.md).
+
+```env
+BALE_ENABLE_LLM=false
+BALE_LLM_MODE=shadow
+BALE_LLM_API_BASE_URL=
+BALE_LLM_API_KEY=
+BALE_LLM_MODEL=gpt-4o-mini
+BALE_LLM_TIMEOUT_SECONDS=10
+```
+
+- **shadow** — persist LLM fields on `incoming_messages` only; patient replies unchanged.
+- **live** — LLM `needs_review` unions with keyword escalation; failures use fail-safe review.
+
+Before `BALE_LLM_MODE=live`, the pharmacy owner must review 20–50 shadow messages. VPS helpers: `deploy/scripts/list-shadow-reviews.py`, `deploy/scripts/10-shadow-llm-verify.sh`. Current VPS state: [docs/agents/HANDOFF.md](docs/agents/HANDOFF.md).
 
 ## Local SQLite Backup
 

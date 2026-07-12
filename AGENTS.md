@@ -6,7 +6,7 @@
 - **Lint:** `make lint` (ruff check + format check)
 - **Run locally:** `python -m uvicorn app.main:app --host 127.0.0.1 --port 8000`
 - **Safety:** No diagnosis, dosage, or prescription replacement — see `docs/SAFETY_RULES.md`
-- **Milestone:** 8 — VPS dry-run deploy; details in [README.md](README.md) and [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md)
+- **Milestone:** 9 — LLM shadow on VPS; P2 owner review before live mode; details in [docs/agents/HANDOFF.md](docs/agents/HANDOFF.md)
 
 We are building a pharmacy automation chatbot connected to Bale messenger. Bale Bot API is similar to Telegram Bot API, but exact fields must be verified before production use.
 
@@ -50,19 +50,19 @@ Build a minimal but production-minded MVP for a pharmacy assistant bot.
 
 For the latest milestone breakdown and sub-milestones, see [README.md](README.md).
 
-## Current Milestone: Milestone 8
+## Current Milestone: Milestone 9
 
 Goal:
-Prepare for real VPS deployment while keeping local development and verification reliable.
+Run LLM classification in shadow mode on the VPS, then gate live escalation behind pharmacy owner review of real shadow traffic.
 
 Current state:
-Milestones 1-7 are complete. Milestone 8A tracks VPS readiness and the branch/PR workflow while waiting for confirmed VPS access. See [README.md](README.md) and [docs/DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) for deployment guidance.
+Milestones 1–8 foundation is complete. VPS dry-run deploy is live at `/opt/bale-bot`. Shadow LLM (P1) is confirmed on real bot traffic. Next: P2 owner review of 20–50 shadow messages before `BALE_LLM_MODE=live`. See [docs/agents/HANDOFF.md](docs/agents/HANDOFF.md).
 
 Scope IN:
 
-1. VPS readiness documentation and workflow alignment.
-2. Agent-friendly local setup and verification docs.
-3. Small, safe fixes that improve local bootstrap without changing pharmacy safety boundaries.
+1. Shadow LLM verification and owner review tooling (`list-shadow-reviews.py`, HANDOFF checklist).
+2. Documentation and repo structure aligned with Milestone 9 state.
+3. Safe fixes that do not change pharmacy safety boundaries or patient-facing replies.
 
 Scope OUT:
 
@@ -71,9 +71,9 @@ Scope OUT:
 3. No dosage recommendations.
 4. No medication start/stop/change advice.
 5. No autonomous triage decision.
-6. No LLM integration.
-7. No admin dashboard.
-8. No production VPS hardening until access is confirmed.
+6. No patient-facing LLM replies.
+7. No `BALE_LLM_MODE=live` without explicit pharmacy owner approval.
+8. No admin dashboard.
 
 
 

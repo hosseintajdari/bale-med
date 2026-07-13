@@ -250,10 +250,12 @@ The LLM layer is **disabled by default** and never sends generated text to patie
 ```env
 BALE_ENABLE_LLM=false
 BALE_LLM_MODE=shadow
+# Arvan Cloud AI (Iran VPS) — see docs/agents/HANDOFF.md
+# BALE_LLM_API_BASE_URL=https://arvancloudai.ir/gateway/models/DeepSeek-V3.2/<token-from-panel>/v1
 BALE_LLM_API_BASE_URL=
 BALE_LLM_API_KEY=
-BALE_LLM_MODEL=gpt-4o-mini
-BALE_LLM_TIMEOUT_SECONDS=10
+BALE_LLM_MODEL=DeepSeek-V3.2
+BALE_LLM_TIMEOUT_SECONDS=90
 ```
 
 - **shadow** — persist LLM fields on `incoming_messages` only; patient replies unchanged.

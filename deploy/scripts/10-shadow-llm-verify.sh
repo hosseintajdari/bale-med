@@ -37,9 +37,10 @@ if [[ "${BALE_ENABLE_LLM:-false}" != "true" ]]; then
   cat <<'EOF'
 BALE_ENABLE_LLM=true
 BALE_LLM_MODE=shadow
-BALE_LLM_API_BASE_URL=https://YOUR_PROVIDER/v1
-BALE_LLM_API_KEY=YOUR_KEY
-BALE_LLM_MODEL=gpt-4o-mini
+BALE_LLM_API_BASE_URL=https://arvancloudai.ir/gateway/models/DeepSeek-V3.2/<token-from-panel>/v1
+BALE_LLM_API_KEY=<api-key-from-panel-or-arvan>
+BALE_LLM_MODEL=DeepSeek-V3.2
+BALE_LLM_TIMEOUT_SECONDS=90
 EOF
 fi
 

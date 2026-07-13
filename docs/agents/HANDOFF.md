@@ -154,6 +154,8 @@ Then `git pull` works for future deploys (or keep using scp).
 | VPS shadow verify | `deploy/scripts/10-shadow-llm-verify.sh` |
 | Safety rules | `docs/SAFETY_RULES.md` |
 | Vision / roadmap | `docs/VISION-AND-ROADMAP.md` |
+| Compliance study guide | `docs/COMPLIANCE-LEARNING.md` |
+| Blog templates (Notion) | `docs/blog/BLOG-TEMPLATES.md` |
 | Career narrative (draft) | `docs/CAREER-NARRATIVE.md` |
 | Deploy runbook | `docs/DEPLOYMENT_VPS.md` |
 

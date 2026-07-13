@@ -90,13 +90,14 @@ In `/opt/bale-bot/.env` (secrets **only on server**):
 BALE_ENABLE_LLM=true
 BALE_LLM_MODE=shadow
 BALE_LLM_API_BASE_URL=https://arvancloudai.ir/gateway/models/DeepSeek-V3.2/<token-from-panel>/v1
-BALE_LLM_API_KEY=<api-key-from-panel>
+BALE_LLM_API_KEY=<api-key-from-panel-or-arvan>
 BALE_LLM_MODEL=DeepSeek-V3.2
 BALE_LLM_TIMEOUT_SECONDS=90
 ```
 
 - **One `=` per line** — `BALE_LLM_MODEL=DeepSeek-V3.2` (not `==`)
 - **One line per key** — run `dedupe-env-keys.py` if duplicates exist
+- **URL-embedded auth:** if the gateway token is in `BALE_LLM_API_BASE_URL`, set `BALE_LLM_API_KEY=arvan` (or leave empty)
 - Test: `python3 deploy/scripts/test-llm-provider.py` → `status=200`
 
 ### Provider notes (from VPS tests)
@@ -107,6 +108,15 @@ BALE_LLM_TIMEOUT_SECONDS=90
 | Groq | ✅ Works with valid key (`401` = bad key) |
 | Ollama Cloud | ❌ 403 blocked from VPS IP |
 | Local Ollama on VPS | ⚠️ Possible but tight on 2 vCPU / 4 GB RAM |
+
+### Env reference (repo templates)
+
+| Variable | Example / default | Notes |
+|----------|-------------------|-------|
+| `BALE_LLM_API_BASE_URL` | `https://arvancloudai.ir/gateway/models/DeepSeek-V3.2/<token>/v1` | OpenAI-compatible; token often in URL |
+| `BALE_LLM_API_KEY` | panel key or `arvan` | Bearer skipped when empty/`arvan` |
+| `BALE_LLM_MODEL` | `DeepSeek-V3.2` | Must match gateway model id |
+| `BALE_LLM_TIMEOUT_SECONDS` | `90` | Arvan can be slow from Iran VPS |
 
 ---
 

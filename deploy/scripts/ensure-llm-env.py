@@ -11,8 +11,8 @@ DEFAULTS = {
     "BALE_LLM_MODE": "shadow",
     "BALE_LLM_API_BASE_URL": "",
     "BALE_LLM_API_KEY": "",
-    "BALE_LLM_MODEL": "gpt-4o-mini",
-    "BALE_LLM_TIMEOUT_SECONDS": "10",
+    "BALE_LLM_MODEL": "DeepSeek-V3.2",
+    "BALE_LLM_TIMEOUT_SECONDS": "90",
 }
 
 

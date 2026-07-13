@@ -52,4 +52,6 @@ Ubiquitous language for issues, PRs, code, and agent chats. When a term is defin
 
 - Safety boundaries: [docs/SAFETY_RULES.md](docs/SAFETY_RULES.md)
 - LLM shadow decision: [docs/adr/0001-llm-shadow-mode.md](docs/adr/0001-llm-shadow-mode.md)
+- Clinical trust before live: [docs/adr/0002-clinical-trust-requirements-before-live-llm.md](docs/adr/0002-clinical-trust-requirements-before-live-llm.md)
+- Vision and future projects: [docs/VISION-AND-ROADMAP.md](docs/VISION-AND-ROADMAP.md)
 - Current milestone: [docs/agents/HANDOFF.md](docs/agents/HANDOFF.md)

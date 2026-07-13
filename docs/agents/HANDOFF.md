@@ -153,6 +153,8 @@ Then `git pull` works for future deploys (or keep using scp).
 | LLM service | `app/llm/service.py` |
 | VPS shadow verify | `deploy/scripts/10-shadow-llm-verify.sh` |
 | Safety rules | `docs/SAFETY_RULES.md` |
+| Vision / roadmap | `docs/VISION-AND-ROADMAP.md` |
+| Career narrative (draft) | `docs/CAREER-NARRATIVE.md` |
 | Deploy runbook | `docs/DEPLOYMENT_VPS.md` |
 
 **Pin this chat** before archive — P1 shadow_ok confirmed; P2 owner review checklist.

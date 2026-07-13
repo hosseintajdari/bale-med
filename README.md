@@ -128,6 +128,8 @@ scripts/           verify.sh and verify.ps1
 | Doc | Purpose |
 | --- | --- |
 | [HANDOFF.md](docs/agents/HANDOFF.md) | Current milestone status and VPS next steps |
+| [VISION-AND-ROADMAP.md](docs/VISION-AND-ROADMAP.md) | Long-term direction and three-project portfolio arc |
+| [CAREER-NARRATIVE.md](docs/CAREER-NARRATIVE.md) | Resume / portfolio wording (draft) |
 | [CONTEXT.md](CONTEXT.md) | Domain glossary |
 | [SAFETY_RULES.md](docs/SAFETY_RULES.md) | Pharmacy safety boundaries |
 | [DEPLOYMENT_VPS.md](docs/DEPLOYMENT_VPS.md) | VPS runbook |

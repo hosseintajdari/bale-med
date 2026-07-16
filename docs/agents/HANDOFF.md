@@ -1,6 +1,6 @@
 # Handoff — BaleMed (new Agent chat)
 
-**Date:** 2026-07-13  
+**Date:** 2026-07-16  
 **Branch:** `main`  
 **Merged PR:** https://github.com/hosseintajdari/bale-med/pull/38  
 **Issue #9:** closed after merge  
@@ -23,7 +23,7 @@ Copy this file into a new chat, or say: *Read `docs/agents/HANDOFF.md` and conti
 
 **VPS deploy note:** `/opt/bale-bot` has no working `git pull` (no GitHub auth). Updates so far via **scp from laptop**. Optional: attach git (see below).
 
-**Shadow note:** `/local/reviews/pending` may stay **empty** in shadow mode — LLM fields are stored on `incoming_messages` even when keywords do not set `needs_review`. Use `vps-quick-check.py` or `list-shadow-reviews.py`.
+**Shadow note:** `/local/reviews/pending` may stay **empty** in shadow mode — LLM fields are stored on `incoming_messages` even when keywords do not set `needs_review`. Use the **P2 shadow review UI** (below), `vps-quick-check.py`, or `list-shadow-reviews.py`.
 
 **VPS `.env` hygiene:** run `python3 deploy/scripts/dedupe-env-keys.py` if `check-env-safe.py` reports duplicate keys (e.g. `BALE_LLM_MODEL`).
 
@@ -36,7 +36,7 @@ Copy this file into a new chat, or say: *Read `docs/agents/HANDOFF.md` and conti
 ```text
 Read docs/agents/HANDOFF.md.
 
-P1 shadow_ok is confirmed on VPS. Help me with P2: review 20–50 shadow messages (list-shadow-reviews.py) before BALE_LLM_MODE=live.
+P1 shadow_ok is confirmed on VPS. Help me with P2: review 20–50 shadow messages via /local/shadow-reviews/ui before BALE_LLM_MODE=live.
 ```
 
 ---
@@ -60,15 +60,46 @@ python3 deploy/scripts/vps-quick-check.py
 Owner must:
 
 1. Approve LLM live mode explicitly.
-2. Review **20–50 shadow messages** — compare `llm_extracted` vs pharmacist judgment:
+2. Review **20–50 shadow messages** — compare `llm_extracted` vs pharmacist judgment.
+3. Run `make validate` / `scripts/verify.ps1` locally before any live switch.
+
+### Option A — Web UI (recommended)
+
+On your laptop, open an SSH tunnel to the VPS app (localhost only; Caddy blocks `/local/*` publicly):
+
+```bash
+ssh -L 8000:127.0.0.1:8000 balemed
+```
+
+In the browser:
+
+```text
+http://127.0.0.1:8000/local/shadow-reviews/ui
+```
+
+For each `shadow_ok` message, save pharmacist judgment:
+- `needs_review` correct? (yes / no / skip)
+- `drug_name` correct? (yes / no / skip)
+- optional corrected drug name and owner notes
+
+Annotations persist in SQLite table `shadow_review_annotations` (upsert per message id).
+
+JSON API (same tunnel, local only):
+
+```bash
+curl http://127.0.0.1:8000/local/shadow-reviews?limit=50
+curl -X POST http://127.0.0.1:8000/local/shadow-reviews/20/annotate \
+  -H "Content-Type: application/json" \
+  -d '{"needs_review_ok": true, "drug_name_ok": false, "corrected_drug_name": "acetaminophen", "owner_notes": "typo missed"}'
+```
+
+### Option B — CLI on VPS
 
 ```bash
 ssh balemed
 cd /opt/bale-bot && . .venv/bin/activate
 python3 deploy/scripts/list-shadow-reviews.py 50
 ```
-
-3. Run `make validate` / `scripts/verify.ps1` locally before any live switch.
 
 Then **only on VPS** `.env` (after owner approval):
 
@@ -121,7 +152,10 @@ BALE_LLM_TIMEOUT_SECONDS=90
 | `deploy/scripts/check-env-safe.py` | Safe `.env` health check |
 | `deploy/scripts/dedupe-env-keys.py` | Remove duplicate `.env` keys (keep last) |
 | `deploy/scripts/vps-quick-check.py` | Sending + recent messages + LLM status |
-| `deploy/scripts/list-shadow-reviews.py` | P2 — list `shadow_ok` rows + extracted fields |
+| `deploy/scripts/list-shadow-reviews.py` | P2 — list `shadow_ok` rows + extracted fields (CLI) |
+| `GET /local/shadow-reviews` | P2 — JSON list of `shadow_ok` rows + saved annotations |
+| `GET /local/shadow-reviews/ui` | P2 — local HTML review page (SSH tunnel) |
+| `POST /local/shadow-reviews/{id}/annotate` | P2 — save pharmacist judgment |
 | `deploy/scripts/10-shadow-llm-verify.sh` | Full shadow deploy verify |
 
 ---
@@ -149,6 +183,7 @@ Then `git pull` works for future deploys (or keep using scp).
 
 | Purpose | Path |
 |---------|------|
+| Shadow review UI + API | `app/main.py`, `app/shadow_review_ui.py`, `app/shadow_review.py` |
 | LLM provider | `app/llm/provider.py` |
 | LLM service | `app/llm/service.py` |
 | VPS shadow verify | `deploy/scripts/10-shadow-llm-verify.sh` |
@@ -159,4 +194,4 @@ Then `git pull` works for future deploys (or keep using scp).
 | Career narrative (draft) | `docs/CAREER-NARRATIVE.md` |
 | Deploy runbook | `docs/DEPLOYMENT_VPS.md` |
 
-**Pin this chat** before archive — P1 shadow_ok confirmed; P2 owner review checklist.
+**Pin this chat** before archive — P2 shadow review UI + annotation API on `main`.

@@ -1,6 +1,6 @@
-﻿---
+---
+name: english-learning-replies
 description: When the user writes in English, reply in simple learning-friendly English.
-alwaysApply: false
 ---
 # English replies (learning mode)
 

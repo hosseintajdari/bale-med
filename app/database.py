@@ -101,6 +101,19 @@ def init_db() -> None:
                 WHERE external_event_id IS NOT NULL
                 """
             )
+            connection.execute(
+                """
+                CREATE TABLE IF NOT EXISTS shadow_review_annotations (
+                    message_id INTEGER PRIMARY KEY,
+                    annotated_at TEXT NOT NULL,
+                    needs_review_ok INTEGER,
+                    drug_name_ok INTEGER,
+                    corrected_drug_name TEXT,
+                    owner_notes TEXT,
+                    FOREIGN KEY (message_id) REFERENCES incoming_messages(id)
+                )
+                """
+            )
 
 
 def save_incoming_message(
@@ -225,6 +238,120 @@ def list_pending_review_items() -> list[dict[str, str | int | None | bool | dict
         ).fetchall()
 
     return [_build_review_item_dict(row) for row in rows]
+
+
+def _build_shadow_review_item_dict(row: sqlite3.Row) -> dict[str, str | int | None | bool | dict]:
+    item = _build_review_item_dict(row)
+    needs_review_ok = row["needs_review_ok"]
+    drug_name_ok = row["drug_name_ok"]
+    item["annotation"] = None
+    if row["annotated_at"] is not None:
+        item["annotation"] = {
+            "annotated_at": row["annotated_at"],
+            "needs_review_ok": None if needs_review_ok is None else bool(needs_review_ok),
+            "drug_name_ok": None if drug_name_ok is None else bool(drug_name_ok),
+            "corrected_drug_name": row["corrected_drug_name"],
+            "owner_notes": row["owner_notes"],
+        }
+    return item
+
+
+def list_shadow_review_items(limit: int = 50) -> list[dict[str, str | int | None | bool | dict]]:
+    with closing(get_connection()) as connection:
+        connection.row_factory = sqlite3.Row
+        rows = connection.execute(
+            """
+            SELECT
+                incoming_messages.id,
+                incoming_messages.received_at,
+                incoming_messages.message_id,
+                incoming_messages.text,
+                incoming_messages.llm_extracted_json,
+                incoming_messages.llm_model_id,
+                incoming_messages.llm_latency_ms,
+                incoming_messages.llm_validation_pass,
+                incoming_messages.llm_status,
+                shadow_review_annotations.annotated_at,
+                shadow_review_annotations.needs_review_ok,
+                shadow_review_annotations.drug_name_ok,
+                shadow_review_annotations.corrected_drug_name,
+                shadow_review_annotations.owner_notes
+            FROM incoming_messages
+            LEFT JOIN shadow_review_annotations
+                ON shadow_review_annotations.message_id = incoming_messages.id
+            WHERE incoming_messages.llm_status = 'shadow_ok'
+            ORDER BY incoming_messages.id DESC
+            LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+
+    return [_build_shadow_review_item_dict(row) for row in rows]
+
+
+def upsert_shadow_review_annotation(
+    message_id: int,
+    *,
+    needs_review_ok: bool | None,
+    drug_name_ok: bool | None,
+    corrected_drug_name: str | None,
+    owner_notes: str | None,
+) -> dict[str, str | int | bool | None] | None:
+    with closing(get_connection()) as connection:
+        with connection:
+            message_row = connection.execute(
+                """
+                SELECT id
+                FROM incoming_messages
+                WHERE id = ?
+                  AND llm_status = 'shadow_ok'
+                """,
+                (message_id,),
+            ).fetchone()
+            if message_row is None:
+                return None
+
+            annotated_at = datetime.now(UTC).isoformat()
+            needs_review_ok_value = None if needs_review_ok is None else int(needs_review_ok)
+            drug_name_ok_value = None if drug_name_ok is None else int(drug_name_ok)
+
+            connection.execute(
+                """
+                INSERT INTO shadow_review_annotations (
+                    message_id,
+                    annotated_at,
+                    needs_review_ok,
+                    drug_name_ok,
+                    corrected_drug_name,
+                    owner_notes
+                )
+                VALUES (?, ?, ?, ?, ?, ?)
+                ON CONFLICT(message_id) DO UPDATE SET
+                    annotated_at = excluded.annotated_at,
+                    needs_review_ok = excluded.needs_review_ok,
+                    drug_name_ok = excluded.drug_name_ok,
+                    corrected_drug_name = excluded.corrected_drug_name,
+                    owner_notes = excluded.owner_notes
+                """,
+                (
+                    message_id,
+                    annotated_at,
+                    needs_review_ok_value,
+                    drug_name_ok_value,
+                    corrected_drug_name,
+                    owner_notes,
+                ),
+            )
+
+            return {
+                "ok": True,
+                "message_id": message_id,
+                "annotated_at": annotated_at,
+                "needs_review_ok": needs_review_ok,
+                "drug_name_ok": drug_name_ok,
+                "corrected_drug_name": corrected_drug_name,
+                "owner_notes": owner_notes,
+            }
 
 
 def mark_review_item_reviewed(message_id: int) -> dict[str, str | int | bool] | None:

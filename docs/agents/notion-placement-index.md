@@ -39,7 +39,8 @@ Labels: enhancement, ready-for-human
 Body: see docs/agents/pharmacist-decision-workflow.md + er-consult-questions-draft.md
 ```
 
-Issue number: _fill after `gh issue create`_
+Local task file: [pharmacist-task-001.md](./pharmacist-task-001.md)  
+GitHub: run `gh issue create` from that file (agent token could not create issue)
 
 ---
 

@@ -26,7 +26,7 @@ This is health **workflow** technology, not autonomous clinical AI.
 | Phase | Project | Problem it solves | Status |
 | --- | --- | --- | --- |
 | **1** | **BaleMed** (this repo) | Safe patient message intake on Bale; pharmacist review; optional LLM hints in shadow | Active — Milestone 9 shadow; P2 owner review |
-| **2** | **Medicine price bot** (planned) | Price transparency, availability, affordability — common border patient question | Not started — design after BaleMed P2 gate |
+| **2** | **Medicine price bot** (`Bale-Med-Prices`) | Price, authenticity, drug info, rare drug — Ghaza Daru delivery | **Active** — parallel sprint until 5 Shahrivar 1405 |
 | **3** | **Pharmacy management bot/app** (planned) | Inventory, staff workflow, manager ops — from real pharmacy manager experience | Not started — after price bot MVP scope is clear |
 
 **Resume one-liner:**

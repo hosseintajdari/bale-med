@@ -1,8 +1,8 @@
 # Handoff — BaleMed (new Agent chat)
 
-**Date:** 2026-07-18  
+**Date:** 2026-07-19  
 **Branch:** `main`  
-**Milestone:** 9 — **P1 done** → **P2 owner review** → triage design docs + Notion published
+**Milestone:** 9 — **P1 done** → **P2 owner review (accelerated)** → Ghaza Daru delivery 5 Shahrivar 1405
 
 Copy this file into a new chat, or say: *Read `docs/agents/HANDOFF.md` and continue.*
 
@@ -36,6 +36,23 @@ Notion: https://app.notion.com/p/3a1f6d55a673815aba45fc8e3fb9713d
 | Global alignment check (NHS/WHO/Infermedica) | ✅ on standard path — see adoption doc |
 
 **VPS deploy:** no working `git pull` — use **scp**, then `sudo systemctl restart bale-bot`.
+
+---
+
+## Ghaza Daru delivery (2026-07-19)
+
+**Deadline:** 5 Shahrivar 1405 (~2026-08-27)
+
+| Item | Rule |
+|------|------|
+| BaleMed role | Patient intake demo on existing VPS bot |
+| Bale-Med-Prices role | Price + authenticity + drug info + rare drug |
+| Coupling | **Zero** — no shared webhook, no proxy, no price logic in `handlers.py` |
+| P2 gate | Still 20–50 annotations before `BALE_LLM_MODE=live` |
+| ADR | [0005-ghaza-daru-delivery-boundary.md](../adr/0005-ghaza-daru-delivery-boundary.md) |
+| Notion Goal | https://app.notion.com/p/3a1f6d55a673812b9137cdde5233795a |
+
+**Accreditation demo:** evaluators message `@embednebot` directly. Working safe replies = success.
 
 ---
 

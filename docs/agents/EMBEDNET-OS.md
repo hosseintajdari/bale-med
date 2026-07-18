@@ -42,6 +42,7 @@ Goal → Project → Milestone → PRD/Spec (در Docs)
 | KPIs | `a3569b7f-1c09-4127-b7aa-309a73219068` | Metrics |
 | Ship Log | `8334d9b2-f93c-4bfd-909c-a40775efff8f` | Releases |
 | Knowledge | `bde89f17-aae0-48f7-b111-b3494323cd91` | Knowledge Hub |
+| Knowledge (data source) | `642560ff-653b-4ea0-9983-0dd26efea3e8` | collection:// |
 | یادگیری روزانه (Daily Learning Log) | `a3d4f11a-b597-4e46-80ee-2f0d32dec714` | Knowledge Hub |
 | واژه‌نامه برنامه‌نویسی (Dev Vocabulary) | `342d997f-ca98-4776-a8f0-323eec4ea32a` | Knowledge Hub |
 | Ideas | — | Brainstorm |
@@ -92,6 +93,20 @@ Database برای کارهای روزانه و فوری.
 **Views:** همه، نیاز به مرور، بر اساس دسته، تازه‌ها، کارت مطالعه
 
 **Workflow ثبت:** در Cursor بگو `/notion-os — واژه webhook را ثبت کن`
+
+## Knowledge — Reference entries
+
+| Entry | Repo source | Notion import |
+|-------|-------------|---------------|
+| طراحی تریاژ و ارجاع — BaleMed (با/بدون LLM) | [`docs/research/triage-referral-design-fa.md`](../research/triage-referral-design-fa.md) | [`docs/notion-import/README.md`](../notion-import/README.md) |
+
+**Properties (Reference):** Category=Reference, Project=BaleMed, Tags=BaleMed/Pharmacy/Safety/LLM, Status=Draft→Stable
+
+**Relations:** واژه_های_فنی → ADR (فنی), workflow, schema
+
+**Publish script:** `python3 scripts/publish-triage-notion.py` (needs `NOTION_TOKEN`)
+
+**ADR repo:** [`0003-triage-with-llm.md`](../adr/0003-triage-with-llm.md), [`0004-triage-without-llm.md`](../adr/0004-triage-without-llm.md)
 
 ## یادگیری روزانه — properties
 

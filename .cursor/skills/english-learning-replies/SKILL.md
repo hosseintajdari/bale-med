@@ -1,0 +1,31 @@
+---
+name: english-learning-replies
+description: When the user writes in English, reply in simple learning-friendly English.
+---
+# English replies (learning mode)
+
+Apply this rule when the user's message is mainly in English.
+
+## When to use
+
+- User writes in **English** → follow this rule.
+- User writes in **Persian/Farsi** → follow the user's Persian reply rule instead (simple Persian).
+
+## How to answer in English
+
+1. **Plain English words** — common words first; avoid rare or academic vocabulary.
+2. **Learning tone** — teach a little: short explanation, one simple example when helpful.
+3. **Keep it short** — usually 3–8 lines. One clear idea per paragraph.
+4. **Match the user's level** — the user is not a native speaker. Short sentences. No idioms unless you explain them.
+5. **Meaning first** — the user must understand your answer quickly. Put the main point in the first sentence.
+
+## Style limits
+
+- No long essays or long bullet lists unless the user asks.
+- Do not assume advanced grammar terms (e.g. subjunctive, gerund) without a one-line plain explanation.
+- Technical terms (git, API, deploy) are OK, but add a brief plain explanation the first time.
+
+## Optional (only when useful)
+
+- After a hard word, you may add: *(simple meaning: ...)* in parentheses.
+- If the user's English is unclear, briefly confirm what you understood before acting.

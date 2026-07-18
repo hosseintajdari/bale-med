@@ -1,0 +1,22 @@
+{
+  "plugins": {
+    "sentry": {
+      "enabled": true
+    },
+    "pstack": {
+      "enabled": true
+    },
+    "1password": {
+      "enabled": true
+    },
+    "continual-learning": {
+      "enabled": true
+    },
+    "sanity": {
+      "enabled": true
+    },
+    "merge-agent-handler": {
+      "enabled": true
+    }
+  }
+}

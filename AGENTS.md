@@ -6,7 +6,7 @@
 - **Lint:** `make lint` (ruff check + format check)
 - **Run locally:** `python -m uvicorn app.main:app --host 127.0.0.1 --port 8000`
 - **Safety:** No diagnosis, dosage, or prescription replacement — see `docs/SAFETY_RULES.md`
-- **Milestone:** 9 — LLM shadow on VPS; P2 owner review before live mode; details in [docs/agents/HANDOFF.md](docs/agents/HANDOFF.md)
+- **Milestone:** 9 — LLM shadow on VPS; P2 shadow review UI done (PR #43); owner review of shadow messages before live mode; details in [docs/agents/HANDOFF.md](docs/agents/HANDOFF.md)
 
 We are building a pharmacy automation chatbot connected to Bale messenger. Bale Bot API is similar to Telegram Bot API, but exact fields must be verified before production use.
 
@@ -56,7 +56,7 @@ Goal:
 Run LLM classification in shadow mode on the VPS, then gate live escalation behind pharmacy owner review of real shadow traffic.
 
 Current state:
-Milestones 1–8 foundation is complete. VPS dry-run deploy is live at `/opt/bale-bot`. Shadow LLM (P1) is confirmed on real bot traffic. Next: P2 owner review of 20–50 shadow messages before `BALE_LLM_MODE=live`. See [docs/agents/HANDOFF.md](docs/agents/HANDOFF.md).
+Milestones 1–8 foundation is complete. VPS dry-run deploy is live at `/opt/bale-bot`. Shadow LLM (P1) confirmed on real traffic. P2 shadow review UI built and merged (PR #43 — `feat/p2-shadow-review-ui`): annotation API and local review interface added. Next: pharmacy owner reviews 20–50 shadow messages before `BALE_LLM_MODE=live`. See [docs/agents/HANDOFF.md](docs/agents/HANDOFF.md).
 
 Scope IN:
 
@@ -185,9 +185,15 @@ Single-context — `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agen
 
 Practical guide and exercises for using skills in a new Cursor agent session. See `docs/agents/GETTING-STARTED.md`.
 
-Lean project skills (ten): `ask-matt`, `grilling`, `triage`, `to-issues`, `tdd`, `diagnosing-bugs`, `domain-modeling`, `codebase-design`, `resolving-merge-conflicts`, `devops-agent`. Auto-routing: `.cursor/rules/auto-skill-routing.mdc`.
+Project skills (twelve): `ask-matt`, `grilling`, `triage`, `to-issues`, `tdd`, `diagnosing-bugs`, `domain-modeling`, `codebase-design`, `resolving-merge-conflicts`, `devops-agent`, `git-github-scope`, `english-learning-replies`. Auto-routing: `.cursor/rules/auto-skill-routing.mdc`.
 
-Recommended Cursor marketplace plugins: `agent-compatibility`, `github`.
+Global skills (Windows desktop — always available via lean-engineering-skills rule):
+- `smart-coder` — entry point for all coding tasks (Python/FastAPI + TypeScript, HOW/WHY/ARCHITECT/DEBUG/REVIEW workflows)
+- pstack: `how`, `why`, `architect`, `blast-radius`, `unslop`, `typescript-best-practices`, `figure-it-out`, `poteto-mode`
+- `context7-mcp` — auto-fetches library docs (FastAPI, Pydantic, SQLAlchemy, etc.)
+- `review-bugbot`, `review-security`
+
+Recommended Cursor marketplace plugins: `agent-compatibility`, `github`, `context7`, `pstack`.
 
 ## User language (agents)
 
@@ -216,4 +222,28 @@ See `.cursor/rules/pin-important-chats.mdc`.
 - Near the end of a useful session (or before archive), recommend **pinning** once if the chat has lasting value (setup, decisions, hard fixes, reusable checklists).
 - Trigger phrases: `pin this` or `/pin-chat` — then give short UI steps to pin in the Agents sidebar.
 - Do not nag every message; never block archiving.
+
+
+
+## Learned User Preferences
+
+- User writes in Persian (Farsi) in most chats; reply in Persian when they do.
+- User prefers concise answers with one clear next step; avoid long option lists.
+- User expects `smart-coder` as the primary entry point for all coding tasks in this project.
+- User wants `git status` clean; add local-only files (e.g. `cursor-rtl.css`, `.cursor/mcp.json`, `.cursor/settings.json`) to `.gitignore`.
+- User runs `/continual-learning` and `/agents-memory-updater` explicitly to maintain AGENTS.md memory.
+- User confirms scope (handoff) before pushing to GitHub; never push without user confirmation.
+- User prefers CLI scripts over web dashboards for owner-review workflows (shadow mode tooling).
+
+## Learned Workspace Facts
+
+- Shadow LLM (Milestone 9 P1) is confirmed working on real bot traffic on VPS at `/opt/bale-bot`.
+- P2 milestone gate: pharmacy owner must review 20–50 shadow messages before `BALE_LLM_MODE=live`.
+- Drug name validation rules and message classification standards for the LLM layer are planned for Milestone 9 P2.
+- Two new skills created today: `.cursor/skills/english-learning-replies/` and `.cursor/skills/git-github-scope/`.
+- `agent-skills-bale-med.mdc` and `auto-skill-routing.mdc` have local edits not yet committed to GitHub.
+- `cursor-rtl.css` is a local Cursor IDE RTL styling fix; add to `.gitignore` — do not commit to repo.
+- `smart-coder` (`C:\Users\hosse\.cursor\skills-cursor\smart-coder\SKILL.md`) is the comprehensive Windows skill combining HOW, WHY, ARCHITECT, BLAST-RADIUS, TDD, DEBUG, and REVIEW workflows.
+- BaleMed has no UI frontend; shadow message review is CLI-only via `list-shadow-reviews.py`.
+- Cursor has no built-in TODO panel (VS Code base); use Agent plan mode or extensions like TodoTree.
 

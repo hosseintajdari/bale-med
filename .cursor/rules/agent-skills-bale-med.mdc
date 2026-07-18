@@ -1,24 +1,92 @@
----
-description: How to use mattpocock engineering skills in this repo (bale-med)
+﻿---
+description: >-
+  Agent skill map for BaleMed (pharmacy bot). Lists all available skills,
+  routing rules, pstack + context7 integration, and pharmacy safety boundaries.
 alwaysApply: true
 ---
 
-# Agent skills (bale-med)
+# Agent skills (BaleMed)
 
-This repo ships project skills under `.cursor/skills/`. Setup for issue tracker, triage labels, and domain docs is in `docs/agents/` and `AGENTS.md`.
+This repo ships project skills under `.cursor/skills/`. For pstack and context7,
+see the global routing in `lean-engineering-skills.mdc` and the `smart-coder` skill.
 
-## Auto routing (default)
+## Auto routing
 
-Follow `.cursor/rules/auto-skill-routing.mdc`. When context matches, read the matching `.cursor/skills/*/SKILL.md` and run it — no `/skill-name` required.
+Follow `.cursor/rules/auto-skill-routing.mdc`. Agent picks skills from context — no `/skill-name` needed.
+For coding tasks, the `smart-coder` skill is the primary entry point.
 
-## When the user asks about skills, setup, or workflow
+## Available skills in this project
 
-1. Read `docs/agents/GETTING-STARTED.md` if you need the full guide (Persian + English).
-2. Tell the user that **most workflow skills do not auto-run** — they must type `/skill-name` in Agent chat (e.g. `/ask-matt`, `/grilling`, `/triage`).
-3. Skills that **can** auto-apply when relevant: `tdd`, `diagnosing-bugs`, `domain-modeling`, `grilling`, `codebase-design`, and similar skills **without** `disable-model-invocation: true`.
-4. If skills are missing, the user likely needs branch `cursor/install-mattpocock-skills-74e7` or `main` after [PR #29](https://github.com/hosseintajdari/bale-med/pull/29) is merged, then **Developer: Reload Window** in Cursor.
-5. Verify discovery: Cursor sidebar → **Customize → Skills** — project skills from `.cursor/skills/` should appear.
+| Skill | Trigger | Path |
+|-------|---------|------|
+| `devops-agent` | Deploy, VPS, SSH, systemd, Caddy | `.cursor/skills/devops-agent/SKILL.md` |
+| `diagnosing-bugs` | Bug, crash, error, slow | `.cursor/skills/diagnosing-bugs/SKILL.md` |
+| `tdd` | Test-first, red-green-refactor | `.cursor/skills/tdd/SKILL.md` |
+| `grilling` | Stress-test a plan | `.cursor/skills/grilling/SKILL.md` |
+| `domain-modeling` | CONTEXT.md, glossary, ADR | `.cursor/skills/domain-modeling/SKILL.md` |
+| `codebase-design` | Module design, seams | `.cursor/skills/codebase-design/SKILL.md` |
+| `triage` | GitHub issues, PRs | `.cursor/skills/triage/SKILL.md` |
+| `to-issues` | Split plan into issues | `.cursor/skills/to-issues/SKILL.md` |
+| `resolving-merge-conflicts` | Git conflicts | `.cursor/skills/resolving-merge-conflicts/SKILL.md` |
+| `git-github-scope` | Commit/push/PR scope | `.cursor/skills/git-github-scope/SKILL.md` |
+| `ask-matt` | Unclear which skill fits | `.cursor/skills/ask-matt/SKILL.md` |
 
-## Pharmacy safety (always)
+## Global skills (Windows desktop — always available)
 
-Do not use skills to bypass safety boundaries in `docs/SAFETY_RULES.md` — no diagnosis, dosage advice, or prescription replacement.
+| Skill | What it does |
+|-------|-------------|
+| `smart-coder` | Entry point for all coding tasks |
+| pstack `how` | Explain code architecture before editing |
+| pstack `why` | Design rationale research |
+| pstack `architect` | Design types/interfaces before coding |
+| pstack `blast-radius` | Impact analysis before shipping |
+| pstack `unslop` | Clean AI tells from text |
+| pstack `typescript-best-practices` | TS quality enforcement |
+| pstack `figure-it-out` | Custom playbook for large migrations |
+| pstack `poteto-mode` | Deliberate, verified agent style |
+| `context7-mcp` | Fetch library docs (FastAPI, Pydantic, etc.) |
+| `review-bugbot` | Bugbot code review |
+| `review-security` | Security review |
+
+## Skills that auto-apply (no /command needed)
+
+- `diagnosing-bugs` — when user reports a bug
+- `tdd` — when user wants test-first
+- `domain-modeling` — when user asks about CONTEXT.md or terms
+- `grilling` — when user wants to stress-test a plan
+- `codebase-design` — when user asks about module design
+- pstack `how` — before editing existing code
+- pstack `unslop` — on all agent-written prose
+- `context7-mcp` — when any library is mentioned
+
+## Skills requiring /command
+
+- `/grilling` (explicit plan review)
+- `/triage` (GitHub issue workflow)
+- `/to-issues` (split into issues)
+- `/ask-matt` (routing help)
+
+## Pharmacy safety (hard boundary)
+
+Never write code or give advice that:
+- Diagnoses an illness or symptom
+- Recommends a medication dose
+- Replaces a pharmacist or prescription
+- Makes an autonomous triage decision
+- Sends LLM output directly to patients (shadow mode only until P2 owner review)
+
+See `docs/SAFETY_RULES.md`.
+
+## Skills to skip for BaleMed
+
+Do not load these — they conflict or add no value:
+
+- Cloudflare, Netlify, Sentry, magic-patterns, Coralogix, Zapier
+- pstack: `arena`, `automate-me`, `interrogate`, `recall`, `reflect`, `teach`, all `principle-*`
+- Browser automation, Browserbase Functions
+- `continual-learning`
+
+## Current milestone (reference)
+
+Milestone 9: LLM shadow mode on VPS. P2 owner review before live mode.
+See `AGENTS.md` and `docs/agents/HANDOFF.md` for current state and scope.

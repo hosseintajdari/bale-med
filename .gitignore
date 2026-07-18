@@ -13,3 +13,18 @@ deploy/servers/balemed.md
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
+
+# Local Windows / Cursor IDE (keep on laptop; not GitHub deploy scope)
+cursor-rtl.css
+.cursor/mcp.json
+.cursor/settings.json
+.cursor/rules/front-end-cursor-rules.mdc
+.cursor/rules/nextjs-react-generalist-cursor-rules.mdc
+.cursor/rules/python-cybersecurity-tool-development-assistant.mdc
+.cursor/skills/english-learning-replies/
+.cursor/skills/git-github-scope/
+docs/blog/articles/
+.cursor/learning-queue/
+.cursor/hooks.json
+.cursor/hooks/
+.cursor/automations/

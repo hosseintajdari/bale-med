@@ -1,32 +1,63 @@
 ﻿---
-description: Auto-select and run the best project skill from context without waiting for /skill-name
+description: >-
+  Auto-select and run the best skill for BaleMed from context.
+  No /skill-name required. Covers project skills + pstack + context7.
 alwaysApply: true
 ---
 
-# Auto skill routing (no /command required)
+# Auto skill routing (BaleMed — no /command required)
 
-When the user message matches a row below, **immediately read and follow** that skill file before other work. Do not ask them to type `/skill-name`.
+Match the best single row. If two match, pick by priority: bug > blast-radius > deploy > design.
+Read the skill file, then execute its workflow. Do not announce the skill — just run it.
 
-| If the user is about to… | Read and follow |
-|--------------------------|-----------------|
-| Deploy, VPS, SSH, systemd, Caddy, webhook on server, dry-run, rollback, `scp`, CRLF scripts | `.cursor/skills/devops-agent/SKILL.md` |
-| Fix a bug, failing test, error, crash, slow, "diagnose", "debug" | `.cursor/skills/diagnosing-bugs/SKILL.md` |
+## Primary routing
+
+| Context / trigger | Skill to load |
+|-------------------|---------------|
+| Any coding task — new feature, module, refactor | `smart-coder` (Windows: `C:\Users\hosse\.cursor\skills-cursor\smart-coder\SKILL.md`) |
+| Deploy, VPS, SSH, systemd, Caddy, webhook, dry-run, rollback, `scp` | `.cursor/skills/devops-agent/SKILL.md` |
+| Bug, failing test, error, crash, "why is this slow", "diagnose" | `.cursor/skills/diagnosing-bugs/SKILL.md` |
 | Build or fix with tests first, `/tdd`, red-green-refactor | `.cursor/skills/tdd/SKILL.md` |
-| Stress-test a plan, new feature, milestone design | `.cursor/skills/grilling/SKILL.md` |
+| Stress-test a plan, new milestone design, "should we build this" | `.cursor/skills/grilling/SKILL.md` |
 | Domain terms, CONTEXT.md, glossary, ADR | `.cursor/skills/domain-modeling/SKILL.md` |
 | Module design, seams, testability | `.cursor/skills/codebase-design/SKILL.md` |
 | GitHub issue triage, external PR | `.cursor/skills/triage/SKILL.md` |
 | Split plan into issues | `.cursor/skills/to-issues/SKILL.md` |
 | Merge/rebase conflict | `.cursor/skills/resolving-merge-conflicts/SKILL.md` |
+| Git commit scope, push, PR boundaries, Windows-to-VPS scp | `.cursor/skills/git-github-scope/SKILL.md` |
+| Notion, Embednet OS, task list, roadmap, PRD, Daily Learning | `C:\Users\hosse\.cursor\skills\notion-os\SKILL.md` |
 | Unclear which workflow fits | `.cursor/skills/ask-matt/SKILL.md` |
+
+## pstack auto-routing (applies on top of primary)
+
+Run these alongside the primary skill when context matches.
+
+| Trigger | Load |
+|---------|------|
+| Understanding code before editing | pstack `how` |
+| Why code was built a certain way | pstack `why` |
+| Non-trivial new feature, /architect | pstack `architect` |
+| Change touching shared modules, "what could break" | pstack `blast-radius` |
+| .ts or .tsx file | pstack `typescript-best-practices` |
+| Agent-written prose output | pstack `unslop` |
+
+pstack base path: `C:\Users\hosse\.cursor\plugins\cache\cursor-public\pstack\3fe2823ce17c1656c222d4b7c59d3f82fbf20143\skills\`
+
+## context7 auto-routing
+
+When any library or framework is mentioned (FastAPI, Pydantic, SQLAlchemy, aiohttp, requests, etc.):
+Call `resolve-library-id` then `get-library-docs`. Use fetched docs, not training data.
 
 ## How to apply
 
-1. Match the **best single** row (if two fit, pick the more urgent: bug > deploy > design).
-2. `Read` the skill path, then execute its workflow.
-3. Stay on one goal per chat (see `stay-on-task` rule).
-4. Pharmacy safety: never bypass `docs/SAFETY_RULES.md`.
+1. Match the best single primary row.
+2. Stack applicable pstack and context7 on top.
+3. Stay on one goal per chat (`stay-on-task` rule).
+4. Check milestone scope in `AGENTS.md` before writing code.
+5. Pharmacy safety: never bypass `docs/SAFETY_RULES.md`.
 
-## DevOps default
+## BaleMed devops default
 
-For BaleMed server work, prefer **devops-agent** skill. Always run `make validate` before commit unless user says otherwise.
+For VPS server work: prefer `devops-agent` skill. Run `make validate` before every commit.
+
+

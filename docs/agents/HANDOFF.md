@@ -2,32 +2,9 @@
 
 **Date:** 2026-07-16  
 **Branch:** `main`  
-**Merged PR:** https://github.com/hosseintajdari/bale-med/pull/38  
-**Issue #9:** closed after merge  
-**Milestone:** 9 shadow LLM on VPS (Arvan) — **P1 done** → **P2 owner review** before live
+**Milestone:** 9 shadow LLM on VPS (Arvan) — **P1 done** → **P2 owner review in progress**
 
 Copy this file into a new chat, or say: *Read `docs/agents/HANDOFF.md` and continue.*
-
----
-
-## Current status (2026-07-13)
-
-| Item | Status |
-|------|--------|
-| Milestone 9 code on `main` | ✅ |
-| VPS `/opt/bale-bot` has `app/llm/` (deployed via scp) | ✅ |
-| LLM provider: **Arvan Cloud AI** (DeepSeek-V3.2) | ✅ `test-llm-provider.py` → **200** |
-| `BALE_LLM_MODE=shadow` | ✅ configured on VPS |
-| Bot template replies to patients | ✅ unchanged (expected) |
-| `shadow_ok` on real `@embednebot` messages | ✅ confirmed (e.g. row id 20, `update:26`) |
-
-**VPS deploy note:** `/opt/bale-bot` has no working `git pull` (no GitHub auth). Updates so far via **scp from laptop**. Optional: attach git (see below).
-
-**Shadow note:** `/local/reviews/pending` may stay **empty** in shadow mode — LLM fields are stored on `incoming_messages` even when keywords do not set `needs_review`. Use the **P2 shadow review UI** (below), `vps-quick-check.py`, or `list-shadow-reviews.py`.
-
-**VPS `.env` hygiene:** run `python3 deploy/scripts/dedupe-env-keys.py` if `check-env-safe.py` reports duplicate keys (e.g. `BALE_LLM_MODEL`).
-
-**Security:** If Arvan gateway URL/key was pasted in chat, **rotate** in Arvan panel and update `/opt/bale-bot/.env` only.
 
 ---
 
@@ -36,156 +13,184 @@ Copy this file into a new chat, or say: *Read `docs/agents/HANDOFF.md` and conti
 ```text
 Read docs/agents/HANDOFF.md.
 
-P1 shadow_ok is confirmed on VPS. Help me with P2: review 20–50 shadow messages via /local/shadow-reviews/ui before BALE_LLM_MODE=live.
+Continue P2 shadow review. Owner is designing questions at the pharmacy using the request taxonomy below.
+Help compare LLM output vs pharmacist judgment and save annotations via annotate-shadow-review.py.
+Do NOT enable BALE_LLM_MODE=live without explicit owner approval.
 ```
 
 ---
 
-## P1 — Confirm shadow on real bot traffic ✅
+## Current status (2026-07-16)
 
-Confirmed 2026-07-13: newest message `llm_status=shadow_ok`; older rows still `shadow_error` from pre-Arvan (Ollama) config.
+| Item | Status |
+|------|--------|
+| P1 shadow_ok on real `@embednebot` traffic | ✅ |
+| P2 code on VPS (`shadow_review.py`, UI, routes) | ✅ deployed via **scp** 2026-07-16 |
+| `BALE_LLM_MODE=shadow` on VPS | ✅ |
+| LLM provider: Arvan DeepSeek-V3.2 | ✅ |
+| `shadow_ok` rows in DB | **23** (11 old gibberish tests + 1 real + 12 scenario batch) |
+| Owner annotations saved | **4** (#20, #31, #32, #41) |
+| Meaningful rows for P2 gate | **~13** (exclude gibberish #21–30 unless re-testing) |
+| P2 gate target | **20–50 diverse** reviewed messages before live |
 
-Quick re-check on VPS:
+**VPS deploy:** no working `git pull` — use **scp** from laptop, then `sudo systemctl restart bale-bot`.
 
-```bash
-ssh balemed
-cd /opt/bale-bot && . .venv/bin/activate
-python3 deploy/scripts/vps-quick-check.py
+**Uncommitted on laptop (not on GitHub yet):**
+
+- `deploy/scripts/annotate-shadow-review.py` — save one annotation via local API
+- `deploy/scripts/post-common-scenarios.py` — post 12 pharmacy scenarios via loopback webhook
+- `.gitignore`, `AGENTS.md` — local memory / ignore rules
+
+Both scripts are already **copied to VPS** at `/opt/bale-bot/deploy/scripts/`.
+
+---
+
+## P2 progress — owner decisions so far
+
+| DB id | Scenario | LLM `needs_review` | Owner: correct? | Notes |
+|-------|----------|-------------------|-----------------|-------|
+| 20 | «قرص مسکن می‌خواهم» | true | **yes** | درخواست عمومی مسکن — ارجاع منطقی |
+| 31 | S01 موجودی ibuprofen لاتین | false | **yes** | موجودی → no review؛ قیمت/فروش/تبلیغ = آینده |
+| 32 | S02 موجودی ایبوپروفن فارسی | false | **yes** | همان |
+| 41 | S11 تمدید نسخه ساده | false | **yes** | تمدید با درخواست ساده → no؛ فلو آینده زیر |
+| 21–30 | Gibberish tests | true | **skipped** | false positives — not annotated |
+| 33–40, 42 | S03–S10, S12 | mixed | **pending** | owner reviewing at pharmacy |
+
+### Owner workflow rules (document for future milestones)
+
+1. **موجودی / قیمت:** `needs_review=false` — price, sales, promotions are **side projects**; only future capability for now.
+2. **تمدید نسخه ساده:** `needs_review=false` — no direct fulfillment from a simple chat request.
+3. **نسخه الکترونیک (future structured intake):** کد ملی → کد پزشک → شماره تماس بیمار → منتظر پاسخ (not implemented yet).
+4. **MVP gate:** 20–50 **diverse** messages enough for go/no-go; gibberish tests do not count.
+
+### Open review items (need owner judgment)
+
+| DB id | Issue |
+|-------|-------|
+| 33 (S03) | حساسیت پنی‌سیلین — `drug_name=null` (should it be penicillin?) |
+| 42 (S12) | «سردرد شدید» — `urgent_symptoms=true` (too sensitive?) |
+| 34–40 | pregnancy, pediatric, dose, urgent, interaction, side effect — likely yes but not annotated yet |
+
+---
+
+## Scenario batch (2026-07-16) — ids 31–42
+
+Posted via `post-common-scenarios.py` (message_ids 910001–910012). All `shadow_ok`.
+
+| ID | Label | Text (short) | LLM needs_review | drug_name |
+|----|-------|--------------|------------------|-----------|
+| S01 | drug_availability | ibuprofen 400 موجود؟ | false | ibuprofen |
+| S02 | misspelled_drug | ایبوپروفن ۴۰۰ موجوده؟ | false | ایبوپروفن |
+| S03 | allergy | حساسیت پنی‌سیلین | true | null |
+| S04 | pregnancy | باردارم، سرماخوردگی؟ | true | null |
+| S05 | pediatric | بچه ۳ ساله شربت سرفه | true | شربت سرفه |
+| S06 | dose | لووتیروکسین چند mg؟ | true | لووتیروکسین |
+| S07 | urgent | درد قفسه سینه + تنگی نفس | true | null |
+| S08 | greeting | سلام وقت بخیر | false | null |
+| S09 | interaction | آسپرین + وارفارین | true | آسپرین، وارفارین |
+| S10 | side_effect | متفورمین → درد معده | true | metformin |
+| S11 | refill | تمدید نسخه | false | null |
+| S12 | pain_severe | مسکن سردرد شدید | true | null (+ urgent flag) |
+
+---
+
+## Request taxonomy (for pharmacy question design)
+
+Owner uses this at the pharmacy to write real test messages. Full version was drafted in pinned chat 2026-07-16.
+
+### Layer 1 — request type
+
+| Code | Category | Default needs_review |
+|------|----------|---------------------|
+| A | موجودی / قیمت / بسته‌بندی | **NO** (simple stock) |
+| B | نسخه / تجویز / عکس نسخه | structured flow; simple refill **NO** |
+| C | دوز / قطع / شروع / تغییر دارو | **YES** always |
+| D | عارضه / سوءمصرف | **YES** |
+| E | تداخل دارویی | **YES** |
+| F | حساسیت / بارداری / کودک / اورژانس | **YES** always |
+| G | درخواست عمومی / مبهم | **YES** (except pure greeting → NO) |
+| H | اداری (ساعت، آدرس، بیمه) | **NO** or FAQ future |
+| I | فروش / تبلیغ / پیشنهاد | **YES** now; sales module future |
+
+### Layer 2 — message shape (error testing)
+
+فارسی درست، غلط املایی دارو، لاتین، مخلوط، کوتاه، بلند، ایموجی، دستور `/help`, نامفهوم/گ'یبریش.
+
+### Layer 3 — quick decision matrix
+
+```
+موجودی/قیمت ساده     → NO
+نسخه ساده            → NO (+ structured intake future)
+دوز/قطع/شروع/تغییر   → YES
+حساسیت/بارداری/کودک  → YES
+علائم اورژانسی       → YES
+تداخل/عارضه          → YES
+سوال عمومی دارو      → YES
+سلام/اداری           → NO
+متن نامفهوم           → NO (owner preference)
 ```
 
 ---
 
-## P2 — Human go-live gate (before `BALE_LLM_MODE=live`)
+## P2 — How to review (agent-assisted)
 
-Owner must:
-
-1. Approve LLM live mode explicitly.
-2. Review **20–50 shadow messages** — compare `llm_extracted` vs pharmacist judgment.
-3. Run `make validate` / `scripts/verify.ps1` locally before any live switch.
-
-### Option A — Web UI (recommended)
-
-On your laptop, open an SSH tunnel to the VPS app (localhost only; Caddy blocks `/local/*` publicly):
-
-```bash
-ssh -L 8000:127.0.0.1:8000 balemed
-```
-
-In the browser:
-
-```text
-http://127.0.0.1:8000/local/shadow-reviews/ui
-```
-
-For each `shadow_ok` message, save pharmacist judgment:
-- `needs_review` correct? (yes / no / skip)
-- `drug_name` correct? (yes / no / skip)
-- optional corrected drug name and owner notes
-
-Annotations persist in SQLite table `shadow_review_annotations` (upsert per message id).
-
-JSON API (same tunnel, local only):
-
-```bash
-curl http://127.0.0.1:8000/local/shadow-reviews?limit=50
-curl -X POST http://127.0.0.1:8000/local/shadow-reviews/20/annotate \
-  -H "Content-Type: application/json" \
-  -d '{"needs_review_ok": true, "drug_name_ok": false, "corrected_drug_name": "acetaminophen", "owner_notes": "typo missed"}'
-```
-
-### Option B — CLI on VPS
+### List shadow rows
 
 ```bash
 ssh balemed
 cd /opt/bale-bot && . .venv/bin/activate
 python3 deploy/scripts/list-shadow-reviews.py 50
+# or
+curl -s http://127.0.0.1:8000/local/shadow-reviews?limit=50
 ```
 
-Then **only on VPS** `.env` (after owner approval):
+### Save annotation (preferred — avoids shell JSON escaping)
+
+```bash
+python3 deploy/scripts/annotate-shadow-review.py <message_id> \
+  --needs-review-ok yes|no|skip \
+  --drug-name-ok yes|no|skip \
+  --owner-notes "short note in Persian"
+```
+
+### Web UI (laptop + SSH tunnel)
+
+```bash
+ssh -L 8000:127.0.0.1:8000 balemed
+# browser: http://127.0.0.1:8000/local/shadow-reviews/ui
+```
+
+### Post more scenarios
+
+```bash
+python3 deploy/scripts/post-common-scenarios.py
+# edit SCENARIOS in script before run, or add new script
+```
+
+### Live mode (ONLY after owner sign-off)
 
 ```env
 BALE_LLM_MODE=live
 ```
 
-Restart: `sudo systemctl restart bale-bot`
-
-Live mode: LLM `needs_review` unions with keywords; failures → `llm_fail_safe`.
-
----
-
-## Arvan Cloud AI env (working on Iran VPS)
-
-In `/opt/bale-bot/.env` (secrets **only on server**):
-
-```env
-BALE_ENABLE_LLM=true
-BALE_LLM_MODE=shadow
-BALE_LLM_API_BASE_URL=https://arvancloudai.ir/gateway/models/DeepSeek-V3.2/<token-from-panel>/v1
-BALE_LLM_API_KEY=<api-key-from-panel-or-arvan>
-BALE_LLM_MODEL=DeepSeek-V3.2
-BALE_LLM_TIMEOUT_SECONDS=90
+```bash
+sudo systemctl restart bale-bot
 ```
 
-- **One `=` per line** — `BALE_LLM_MODEL=DeepSeek-V3.2` (not `==`)
-- **One line per key** — run `dedupe-env-keys.py` if duplicates exist
-- **URL-embedded auth:** if the gateway token is in `BALE_LLM_API_BASE_URL`, set `BALE_LLM_API_KEY=arvan` (or leave empty)
-- Test: `python3 deploy/scripts/test-llm-provider.py` → `status=200`
-
-### Provider notes (from VPS tests)
-
-| Provider | Iran VPS |
-|----------|----------|
-| **Arvan Cloud AI** | ✅ Works |
-| Groq | ✅ Works with valid key (`401` = bad key) |
-| Ollama Cloud | ❌ 403 blocked from VPS IP |
-| Local Ollama on VPS | ⚠️ Possible but tight on 2 vCPU / 4 GB RAM |
-
-### Env reference (repo templates)
-
-| Variable | Example / default | Notes |
-|----------|-------------------|-------|
-| `BALE_LLM_API_BASE_URL` | `https://arvancloudai.ir/gateway/models/DeepSeek-V3.2/<token>/v1` | OpenAI-compatible; token often in URL |
-| `BALE_LLM_API_KEY` | panel key or `arvan` | Bearer skipped when empty/`arvan` |
-| `BALE_LLM_MODEL` | `DeepSeek-V3.2` | Must match gateway model id |
-| `BALE_LLM_TIMEOUT_SECONDS` | `90` | Arvan can be slow from Iran VPS |
-
 ---
 
-## VPS helpers (in repo)
+## VPS helpers
 
 | Script | Purpose |
 |--------|---------|
-| `deploy/scripts/test-llm-provider.py` | Test LLM API (no secrets printed) |
-| `deploy/scripts/test-shadow-classify.py` | One-shot classify via app LLM service |
-| `deploy/scripts/post-shadow-test-webhooks.py` | Local loopback webhooks for shadow test |
-| `deploy/scripts/ensure-llm-env.py` | Add missing LLM env keys |
-| `deploy/scripts/check-env-safe.py` | Safe `.env` health check |
-| `deploy/scripts/dedupe-env-keys.py` | Remove duplicate `.env` keys (keep last) |
-| `deploy/scripts/vps-quick-check.py` | Sending + recent messages + LLM status |
-| `deploy/scripts/list-shadow-reviews.py` | P2 — list `shadow_ok` rows + extracted fields (CLI) |
-| `GET /local/shadow-reviews` | P2 — JSON list of `shadow_ok` rows + saved annotations |
-| `GET /local/shadow-reviews/ui` | P2 — local HTML review page (SSH tunnel) |
-| `POST /local/shadow-reviews/{id}/annotate` | P2 — save pharmacist judgment |
-| `deploy/scripts/10-shadow-llm-verify.sh` | Full shadow deploy verify |
-
----
-
-## Optional — attach git on VPS
-
-```bash
-ssh balemed
-cp /opt/bale-bot/.env /tmp/bale-bot.env.backup
-cd /opt/bale-bot
-git init
-git remote add origin https://github.com/hosseintajdari/bale-med.git
-git fetch origin
-git checkout -B main origin/main
-cp /tmp/bale-bot.env.backup .env
-chmod 600 .env
-python3 deploy/scripts/dedupe-env-keys.py
-```
-
-Then `git pull` works for future deploys (or keep using scp).
+| `annotate-shadow-review.py` | Save one P2 annotation |
+| `post-common-scenarios.py` | Post 12 loopback shadow scenarios |
+| `list-shadow-reviews.py` | CLI list shadow_ok rows |
+| `vps-quick-check.py` | Health + recent LLM status |
+| `test-llm-provider.py` | LLM API smoke test |
+| `GET /local/shadow-reviews` | JSON API |
+| `GET /local/shadow-reviews/ui` | HTML review page |
+| `POST /local/shadow-reviews/{id}/annotate` | Annotation API |
 
 ---
 
@@ -193,15 +198,22 @@ Then `git pull` works for future deploys (or keep using scp).
 
 | Purpose | Path |
 |---------|------|
-| Shadow review UI + API | `app/main.py`, `app/shadow_review_ui.py`, `app/shadow_review.py` |
-| LLM provider | `app/llm/provider.py` |
-| LLM service | `app/llm/service.py` |
-| VPS shadow verify | `deploy/scripts/10-shadow-llm-verify.sh` |
-| Safety rules | `docs/SAFETY_RULES.md` |
-| Vision / roadmap | `docs/VISION-AND-ROADMAP.md` |
-| Compliance study guide | `docs/COMPLIANCE-LEARNING.md` |
-| Blog templates (Notion) | `docs/blog/BLOG-TEMPLATES.md` |
-| Career narrative (draft) | `docs/CAREER-NARRATIVE.md` |
-| Deploy runbook | `docs/DEPLOYMENT_VPS.md` |
+| Shadow review | `app/shadow_review.py`, `app/shadow_review_ui.py`, `app/main.py` |
+| Annotations DB | `app/database.py` → `shadow_review_annotations` |
+| LLM | `app/llm/service.py`, `app/llm/client.py` |
+| Keywords (live union) | `app/replies.py` → `HIGH_RISK_KEYWORDS` |
+| Safety | `docs/SAFETY_RULES.md` |
+| Live gate ADR | `docs/adr/0002-clinical-trust-requirements-before-live-llm.md` |
+| Deploy | `docs/DEPLOYMENT_VPS.md` |
 
-**Pin this chat** before archive — P2 shadow review UI + annotation API on `main`.
+---
+
+## Next steps
+
+1. Owner writes **7+ more diverse questions** at pharmacy (use taxonomy) — target 20 reviewed.
+2. Agent helps annotate remaining scenarios (#33–40, #42) when owner returns.
+3. Commit new scripts to GitHub when owner confirms scope.
+4. Future issue: structured e-prescription intake (کد ملی → کد پزشک → موبایل).
+5. Do **not** set `BALE_LLM_MODE=live` until 20–50 diverse reviews + owner explicit OK.
+
+**Pin the 2026-07-16 P2 review chat** — taxonomy, owner decisions, scenario results.

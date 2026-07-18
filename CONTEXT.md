@@ -26,6 +26,7 @@ Ubiquitous language for issues, PRs, code, and agent chats. When a term is defin
 
 | Term | Meaning |
 | --- | --- |
+| **Disposition (D0 / D1 / D2)** | Next step for the patient — not a diagnosis. **D0** = normal intake (no review). **D1** = pharmacist review. **D2** = emergency red flag (115 / ER emphasis). |
 | **Escalation** | Route a case to pharmacist review instead of automated clinical handling. |
 | **Keyword escalation** | Rule-based `needs_review` from message text (urgent, pregnancy, allergy, etc.). |
 | **Fail-safe** | On LLM error or invalid output in live mode, treat as `needs_review`. |
@@ -53,5 +54,9 @@ Ubiquitous language for issues, PRs, code, and agent chats. When a term is defin
 - Safety boundaries: [docs/SAFETY_RULES.md](docs/SAFETY_RULES.md)
 - LLM shadow decision: [docs/adr/0001-llm-shadow-mode.md](docs/adr/0001-llm-shadow-mode.md)
 - Clinical trust before live: [docs/adr/0002-clinical-trust-requirements-before-live-llm.md](docs/adr/0002-clinical-trust-requirements-before-live-llm.md)
+- Triage with LLM: [docs/adr/0003-triage-with-llm.md](docs/adr/0003-triage-with-llm.md)
+- Triage rules-only: [docs/adr/0004-triage-without-llm.md](docs/adr/0004-triage-without-llm.md)
+- Triage design (Persian): [docs/research/triage-referral-design-fa.md](docs/research/triage-referral-design-fa.md)
+- Global patterns to adopt: [docs/research/triage-patterns-adoption-fa.md](docs/research/triage-patterns-adoption-fa.md)
 - Vision and future projects: [docs/VISION-AND-ROADMAP.md](docs/VISION-AND-ROADMAP.md)
 - Current milestone: [docs/agents/HANDOFF.md](docs/agents/HANDOFF.md)

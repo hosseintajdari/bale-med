@@ -22,6 +22,20 @@ Build a minimal but production-minded MVP for a pharmacy assistant bot.
 - The bot should collect structured information and route cases to a pharmacist when needed.
 - Keep all code simple, documented, and suitable for gradual deployment.
 
+## Agent execution harness
+
+Apply this workflow for Codex, Junie, and other IDE agents on non-trivial tasks:
+
+1. Read this file and the relevant `CONTEXT.md`, ADR, handoff, and source files before changing code.
+2. State a short plan when the task has more than one implementation step. Keep the task focused; do not bundle unrelated work.
+3. Make the smallest safe change, preserving unrelated edits already in the worktree.
+4. Run the relevant tests, compilation, lint, and diff checks listed below. Report the actual results.
+5. Summarize changed files, verification, and any remaining decision or risk.
+
+Use IDE context and the local IDE MCP tools when they are available for the current task. Do not add external MCP servers, credentials, or integrations unless the user explicitly requests them.
+
+For normal repository work, prefer an agent mode limited to the workspace. Use full machine access only for an explicitly requested system-level task, and never deploy or change production configuration without explicit approval.
+
 
 
 ## Tech Stack
@@ -216,4 +230,3 @@ See `.cursor/rules/pin-important-chats.mdc`.
 - Near the end of a useful session (or before archive), recommend **pinning** once if the chat has lasting value (setup, decisions, hard fixes, reusable checklists).
 - Trigger phrases: `pin this` or `/pin-chat` — then give short UI steps to pin in the Agents sidebar.
 - Do not nag every message; never block archiving.
-

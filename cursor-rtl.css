@@ -106,3 +106,105 @@ samp,
 
 /* Softer focus ring */
 .monaco-editor .cursor { border-color: #58a6ff !important; }
+
+/* -----------------------------------------------------
+   RTL / Persian support
+   - Enable when <html lang="fa">, body[lang^="fa"], or [dir="rtl"] present
+   - Force RTL flow, Persian font stack, but keep code blocks LTR
+   ----------------------------------------------------- */
+:root, html[lang^="fa"], html[lang="fa"], body[lang^="fa"], body[lang^="fa"], [dir="rtl"], .rtl {
+    direction: rtl !important;
+    unicode-bidi: embed !important;
+    text-align: right !important;
+}
+
+/* Persian-friendly font stack for prose and UI text */
+[class*="markdown"], [class*="message-content"], [class*="prose"],
+p, li, label, summary, h1, h2, h3, h4, h5, h6, blockquote {
+    font-family: "Vazirmatn", "IRANSans", "Noto Sans Arabic", "Segoe UI", Tahoma, sans-serif !important;
+    line-height: 1.6 !important;
+}
+
+/* Keep inline spans and emphasis consistent */
+[class*="markdown"] strong, [class*="markdown"] em, a, span {
+    direction: inherit !important;
+    unicode-bidi: isolate-override !important;
+}
+
+/* Code and preformatted text must remain LTR */
+[class*="markdown"] pre, [class*="markdown"] code, pre, code, .monaco-editor .view-line, .monaco-editor .lines-content {
+    direction: ltr !important;
+    text-align: left !important;
+    unicode-bidi: embed !important;
+}
+
+/* Lists: keep marker positions sane in RTL */
+ol, ul {
+    direction: rtl !important;
+    padding-inline-start: 1.4rem !important;
+}
+
+/* Tables alignment */
+table { direction: rtl !important; }
+th, td { text-align: right !important; }
+
+/* Inputs and editors default to RTL for Persian typing */
+input, textarea, select, .monaco-editor, .inputarea {
+    direction: rtl !important;
+    text-align: right !important;
+}
+
+/* Local font-face fallback (no remote downloads) */
+@font-face {
+    font-family: 'VazirmatnLocal';
+    src: local('Vazirmatn'), local('Vazirmatn-Regular');
+    font-weight: 400;
+    font-style: normal;
+    unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
+}
+
+/* Respect explicit LTR containers inside RTL pages */
+.rtl .ltr, [dir="rtl"] .ltr, .ltr {
+    direction: ltr !important;
+    text-align: left !important;
+}
+
+/* -----------------------------------------------------
+   Stronger overrides for RTL contexts (more specific)
+   Targets descendants when the document or a root node
+   indicates Persian/RTL via lang or dir or .rtl class.
+   These selectors beat the earlier generic ones.
+   ----------------------------------------------------- */
+:root[dir="rtl"] p, :root[dir="rtl"] li, :root[dir="rtl"] h1, :root[dir="rtl"] h2, :root[dir="rtl"] h3, :root[dir="rtl"] h4, :root[dir="rtl"] h5, :root[dir="rtl"] h6,
+html[lang="fa"] p, html[lang="fa"] li, html[lang="fa"] h1, html[lang="fa"] h2, html[lang="fa"] h3, html[lang="fa"] h4, html[lang="fa"] h5, html[lang="fa"] h6,
+body[lang^="fa"] p, body[lang^="fa"] li, body[lang^="fa"] h1, body[lang^="fa"] h2, body[lang^="fa"] h3, body[lang^="fa"] h4, body[lang^="fa"] h5, body[lang^="fa"] h6,
+.rtl p, .rtl li, .rtl h1, .rtl h2, .rtl h3, .rtl h4, .rtl h5, .rtl h6,
+[dir="rtl"] p, [dir="rtl"] li, [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4, [dir="rtl"] h5, [dir="rtl"] h6,
+[class*="markdown"]:dir(rtl) p, [class*="message-content"]:dir(rtl) p {
+    direction: rtl !important;
+    unicode-bidi: embed !important;
+    text-align: right !important;
+}
+
+/* Ensure form controls inside RTL contexts are RTL */
+:root[dir="rtl"] input, :root[dir="rtl"] textarea, :root[dir="rtl"] select,
+html[lang="fa"] input, html[lang="fa"] textarea, html[lang="fa"] select,
+[dir="rtl"] input, [dir="rtl"] textarea, [dir="rtl"] select,
+.rtl input, .rtl textarea, .rtl select {
+    direction: rtl !important;
+    text-align: right !important;
+}
+
+/* Keep code blocks LTR even inside RTL contexts */
+:root[dir="rtl"] pre, :root[dir="rtl"] code,
+html[lang="fa"] pre, html[lang="fa"] code,
+[dir="rtl"] pre, [dir="rtl"] code,
+.rtl pre, .rtl code,
+[class*="markdown"] pre, [class*="markdown"] code {
+    direction: ltr !important;
+    text-align: left !important;
+    unicode-bidi: embed !important;
+}
+
+/* Small helper: add .rtl to <html> if it's missing when running tests */
+/* (Not applied automatically; kept for manual toggling) */

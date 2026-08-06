@@ -126,7 +126,10 @@ def build_shadow_review_ui_page(
 </head>
 <body>
   <h1>P2 Shadow Review (local only)</h1>
-  <p class="meta">Showing up to {limit} recent <code>shadow_ok</code> messages. Compare LLM output with pharmacist judgment.</p>
+  <p class="meta">
+    Showing up to {limit} recent <code>shadow_ok</code> messages.
+    Compare LLM output with pharmacist judgment.
+  </p>
   {saved_banner}
   {rows or "<p>No shadow_ok messages found yet.</p>"}
   <p class="footnote">Access via SSH tunnel only. Caddy blocks <code>/local/*</code> on the public domain.</p>
@@ -143,6 +146,8 @@ def _render_shadow_review_row(item: dict[str, Any]) -> str:
     if extracted_json == "null":
         extracted_json = "{}"
 
+    corrected_drug_name_value = html.escape(str(annotation.get("corrected_drug_name") or ""))
+
     return f"""
 <section class="{card_class}" id="message-{message_id}">
   <h2>Message #{message_id} · {html.escape(str(item.get("received_at") or ""))}</h2>
@@ -155,7 +160,7 @@ def _render_shadow_review_row(item: dict[str, Any]) -> str:
     <p><strong>drug_name</strong> درست بود؟</p>
     <div class="choices">{_render_tristate_radios("drug_name_ok", annotation.get("drug_name_ok"))}</div>
     <label>نام داروی صحیح (اختیاری)
-      <input type="text" name="corrected_drug_name" maxlength="120" value="{html.escape(str(annotation.get("corrected_drug_name") or ""))}">
+      <input type="text" name="corrected_drug_name" maxlength="120" value="{corrected_drug_name_value}">
     </label>
     <label>یادداشت داروساز (اختیاری)
       <textarea name="owner_notes" maxlength="500">{html.escape(str(annotation.get("owner_notes") or ""))}</textarea>

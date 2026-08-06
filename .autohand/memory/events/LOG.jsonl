@@ -1,0 +1,2 @@
+{"version":1,"eventId":"386e8699-07f3-4720-a5d7-ba66a7b3bfad","operation":"capability_used","level":"project","capability":{"kind":"slash_command","name":"/model","source":"core"},"origin":"user","outcome":"succeeded","occurredAt":"2026-08-05T12:50:29.912Z"}
+{"version":1,"eventId":"e0249600-2b48-4797-ba31-7537b1005500","operation":"capability_used","level":"project","capability":{"kind":"slash_command","name":"/model","source":"core"},"origin":"user","outcome":"succeeded","occurredAt":"2026-08-05T12:52:08.378Z"}

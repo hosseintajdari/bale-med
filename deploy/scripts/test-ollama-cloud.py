@@ -2,7 +2,6 @@
 """Test Ollama Cloud connectivity from VPS (no secrets printed)."""
 from __future__ import annotations
 
-import json
 import os
 import sys
 

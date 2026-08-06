@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RTL CSS test</title>
+<link rel="stylesheet" href="cursor-rtl.css">
+<style>
+  body{padding:20px;font-size:16px;font-family:Segoe UI, Tahoma, sans-serif}
+  pre{background:#111;color:#eee;padding:12px;border-radius:6px;overflow:auto}
+  .status{position:fixed;top:12px;left:12px;padding:6px 10px;border-radius:6px;background:#222;color:#fff;font-size:13px}
+  .controls{position:fixed;top:12px;right:12px}
+  .controls button{margin-left:8px;padding:6px 10px}
+</style>
+</head>
+<body>
+<div class="status" id="status">در حال آماده‌سازی...</div>
+<div class="controls">
+  <button id="toggleDir">تغییر جهت</button>
+  <button id="setAuto">Force RTL</button>
+</div>
+<h2>نمونه متن فارسی (باید راست‌چین شود)</h2>
+<p>این یک پاراگراف تست است که باید با فونت فارسی و جهت راست به چپ نمایش داده شود.</p>
+<h3>Inline English (should remain sensible)</h3>
+<p>Inline code: <code>console.log('hello')</code> and Persian متن فارسی بعد از کد.</p>
+<h3>Code block (must stay LTR)</h3>
+<pre><code>def greet():
+  print("سلام")
+# this line should be LTR</code></pre>
+<h3>Lists & table</h3>
+<ul>
+  <li>مورد اول</li>
+  <li>Item two (EN)</li>
+  <li>مورد سوم</li>
+</ul>
+<table border="1" cellpadding="6">
+  <tr><th>ستون</th><th>Column</th></tr>
+  <tr><td>ردیف 1</td><td>Value</td></tr>
+</table>
+
+<script>
+  // Detect presence of Persian characters in document text
+  function hasPersianText() {
+    var bodyText = document.body.innerText || '';
+    return /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/.test(bodyText);
+  }
+
+  function applyRTL() {
+    document.documentElement.lang = 'fa';
+    document.documentElement.setAttribute('dir','rtl');
+    document.documentElement.classList.add('rtl');
+    document.body.classList.add('rtl');
+    document.getElementById('status').innerText = 'RTL فعال است — dir="rtl" اعمال شد';
+  }
+  function unsetRTL() {
+    document.documentElement.removeAttribute('lang');
+    document.documentElement.removeAttribute('dir');
+    document.documentElement.classList.remove('rtl');
+    document.body.classList.remove('rtl');
+    document.getElementById('status').innerText = 'RTL غیرفعال است';
+  }
+
+  // Auto-apply if Persian text detected
+  window.addEventListener('load', function(){
+    if (hasPersianText()) applyRTL(); else document.getElementById('status').innerText = 'هیچ متن فارسی تشخیص داده نشد';
+
+    document.getElementById('toggleDir').addEventListener('click', function(){
+      if (document.documentElement.getAttribute('dir') === 'rtl') unsetRTL(); else applyRTL();
+    });
+    document.getElementById('setAuto').addEventListener('click', applyRTL);
+  });
+</script>
+</body>
+</html>

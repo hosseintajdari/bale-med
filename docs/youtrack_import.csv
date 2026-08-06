@@ -1,0 +1,7 @@
+Summary,Description,Type,Priority,Tags,Assignee
+Align: Source-of-truth mapping,Create tasks to implement Source-of-truth rules: update repo docs and Notion pages,Task,Major,embednet,ops
+Migrate: Embednet OS page,Import Embednet OS summary and SoT rules from Notion to YouTrack as a project description,Task,Major,embednet,docs
+Migrate: BaleMed project summary,Import BaleMed project summary (safety boundaries, ADR links) as a YouTrack ticket for review,Task,Major,bale-med,safety
+Migrate: Learning.py scratch,Capture Learning.py scratch content into Notion resources and link to Embednet OS,Task,Minor,docs,learning
+Triage: OneDrive vs IdeaProjects,Investigate OneDrive/IdeaProjects duplication and set repo as canonical,Task,Major,ops,sync
+Review: acp-agents contents,Review AppData\\Local\\JetBrains\\acp-agents files for safety/cleanup,Task,Minor,jetbrains

@@ -24,6 +24,16 @@ Notion: https://app.notion.com/p/3a1f6d55a673815aba45fc8e3fb9713d
 
 ## Current status (2026-07-18)
 
+### GitHub Actions repair (verified 2026-09-05)
+
+- The retired Qodana workflow and configuration were removed.
+- `validate` now uses a standard GitHub-hosted runner, pinned GitHub-owned
+  actions, read-only repository permission, concurrency cancellation, and a
+  manual dispatch option.
+- Hosted run `33993938097` completed successfully with the repository's
+  unittest, compile, and ruff checks. Earlier synthetic `BuildFailed`
+  startup-failure records are historical and no longer reproduce.
+
 | Item | Status |
 |------|--------|
 | P1 shadow_ok on real `@embednebot` traffic | ✅ |

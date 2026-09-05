@@ -18,7 +18,7 @@ Summary of proposed changes
    - YouTrack admin: project setup, issue-type config, workflows, custom fields, import CSV, REST API.
    - Notion editor: page templates, linked databases, exportable tables, page permissions.
    - Git/GitHub: merging rules, ADR maintenance, release tagging.
-   - CI/CD & infra: Qodana, deployment pipelines, and environment separation (OneDrive risks).
+   - CI/CD & infra: validation workflows, deployment pipelines, and environment separation (OneDrive risks).
 
 4. Sync rules and governance (concrete)
    - Durable technical facts (code, ADRs): update repo first, then Notion.

@@ -2,7 +2,8 @@
 
 ## GitHub Actions
 
-[validate.yml](validate.yml) runs on every push to `main` and on pull requests:
+[validate.yml](validate.yml) runs on every push to `main`, on pull requests, or
+manually from the Actions tab:
 
 - `unittest`
 - `compileall`

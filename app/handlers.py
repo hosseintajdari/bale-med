@@ -230,9 +230,9 @@ def build_llm_storage_fields(llm_result) -> LLMStorageFields | None:
     )
 
 def emit_shadow_trace(incoming, saved_id, review_metadata, llm_result):
-    import urllib.request
     import json
-    from datetime import datetime, UTC
+    import urllib.request
+    from datetime import UTC, datetime
     
     payload = {
         "engine_id": "bale-med",

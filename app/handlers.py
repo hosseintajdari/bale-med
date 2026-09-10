@@ -229,6 +229,46 @@ def build_llm_storage_fields(llm_result) -> LLMStorageFields | None:
         status=llm_result.audit.status,
     )
 
+def emit_shadow_trace(incoming, saved_id, review_metadata, llm_result):
+    import urllib.request
+    import json
+    from datetime import datetime, UTC
+    
+    payload = {
+        "engine_id": "bale-med",
+        "shadow_item": {
+            "id": f"bmed-{saved_id}",
+            "sessionId": str(incoming.chat_id or "unknown"),
+            "channel": "bale",
+            "senderDisplay": str(incoming.chat_id or "unknown"),
+            "userMessage": incoming.text or "",
+            "proposedReply": "نیاز به بررسی تخصصی داروساز",
+            "timestamp": datetime.now(UTC).isoformat(),
+            "confidenceScore": 0.85,
+            "riskLevel": "high_redline" if review_metadata.get("review_reason") == "pharmacist_review_required" else "safe",
+            "status": "pending",
+            "deterministicRuleApplied": str(review_metadata.get("review_reason") or "")
+        },
+        "pipeline_traces": [
+            {
+                "stage": "GATEWAY_INGEST",
+                "title": "Received via Bale Webhook",
+                "status": "passed",
+                "detail": "Parsed successfully",
+                "durationMs": 5
+            }
+        ]
+    }
+    try:
+        req = urllib.request.Request(
+            "http://localhost:3001/api/pipeline/ingest/shadow-trace",
+            data=json.dumps(payload).encode('utf-8'),
+            headers={'Content-Type': 'application/json'}
+        )
+        urllib.request.urlopen(req, timeout=1)
+    except Exception:
+        pass
+
 
 def route_update(update: dict[str, Any]) -> dict[str, Any]:
     incoming = IncomingMessage.from_update(update)
@@ -348,6 +388,8 @@ def route_update(update: dict[str, Any]) -> dict[str, Any]:
             admin_notification_result.get("skipped"),
             review_metadata["review_status"],
         )
+
+    emit_shadow_trace(incoming, saved_id, review_metadata, llm_result)
 
     return {
         "ok": True,

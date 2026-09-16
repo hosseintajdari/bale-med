@@ -1,4 +1,5 @@
 import logging
+from datetime import UTC, datetime
 from typing import Any
 
 from .bale_client import BaleAPIError, BaleClient
@@ -8,6 +9,7 @@ from .llm import classify_message_text, merge_review_metadata
 from .llm.service import should_run_llm_for_message
 from .models import IncomingMessage
 from .replies import build_safe_reply, needs_pharmacist_review
+from .shadow_emitter import build_shadow_payload, emit_shadow_record
 
 logger = logging.getLogger(__name__)
 
@@ -349,6 +351,50 @@ def route_update(update: dict[str, Any]) -> dict[str, Any]:
             review_metadata["review_status"],
         )
 
+    # --- Panel emit (shadow-only) -------------------------------------------
+    # فقط پیام‌های LLM shadow جدید به پنل ارسال می‌شوند.
+    # شکست emit روی پردازش اصلی تأثیر ندارد (fire-and-forget).
+    panel_emit_result = None
+    should_emit = (
+        save_result.inserted
+        and llm_result is not None
+        and llm_result.audit.status in {"shadow_ok", "live_ok"}
+        and incoming.text is not None
+        and incoming.chat_id is not None
+    )
+    if should_emit:
+        extracted_fields = (
+            llm_result.extracted.to_json_dict() if llm_result.extracted is not None else None
+        )
+        deterministic_rule = (
+            str(review_metadata["review_reason"])
+            if review_metadata.get("needs_review") and review_metadata.get("review_reason")
+            else None
+        )
+        payload = build_shadow_payload(
+            chat_id=str(incoming.chat_id),
+            user_message=incoming.text or "",
+            proposed_reply=reply_text,
+            timestamp=datetime.now(UTC).isoformat(),
+            extracted_fields=extracted_fields,
+            deterministic_rule=deterministic_rule,
+        )
+        emit_result = emit_shadow_record(payload)
+        panel_emit_result = {
+            "success": emit_result.success,
+            "skipped": emit_result.skipped,
+            "status_code": emit_result.status_code,
+            "error": emit_result.error,
+        }
+        logger.info(
+            "panel_emit stored_message_id=%s success=%s skipped=%s error=%s",
+            saved_id,
+            emit_result.success,
+            emit_result.skipped,
+            emit_result.error,
+        )
+    # -------------------------------------------------------------------------
+
     return {
         "ok": True,
         "stored_message_id": saved_id,
@@ -360,4 +406,5 @@ def route_update(update: dict[str, Any]) -> dict[str, Any]:
         "admin_notification_result": build_public_admin_notification_result(
             admin_notification_result
         ),
+        "panel_emit_result": panel_emit_result,
     }

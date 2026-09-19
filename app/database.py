@@ -240,6 +240,26 @@ def list_pending_review_items() -> list[dict[str, str | int | None | bool | dict
     return [_build_review_item_dict(row) for row in rows]
 
 
+def get_message_stats() -> dict[str, int]:
+    with closing(get_connection()) as connection:
+        total = connection.execute("SELECT COUNT(*) FROM incoming_messages").fetchone()[0]
+        pending = connection.execute(
+            "SELECT COUNT(*) FROM incoming_messages WHERE needs_review = 1 AND review_status = 'pending'"
+        ).fetchone()[0]
+        reviewed = connection.execute(
+            "SELECT COUNT(*) FROM incoming_messages WHERE review_status = 'reviewed'"
+        ).fetchone()[0]
+        shadow_ok = connection.execute(
+            "SELECT COUNT(*) FROM incoming_messages WHERE llm_status = 'shadow_ok'"
+        ).fetchone()[0]
+        return {
+            "total_messages": int(total),
+            "pending_reviews": int(pending),
+            "reviewed": int(reviewed),
+            "shadow_ok": int(shadow_ok),
+        }
+
+
 def _build_shadow_review_item_dict(row: sqlite3.Row) -> dict[str, str | int | None | bool | dict]:
     item = _build_review_item_dict(row)
     needs_review_ok = row["needs_review_ok"]

@@ -270,6 +270,74 @@ class WebhookRouteTests(unittest.TestCase):
             },
         )
 
+    def test_webhook_rejects_malformed_json_with_400(self):
+        with TestClient(self.main_module.app) as client:
+            response = client.post(
+                "/webhook/bale/test-secret",
+                content="malformed-not-json",
+                headers={"Content-Type": "application/json"},
+            )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["detail"], "Invalid JSON payload")
+
+    def test_webhook_rejects_non_dict_json_with_400(self):
+        with TestClient(self.main_module.app) as client:
+            response = client.post(
+                "/webhook/bale/test-secret",
+                json=["not", "a", "dict"],
+            )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["detail"], "Webhook payload must be a JSON object")
+
+    def test_review_stats_endpoint_returns_metrics(self):
+        with TestClient(self.main_module.app) as client:
+            initial_stats = client.get("/local/reviews/stats").json()
+            self.assertEqual(initial_stats["total_messages"], 0)
+            self.assertEqual(initial_stats["pending_reviews"], 0)
+
+            webhook_response = client.post(
+                "/webhook/bale/test-secret",
+                json=self._payload("Can I use this medicine during pregnancy?", message_id=124),
+            )
+            stored_message_id = webhook_response.json()["stored_message_id"]
+
+            after_insert_stats = client.get("/local/reviews/stats").json()
+            self.assertEqual(after_insert_stats["total_messages"], 1)
+            self.assertEqual(after_insert_stats["pending_reviews"], 1)
+            self.assertEqual(after_insert_stats["reviewed"], 0)
+
+            client.post(f"/local/reviews/{stored_message_id}/mark-reviewed")
+
+            after_review_stats = client.get("/local/reviews/stats").json()
+            self.assertEqual(after_review_stats["total_messages"], 1)
+            self.assertEqual(after_review_stats["pending_reviews"], 0)
+            self.assertEqual(after_review_stats["reviewed"], 1)
+
+    def test_review_stats_endpoint_rejects_non_local_client(self):
+        with TestClient(self.main_module.app, client=("203.0.113.10", 50000)) as client:
+            response = client.get("/local/reviews/stats")
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()["detail"], "Not Found")
+
+    def test_annotate_shadow_review_rejects_invalid_json_with_400(self):
+        with TestClient(self.main_module.app) as client:
+            response = client.post(
+                "/local/shadow-reviews/1/annotate",
+                content="invalid json payload {{{",
+                headers={"Content-Type": "application/json"},
+            )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["detail"], "Invalid JSON payload")
+
+    def test_annotate_shadow_review_rejects_invalid_schema_with_422(self):
+        with TestClient(self.main_module.app) as client:
+            response = client.post(
+                "/local/shadow-reviews/1/annotate",
+                json={"owner_notes": 12345},  # numbers not allowed where string/null expected
+                headers={"Content-Type": "application/json"},
+            )
+        self.assertEqual(response.status_code, 422)
+
 
 if __name__ == "__main__":
     unittest.main()

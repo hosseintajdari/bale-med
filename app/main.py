@@ -7,6 +7,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 
 from .config import get_settings
 from .database import (
+    get_message_stats,
     init_db,
     list_pending_review_items,
     list_shadow_review_items,
@@ -60,6 +61,12 @@ def pending_reviews(request: Request) -> dict[str, list[dict[str, str | int | No
     return {"pending_reviews": list_pending_review_items()}
 
 
+@app.get("/local/reviews/stats")
+def review_stats(request: Request) -> dict[str, int]:
+    require_local_review_request(request)
+    return get_message_stats()
+
+
 @app.post("/local/reviews/{message_id}/mark-reviewed")
 def mark_reviewed(request: Request, message_id: int) -> dict[str, str | int | bool]:
     require_local_review_request(request)
@@ -99,7 +106,14 @@ async def annotate_shadow_review(
 
     content_type = request.headers.get("content-type", "")
     if "application/json" in content_type:
-        payload = ShadowReviewAnnotationPayload.model_validate(await request.json())
+        try:
+            body_json = await request.json()
+        except Exception as exc:
+            raise HTTPException(status_code=400, detail="Invalid JSON payload") from exc
+        try:
+            payload = ShadowReviewAnnotationPayload.model_validate(body_json)
+        except Exception as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
         annotation_input = payload_to_annotation_input(payload)
         redirect_after_save = False
     else:
@@ -140,5 +154,10 @@ async def bale_webhook(secret: str, request: Request) -> dict[str, Any]:
         )
     if secret != settings.bale_webhook_secret:
         raise HTTPException(status_code=404, detail="Not Found")
-    update = await request.json()
+    try:
+        update = await request.json()
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail="Invalid JSON payload") from exc
+    if not isinstance(update, dict):
+        raise HTTPException(status_code=400, detail="Webhook payload must be a JSON object")
     return route_update(update)

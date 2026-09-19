@@ -231,6 +231,8 @@ def build_llm_storage_fields(llm_result) -> LLMStorageFields | None:
 
 def emit_shadow_trace(incoming, saved_id, review_metadata, llm_result):
     import json
+    import os
+    import threading
     import urllib.request
     from datetime import UTC, datetime
     
@@ -259,15 +261,23 @@ def emit_shadow_trace(incoming, saved_id, review_metadata, llm_result):
             }
         ]
     }
-    try:
-        req = urllib.request.Request(
-            "http://localhost:3001/api/pipeline/ingest/shadow-trace",
-            data=json.dumps(payload).encode('utf-8'),
-            headers={'Content-Type': 'application/json'}
-        )
-        urllib.request.urlopen(req, timeout=1)
-    except Exception:
-        pass
+
+    def _send():
+        try:
+            panel_url = os.environ.get(
+                "PANEL_SHADOW_TRACE_URL",
+                "http://localhost:3001/api/pipeline/ingest/shadow-trace",
+            )
+            req = urllib.request.Request(
+                panel_url,
+                data=json.dumps(payload).encode('utf-8'),
+                headers={'Content-Type': 'application/json'}
+            )
+            urllib.request.urlopen(req, timeout=1)
+        except Exception:
+            pass
+
+    threading.Thread(target=_send, daemon=True).start()
 
 
 def route_update(update: dict[str, Any]) -> dict[str, Any]:

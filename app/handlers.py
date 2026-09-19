@@ -7,7 +7,12 @@ from .database import LLMStorageFields, save_incoming_message
 from .llm import classify_message_text, merge_review_metadata
 from .llm.service import should_run_llm_for_message
 from .models import IncomingMessage
-from .replies import build_safe_reply, needs_pharmacist_review
+from .replies import (
+    build_safe_reply,
+    determine_disposition,
+    is_emergency_urgent,
+    needs_pharmacist_review,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -67,17 +72,27 @@ def get_review_metadata(message_text: str | None) -> dict[str, str | bool | None
             "review_status": "not_required",
         }
 
+    if is_emergency_urgent(message_text):
+        return {
+            "needs_review": True,
+            "review_reason": "er_urgent_redline",
+            "review_status": "pending",
+            "disposition": "D2",
+        }
+
     if needs_pharmacist_review(message_text):
         return {
             "needs_review": True,
             "review_reason": "pharmacist_review_required",
             "review_status": "pending",
+            "disposition": "D1",
         }
 
     return {
         "needs_review": False,
         "review_reason": None,
         "review_status": "not_required",
+        "disposition": "D0",
     }
 
 
@@ -247,7 +262,7 @@ def emit_shadow_trace(incoming, saved_id, review_metadata, llm_result):
             "proposedReply": "نیاز به بررسی تخصصی داروساز",
             "timestamp": datetime.now(UTC).isoformat(),
             "confidenceScore": 0.85,
-            "riskLevel": "high_redline" if review_metadata.get("review_reason") == "pharmacist_review_required" else "safe",
+            "riskLevel": "redline" if review_metadata.get("disposition") == "D2" or review_metadata.get("review_reason") == "er_urgent_redline" else ("caution" if review_metadata.get("needs_review") else "safe"),
             "status": "pending",
             "deterministicRuleApplied": str(review_metadata.get("review_reason") or "")
         },

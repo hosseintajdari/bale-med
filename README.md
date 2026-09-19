@@ -20,6 +20,8 @@ Latest deploy state and next steps: [docs/agents/HANDOFF.md](docs/agents/HANDOFF
 - [Long-Term Product Vision](#long-term-product-vision)
 - [Milestone Map](#milestone-map)
 - [MVP Guarantees vs Non-Goals](#mvp-guarantees-vs-non-goals)
+- [System Architecture](#system-architecture)
+- [Project Structure](#project-structure)
 - [Setup on Windows PowerShell](#setup-on-windows-powershell)
 - [Run Locally](#run-locally)
 - [Local Webhook Test](#local-webhook-test)
@@ -96,6 +98,42 @@ Notes:
 | Bale outbound API | Available only when explicitly enabled; keep disabled by default |
 | Deployment | Local-first; VPS runbook in `docs/DEPLOYMENT_VPS.md` and scripts in `deploy/` |
 | Clinical status | Safety-oriented workflow support only; not clinically validated |
+
+## System Architecture
+
+```mermaid
+flowchart TD
+    subgraph Ingress ["1. Webhook Ingress (Public Interface)"]
+        Bale["Bale Messenger Gateway"] -->|"POST /webhook/bale/{secret}"| IngressHandler["Webhook Handler (app/main.py)"]
+        IngressHandler --> Deduplication{"Duplicate Delivery?<br/>(update_id / chat+msg)"}
+    end
+
+    subgraph Core ["2. Deterministic Safety & Routing Core"]
+        Deduplication -->|"Duplicate"| DuplicateAck["Return Existing Stored ID"]
+        Deduplication -->|"New Update"| Router["Update Router (app/handlers.py)"]
+        Router --> SafetyEngine["Deterministic Keyword Safety Floor<br/>(Emergency 115 / Pregnancy / High Risk)"]
+        SafetyEngine --> ResponseSelector["Safe Persian Reply Selection (app/replies.py)"]
+        ResponseSelector --> OutboundGate{"BALE_ENABLE_SENDING<br/>Enabled?"}
+        OutboundGate -->|"true"| OutboundClient["Bale API Client (sendMessage)"]
+        OutboundGate -->|"false (default)"| SafeLog["Dry-Run Operational Log"]
+    end
+
+    subgraph Storage ["3. SQLite Persistence & Audit"]
+        Router --> SQLiteStore[("SQLite Database<br/>(app/database.py)<br/>- incoming_messages<br/>- review_metadata")]
+    end
+
+    subgraph ShadowLLM ["4. Optional LLM Classification (Shadow Mode)"]
+        Router -.->|"Async Background Task"| LLMBridge["LLM Service (app/llm/)"]
+        LLMBridge -.->|"Structured Output Validation"| LLMStore["Store Shadow Topic/Age/Risk in DB"]
+    end
+
+    subgraph Governance ["5. Pharmacist Review & Governance"]
+        SQLiteStore --> LocalEndpoints["Local Review Endpoints (/local/reviews/*)"]
+        LocalEndpoints --> Pharmacist["Pharmacist (Human-in-the-Loop)"]
+        Pharmacist -->|"Acknowledge / Mark Reviewed"| LocalEndpoints
+        Router -.->|"Optional Review Notification"| AdminNotify["Admin Alert (if enabled)"]
+    end
+```
 
 ## Project Structure
 

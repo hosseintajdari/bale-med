@@ -55,6 +55,71 @@ def health_check() -> dict[str, str]:
     return {"status": "ok"}
 
 
+@app.get("/api/v1/rare-medicines/search")
+def search_rare_medicines(
+    q: str | None = None,
+    province: str | None = None,
+    category: str | None = None,
+    scarcity_level: str | None = None,
+    supply_status: str | None = None,
+    limit: int = 20,
+    offset: int = 0,
+) -> dict[str, Any]:
+    from .rare_medicine import get_rare_medicine_service
+
+    service = get_rare_medicine_service()
+    result = service.search(
+        query=q,
+        province=province,
+        category=category,
+        scarcity_level=scarcity_level,
+        supply_status=supply_status,
+        limit=limit,
+        offset=offset,
+    )
+    return result.to_dict()
+
+
+@app.get("/api/v1/rare-medicines/categories")
+def list_rare_medicine_categories() -> dict[str, list[str]]:
+    from .rare_medicine import get_rare_medicine_service
+
+    service = get_rare_medicine_service()
+    return {"categories": service.list_categories()}
+
+
+@app.get("/api/v1/rare-medicines/pharmacies")
+def list_rare_medicine_pharmacies(province: str | None = None) -> dict[str, list[dict[str, str]]]:
+    from .rare_medicine import get_rare_medicine_service
+
+    service = get_rare_medicine_service()
+    return {"pharmacies": service.list_pharmacies(province)}
+
+
+@app.get("/api/v1/rare-medicines/{medicine_id}")
+def get_rare_medicine_detail(medicine_id: str) -> dict[str, Any]:
+    from .rare_medicine import get_rare_medicine_service
+
+    service = get_rare_medicine_service()
+    item = service.get_by_id(medicine_id)
+    if item is None:
+        raise HTTPException(status_code=404, detail="Rare medicine not found")
+    return item.to_dict()
+
+
+@app.get("/local/rare-medicines/summary")
+def local_rare_medicines_summary(request: Request) -> dict[str, Any]:
+    require_local_review_request(request)
+    from .rare_medicine import get_rare_medicine_service
+
+    service = get_rare_medicine_service()
+    return {
+        "total_rare_medicines": service.total_count,
+        "categories": service.list_categories(),
+        "provinces": service.list_provinces(),
+    }
+
+
 @app.get("/local/reviews/pending")
 def pending_reviews(request: Request) -> dict[str, list[dict[str, str | int | None]]]:
     require_local_review_request(request)

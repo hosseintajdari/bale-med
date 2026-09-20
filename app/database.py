@@ -114,6 +114,9 @@ def init_db() -> None:
                 )
                 """
             )
+            from .rare_medicine import RareMedicineQueryService
+            RareMedicineQueryService.init_table(connection)
+            RareMedicineQueryService().seed_table(connection)
 
 
 def save_incoming_message(

@@ -50,6 +50,20 @@ def get_reply_text(
     command = message_text.strip().split(maxsplit=1)[0].lower()
     if command == "/status":
         return get_status_reply(bale_enable_sending)
+    if command == "/rare":
+        from .rare_medicine import get_rare_medicine_service
+        service = get_rare_medicine_service()
+        parts = message_text.strip().split(maxsplit=1)
+        subquery = parts[1].strip() if len(parts) > 1 else ""
+        if not subquery:
+            return (
+                "راهنمای جستجوی داروی کمیاب:\n"
+                "جهت استعلام موجودی سهمیه‌ای و داروخانه‌های توزیع، نام دارو را به همراه دستور ارسال کنید:\n"
+                "مثال: /rare هرسپتین یا /rare IVIG\n\n"
+                "سامانه تلفنی کمبودهای دارویی وزارت بهداشت: سامانه ۱۹۰"
+            )
+        result = service.search(query=subquery)
+        return service.format_search_summary_reply(result)
     if command in COMMAND_REPLIES:
         return COMMAND_REPLIES[command]
 
@@ -65,7 +79,7 @@ def get_review_metadata(message_text: str | None) -> dict[str, str | bool | None
         }
 
     command = message_text.strip().split(maxsplit=1)[0].lower()
-    if command in COMMAND_REPLIES:
+    if command in COMMAND_REPLIES or command == "/rare":
         return {
             "needs_review": False,
             "review_reason": None,

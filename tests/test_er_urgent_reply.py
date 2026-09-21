@@ -2,7 +2,6 @@ import unittest
 
 from app.handlers import get_review_metadata
 from app.replies import (
-    EMERGENCY_REDLINE_KEYWORDS,
     ER_URGENT_REPLY,
     ESCALATION_REPLY,
     SAFE_INTAKE_REPLY,

@@ -9,7 +9,6 @@ from .llm.service import should_run_llm_for_message
 from .models import IncomingMessage
 from .replies import (
     build_safe_reply,
-    determine_disposition,
     is_emergency_urgent,
     needs_pharmacist_review,
 )

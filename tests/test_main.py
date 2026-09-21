@@ -338,6 +338,36 @@ class WebhookRouteTests(unittest.TestCase):
             )
         self.assertEqual(response.status_code, 422)
 
+    def test_lexicon_resolve_endpoint_exact_and_fuzzy(self):
+        with TestClient(self.main_module.app) as client:
+            # 1. Exact match
+            res = client.get("/api/v1/lexicon/resolve", params={"q": "استامینوفن"})
+            self.assertEqual(res.status_code, 200)
+            data = res.json()
+            self.assertTrue(data["matched"])
+            self.assertEqual(data["canonical_entry"]["generic_name"], "Acetaminophen")
+            self.assertFalse(data["is_controlled"])
+
+            # 2. Controlled substance
+            res_controlled = client.get("/api/v1/lexicon/resolve", params={"q": "استامینوفن کدئین"})
+            self.assertEqual(res_controlled.status_code, 200)
+            data_ctrl = res_controlled.json()
+            self.assertTrue(data_ctrl["matched"])
+            self.assertTrue(data_ctrl["is_controlled"])
+
+    def test_lexicon_controlled_list_endpoint(self):
+        with TestClient(self.main_module.app) as client:
+            res = client.get("/api/v1/lexicon/controlled")
+            self.assertEqual(res.status_code, 200)
+            data = res.json()
+            self.assertIn("controlled_drugs", data)
+            self.assertGreater(len(data["controlled_drugs"]), 0)
+            names = [d["generic_name"] for d in data["controlled_drugs"]]
+            self.assertIn("Acetaminophen Codeine", names)
+            self.assertIn("Diazepam", names)
+            self.assertIn("Clonazepam", names)
+
 
 if __name__ == "__main__":
     unittest.main()
+

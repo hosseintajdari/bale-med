@@ -357,3 +357,18 @@ class DrugLexiconService:
             needs_confirmation=False,
             clarification_prompt=None,
         )
+
+    def get_controlled_drugs(self) -> list[DrugLexiconEntry]:
+        """Return all controlled / psychotropic substances in the catalog."""
+        return [entry for entry in self.catalog if entry.is_controlled]
+
+
+_drug_lexicon_service: DrugLexiconService | None = None
+
+
+def get_drug_lexicon_service() -> DrugLexiconService:
+    global _drug_lexicon_service
+    if _drug_lexicon_service is None:
+        _drug_lexicon_service = DrugLexiconService()
+    return _drug_lexicon_service
+

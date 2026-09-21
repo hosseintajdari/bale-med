@@ -120,6 +120,24 @@ def local_rare_medicines_summary(request: Request) -> dict[str, Any]:
     }
 
 
+@app.get("/api/v1/lexicon/resolve")
+def resolve_drug_lexicon(q: str = "", min_confidence: float = 0.60) -> dict[str, Any]:
+    from .drug_lexicon import get_drug_lexicon_service
+
+    service = get_drug_lexicon_service()
+    result = service.match_drug(user_query=q, min_confidence=min_confidence)
+    return result.to_dict()
+
+
+@app.get("/api/v1/lexicon/controlled")
+def list_controlled_drugs() -> dict[str, list[dict[str, Any]]]:
+    from .drug_lexicon import get_drug_lexicon_service
+
+    service = get_drug_lexicon_service()
+    return {"controlled_drugs": [d.to_dict() for d in service.get_controlled_drugs()]}
+
+
+
 @app.get("/local/reviews/pending")
 def pending_reviews(request: Request) -> dict[str, list[dict[str, str | int | None]]]:
     require_local_review_request(request)

@@ -11,9 +11,8 @@ from __future__ import annotations
 import json
 import re
 import sqlite3
-from dataclasses import asdict, dataclass, field
-from pathlib import Path
-from typing import Any, Iterable
+from dataclasses import asdict, dataclass
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -60,7 +59,7 @@ class RareMedicineItem:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "RareMedicineItem":
+    def from_dict(cls, data: dict[str, Any]) -> RareMedicineItem:
         pharmacies = [
             DesignatedPharmacy(**p) if isinstance(p, dict) else p
             for p in data.get("designated_pharmacies", [])

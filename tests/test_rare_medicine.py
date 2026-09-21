@@ -6,21 +6,17 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from fastapi.testclient import TestClient
-
 from app.database import init_db
 from app.handlers import route_update
 from app.main import app
 from app.rare_medicine import (
-    DEFAULT_RARE_MEDICINE_CATALOG,
     DesignatedPharmacy,
     RareMedicineItem,
     RareMedicineQueryService,
-    build_patient_guidance_text,
-    get_rare_medicine_service,
     normalize_query_text,
     reset_rare_medicine_service_for_test,
 )
+from fastapi.testclient import TestClient
 
 
 class RareMedicineServiceTests(unittest.TestCase):

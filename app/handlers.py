@@ -296,10 +296,14 @@ def emit_shadow_trace(incoming, saved_id, review_metadata, llm_result):
                 "PANEL_SHADOW_TRACE_URL",
                 "http://localhost:3001/api/pipeline/ingest/shadow-trace",
             )
+            token = os.environ.get("PANEL_OPERATOR_TOKEN") or os.environ.get("PANEL_API_SECRET")
+            headers = {"Content-Type": "application/json"}
+            if token:
+                headers["Authorization"] = f"Bearer {token}"
             req = urllib.request.Request(
                 panel_url,
                 data=json.dumps(payload).encode('utf-8'),
-                headers={'Content-Type': 'application/json'}
+                headers=headers
             )
             urllib.request.urlopen(req, timeout=1)
         except Exception:

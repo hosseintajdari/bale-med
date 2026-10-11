@@ -371,6 +371,58 @@ class HandlerTests(unittest.TestCase):
         self.assertEqual(count, 1)
         self.assertEqual(row, ("update:987",))
 
+    def test_new_and_duplicate_messages_make_no_network_requests(self):
+        original_cwd = Path.cwd()
+        original_values = {key: os.environ.get(key) for key in self.ENV_KEYS}
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            try:
+                os.chdir(temp_dir)
+                for key in original_values:
+                    os.environ.pop(key, None)
+
+                Path(".env").write_text(
+                    "\n".join(
+                        [
+                            "BALE_BOT_TOKEN=test-token",
+                            "BALE_API_BASE_URL=https://example.test",
+                            "BALE_ENABLE_SENDING=false",
+                            "DATABASE_PATH=test.db",
+                            "BALE_REPLY_TEXT=سلام حسین جان!",
+                            "BALE_WEBHOOK_SECRET=test-secret",
+                        ]
+                    ),
+                    encoding="utf-8",
+                )
+
+                init_db()
+                payload = {
+                    "update_id": 988,
+                    "message": {
+                        "message_id": 124,
+                        "chat": {"id": "demo-chat"},
+                        "text": "Hello pharmacy",
+                    },
+                }
+                with patch("urllib.request.urlopen") as urlopen:
+                    first_result = route_update(payload)
+                    duplicate_result = route_update(payload)
+
+                request_count = urlopen.call_count
+            finally:
+                os.chdir(original_cwd)
+                for key, value in original_values.items():
+                    if value is None:
+                        os.environ.pop(key, None)
+                    else:
+                        os.environ[key] = value
+
+        self.assertTrue(first_result["message_inserted"])
+        self.assertFalse(first_result["duplicate_delivery"])
+        self.assertFalse(duplicate_result["message_inserted"])
+        self.assertTrue(duplicate_result["duplicate_delivery"])
+        self.assertEqual(request_count, 0)
+
     def test_duplicate_delivery_uses_chat_and_message_id_when_update_id_is_missing(self):
         original_cwd = Path.cwd()
         original_values = {key: os.environ.get(key) for key in self.ENV_KEYS}

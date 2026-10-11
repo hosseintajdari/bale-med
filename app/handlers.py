@@ -257,61 +257,6 @@ def build_llm_storage_fields(llm_result) -> LLMStorageFields | None:
         status=llm_result.audit.status,
     )
 
-def emit_shadow_trace(incoming, saved_id, review_metadata, llm_result):
-    import json
-    import os
-    import threading
-    import urllib.request
-    from datetime import UTC, datetime
-    
-    payload = {
-        "engine_id": "bale-med",
-        "shadow_item": {
-            "id": f"bmed-{saved_id}",
-            "sessionId": str(incoming.chat_id or "unknown"),
-            "channel": "bale",
-            "senderDisplay": str(incoming.chat_id or "unknown"),
-            "userMessage": incoming.text or "",
-            "proposedReply": "نیاز به بررسی تخصصی داروساز",
-            "timestamp": datetime.now(UTC).isoformat(),
-            "confidenceScore": 0.85,
-            "riskLevel": "redline" if review_metadata.get("disposition") == "D2" or review_metadata.get("review_reason") == "er_urgent_redline" else ("caution" if review_metadata.get("needs_review") else "safe"),
-            "status": "pending",
-            "deterministicRuleApplied": str(review_metadata.get("review_reason") or "")
-        },
-        "pipeline_traces": [
-            {
-                "stage": "GATEWAY_INGEST",
-                "title": "Received via Bale Webhook",
-                "status": "passed",
-                "detail": "Parsed successfully",
-                "durationMs": 5
-            }
-        ]
-    }
-
-    def _send():
-        try:
-            panel_url = os.environ.get(
-                "PANEL_SHADOW_TRACE_URL",
-                "http://localhost:3001/api/pipeline/ingest/shadow-trace",
-            )
-            token = os.environ.get("PANEL_OPERATOR_TOKEN") or os.environ.get("PANEL_API_SECRET")
-            headers = {"Content-Type": "application/json"}
-            if token:
-                headers["Authorization"] = f"Bearer {token}"
-            req = urllib.request.Request(
-                panel_url,
-                data=json.dumps(payload).encode('utf-8'),
-                headers=headers
-            )
-            urllib.request.urlopen(req, timeout=1)
-        except Exception:
-            pass
-
-    threading.Thread(target=_send, daemon=True).start()
-
-
 def route_update(update: dict[str, Any]) -> dict[str, Any]:
     incoming = IncomingMessage.from_update(update)
     settings = get_settings()
@@ -430,8 +375,6 @@ def route_update(update: dict[str, Any]) -> dict[str, Any]:
             admin_notification_result.get("skipped"),
             review_metadata["review_status"],
         )
-
-    emit_shadow_trace(incoming, saved_id, review_metadata, llm_result)
 
     return {
         "ok": True,

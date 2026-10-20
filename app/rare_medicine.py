@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import re
 import sqlite3
+from contextlib import closing
 from dataclasses import asdict, dataclass
 from typing import Any
 
@@ -764,9 +765,15 @@ _rare_medicine_service: RareMedicineQueryService | None = None
 
 def get_rare_medicine_service(connection: sqlite3.Connection | None = None) -> RareMedicineQueryService:
     global _rare_medicine_service
-    if _rare_medicine_service is None or connection is not None:
-        _rare_medicine_service = RareMedicineQueryService(connection=connection)
-    return _rare_medicine_service
+    if connection is not None:
+        return RareMedicineQueryService(connection=connection)
+
+    # Read the persisted catalog on every call so operator edits are reflected
+    # in API responses and bot queries instead of serving a stale code snapshot.
+    from .config import get_settings
+
+    with closing(sqlite3.connect(get_settings().database_path)) as database:
+        return RareMedicineQueryService(connection=database)
 
 
 def reset_rare_medicine_service_for_test() -> None:

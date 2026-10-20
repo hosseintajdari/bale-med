@@ -202,7 +202,11 @@ async def annotate_shadow_review(
         redirect_after_save = False
     else:
         body = await request.body()
-        parsed_form = parse_qs(body.decode("utf-8"), keep_blank_values=True)
+        try:
+            decoded_form = body.decode("utf-8")
+        except UnicodeDecodeError as exc:
+            raise HTTPException(status_code=400, detail="Invalid form encoding") from exc
+        parsed_form = parse_qs(decoded_form, keep_blank_values=True)
         form_data = {key: values[0] if values else "" for key, values in parsed_form.items()}
         try:
             annotation_input = form_to_annotation_input(form_data)

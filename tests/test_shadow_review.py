@@ -7,7 +7,12 @@ import unittest
 from pathlib import Path
 
 from app.database import init_db
-from app.shadow_review import form_to_annotation_input, parse_tristate_choice
+from app.shadow_review import (
+    MAX_CORRECTED_DRUG_NAME_LENGTH,
+    MAX_OWNER_NOTES_LENGTH,
+    form_to_annotation_input,
+    parse_tristate_choice,
+)
 from fastapi.testclient import TestClient
 
 
@@ -201,6 +206,23 @@ class ShadowReviewRouteTests(unittest.TestCase):
 
         self.assertIsNotNone(listed["annotation"])
         self.assertFalse(listed["annotation"]["drug_name_ok"])
+
+    def test_shadow_review_form_rejects_overlong_text_fields(self):
+        stored_message_id = self._seed_shadow_message()
+        overlong_fields = [
+            ("corrected_drug_name", MAX_CORRECTED_DRUG_NAME_LENGTH + 1),
+            ("owner_notes", MAX_OWNER_NOTES_LENGTH + 1),
+        ]
+
+        with TestClient(self.main_module.app) as client:
+            for field_name, length in overlong_fields:
+                with self.subTest(field=field_name):
+                    response = client.post(
+                        f"/local/shadow-reviews/{stored_message_id}/annotate",
+                        content=f"{field_name}=" + ("x" * length),
+                        headers={"Content-Type": "application/x-www-form-urlencoded"},
+                    )
+                    self.assertEqual(response.status_code, 422)
 
     def test_shadow_review_form_post_redirects_back_to_ui(self):
         stored_message_id = self._seed_shadow_message()

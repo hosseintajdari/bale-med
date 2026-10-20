@@ -38,6 +38,26 @@ class TestERUrgentReplyD2(unittest.TestCase):
                 self.assertNotIn("قرص", reply)
                 self.assertNotIn("تجویز", reply)
 
+    def test_emergency_matching_normalizes_persian_and_arabic_spellings(self):
+        emergency_messages = [
+            "درد قفسه سينه",  # Arabic yeh
+            "تنگي نفس",  # Arabic yeh
+            "حساسيت شديد",  # Arabic yeh
+            "خونريزي شديد",  # Arabic yeh
+            "بيهوشي",  # Arabic yeh
+            "درد قفسه‌سینه",  # ZWNJ in place of a space
+            "درد قفســه سینه",  # Arabic tatweel
+        ]
+        for msg in emergency_messages:
+            with self.subTest(msg=msg):
+                self.assertTrue(is_emergency_urgent(msg))
+                self.assertEqual(determine_disposition(msg), "D2")
+                self.assertEqual(build_safe_reply(msg, "default"), ER_URGENT_REPLY)
+                metadata = get_review_metadata(msg)
+                self.assertTrue(metadata["needs_review"])
+                self.assertEqual(metadata["review_status"], "pending")
+                self.assertEqual(metadata["disposition"], "D2")
+
     def test_d2_escalates_to_pharmacist_review_without_bypass(self):
         msg = "بیمار درد قفسه سینه دارد"
         metadata = get_review_metadata(msg)

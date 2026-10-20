@@ -122,6 +122,25 @@ class DatabaseBackupTests(unittest.TestCase):
 
         self.assertEqual(row, ("demo-chat", "123", "Hello pharmacy"))
 
+    def test_restore_updates_database_through_existing_sqlite_connection(self):
+        init_db()
+        with sqlite3.connect("test.db") as connection:
+            connection.execute(
+                "INSERT INTO incoming_messages (received_at, chat_id, message_id, raw_update) "
+                "VALUES ('now', 'demo-chat', 'before', '{}')"
+            )
+        backup = create_sqlite_backup()
+        with sqlite3.connect(backup.backup_path) as connection:
+            connection.execute("DELETE FROM incoming_messages")
+
+        with sqlite3.connect("test.db") as live_connection:
+            restore_sqlite_backup(backup.backup_path, overwrite=True)
+            count = live_connection.execute(
+                "SELECT COUNT(*) FROM incoming_messages"
+            ).fetchone()[0]
+
+        self.assertEqual(count, 0)
+
     def test_restore_sqlite_backup_creates_database_parent_directory(self):
         init_db()
         backup = create_sqlite_backup()

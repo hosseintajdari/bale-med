@@ -1,5 +1,4 @@
 import json
-import shutil
 import sqlite3
 from contextlib import closing
 from dataclasses import dataclass
@@ -431,7 +430,10 @@ def create_sqlite_backup(backup_dir: str | Path = "backups") -> BackupResult:
     backup_path = destination_dir / backup_name
 
     destination_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(source_path, backup_path)
+    with closing(sqlite3.connect(source_path)) as source, closing(
+        sqlite3.connect(backup_path)
+    ) as destination:
+        source.backup(destination)
 
     return BackupResult(source_path=source_path, backup_path=backup_path, created=True)
 
@@ -447,6 +449,11 @@ def restore_sqlite_backup(backup_path: str | Path, overwrite: bool = False) -> R
         raise FileExistsError(f"Refusing to overwrite existing SQLite database: {destination_path}")
 
     destination_path.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(source_path, destination_path)
+    # Restore through SQLite so existing connections keep a coherent database
+    # handle and SQLite coordinates locks with any in-flight transactions.
+    with closing(sqlite3.connect(source_path)) as source, closing(
+        sqlite3.connect(destination_path)
+    ) as destination:
+        source.backup(destination)
 
     return RestoreResult(backup_path=source_path, restored_path=destination_path, restored=True)

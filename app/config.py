@@ -13,6 +13,7 @@ class Settings:
     database_path: str
     bale_reply_text: str
     bale_webhook_secret: str
+    bale_local_review_token: str
     bale_store_raw_updates: bool
     bale_admin_chat_id: str
     bale_enable_admin_notifications: bool
@@ -61,6 +62,7 @@ def get_settings() -> Settings:
         database_path=os.getenv("DATABASE_PATH", "bale_bot.db"),
         bale_reply_text=os.getenv("BALE_REPLY_TEXT", default_reply_text),
         bale_webhook_secret=os.getenv("BALE_WEBHOOK_SECRET", ""),
+        bale_local_review_token=os.getenv("BALE_LOCAL_REVIEW_TOKEN", ""),
         bale_store_raw_updates=_to_bool(os.getenv("BALE_STORE_RAW_UPDATES"), default=False),
         bale_admin_chat_id=os.getenv("BALE_ADMIN_CHAT_ID", ""),
         bale_enable_admin_notifications=_to_bool(

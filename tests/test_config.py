@@ -18,6 +18,7 @@ class SettingsTests(unittest.TestCase):
                 "DATABASE_PATH",
                 "BALE_REPLY_TEXT",
                 "BALE_WEBHOOK_SECRET",
+                "BALE_LOCAL_REVIEW_TOKEN",
                 "BALE_ADMIN_CHAT_ID",
                 "BALE_ENABLE_ADMIN_NOTIFICATIONS",
             )
@@ -38,6 +39,7 @@ class SettingsTests(unittest.TestCase):
                             "DATABASE_PATH=test.db",
                             "BALE_REPLY_TEXT=سلام حسین جان!",
                             "BALE_WEBHOOK_SECRET=test-secret",
+                            "BALE_LOCAL_REVIEW_TOKEN=review-token",
                             "BALE_ADMIN_CHAT_ID=admin-chat",
                             "BALE_ENABLE_ADMIN_NOTIFICATIONS=true",
                         ]
@@ -60,6 +62,7 @@ class SettingsTests(unittest.TestCase):
         self.assertEqual(settings.database_path, "test.db")
         self.assertEqual(settings.bale_reply_text, "سلام حسین جان!")
         self.assertEqual(settings.bale_webhook_secret, "test-secret")
+        self.assertEqual(settings.bale_local_review_token, "review-token")
         self.assertEqual(settings.bale_admin_chat_id, "admin-chat")
         self.assertTrue(settings.bale_enable_admin_notifications)
         self.assertFalse(settings.bale_enable_llm)
@@ -76,6 +79,7 @@ class SettingsTests(unittest.TestCase):
                 "DATABASE_PATH",
                 "BALE_REPLY_TEXT",
                 "BALE_WEBHOOK_SECRET",
+                "BALE_LOCAL_REVIEW_TOKEN",
                 "BALE_ADMIN_CHAT_ID",
                 "BALE_ENABLE_ADMIN_NOTIFICATIONS",
             )

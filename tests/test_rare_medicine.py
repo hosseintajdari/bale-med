@@ -19,6 +19,18 @@ from app.rare_medicine import (
 from fastapi.testclient import TestClient
 
 
+class AuthorizedTestClient(TestClient):
+    def __init__(self, app, **kwargs):
+        kwargs.setdefault(
+            "headers",
+            {"Authorization": "Basic cmV2aWV3OnRlc3QtbG9jYWwtcmV2aWV3LXRva2Vu"},
+        )
+        super().__init__(app, **kwargs)
+
+
+TestClient = AuthorizedTestClient
+
+
 class RareMedicineServiceTests(unittest.TestCase):
     def setUp(self):
         reset_rare_medicine_service_for_test()
@@ -178,7 +190,9 @@ class RareMedicineBotAndApiTests(unittest.TestCase):
         self.temp_dir = tempfile.TemporaryDirectory()
         self.db_path = Path(self.temp_dir.name) / "test.db"
         self.orig_db = os.environ.get("DATABASE_PATH")
+        self.orig_review_token = os.environ.get("BALE_LOCAL_REVIEW_TOKEN")
         os.environ["DATABASE_PATH"] = str(self.db_path)
+        os.environ["BALE_LOCAL_REVIEW_TOKEN"] = "test-local-review-token"
         init_db()
         reset_rare_medicine_service_for_test()
 
@@ -188,6 +202,10 @@ class RareMedicineBotAndApiTests(unittest.TestCase):
             os.environ["DATABASE_PATH"] = self.orig_db
         else:
             os.environ.pop("DATABASE_PATH", None)
+        if self.orig_review_token is not None:
+            os.environ["BALE_LOCAL_REVIEW_TOKEN"] = self.orig_review_token
+        else:
+            os.environ.pop("BALE_LOCAL_REVIEW_TOKEN", None)
         self.temp_dir.cleanup()
 
     def test_api_reads_operator_edits_from_sqlite_catalog(self):

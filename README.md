@@ -250,18 +250,24 @@ Dry-run behavior note: keep `BALE_ENABLE_SENDING=false` so webhook processing st
 
 ## Local Pending Review List
 
-After the app is running locally, use this read-only JSON endpoint to see messages waiting for pharmacist review:
+Set a long random `BALE_LOCAL_REVIEW_TOKEN` in `.env`. Review routes require HTTP Basic authentication; use the token as the password. This also protects the routes when a reverse proxy strips forwarding headers.
+
+After the app is running, use this read-only JSON endpoint to see messages waiting for pharmacist review. PowerShell prompts for the token:
 
 ```powershell
-Invoke-RestMethod -Method Get -Uri http://127.0.0.1:8000/local/reviews/pending
+Invoke-RestMethod -Method Get `
+  -Uri http://127.0.0.1:8000/local/reviews/pending `
+  -Authentication Basic -Credential (Get-Credential -UserName review -Message "Local review token")
 ```
 
-The endpoint returns only pending review rows and does not include stored raw webhook payloads. It is intended for local inspection, not public deployment.
+The endpoint returns only pending review rows and does not include stored raw webhook payloads.
 
 To mark a pending review item as reviewed locally, use the stored message `id` from the pending list:
 
 ```powershell
-Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/local/reviews/1/mark-reviewed
+Invoke-RestMethod -Method Post `
+  -Uri http://127.0.0.1:8000/local/reviews/1/mark-reviewed `
+  -Authentication Basic -Credential (Get-Credential -UserName review -Message "Local review token")
 ```
 
 This changes only `pending` items to `reviewed`. Missing items return 404, and already reviewed items return a safe unchanged response.

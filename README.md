@@ -14,6 +14,8 @@ This is not a deployed production system and not a clinically validated product.
 
 Latest deploy state and next steps: [docs/agents/HANDOFF.md](docs/agents/HANDOFF.md).
 
+For the current drug-price transparency platform, see the separate [Bale-Med-Prices repository](https://github.com/hosseintajdari/Bale-Med-Prices).
+
 ## Table of Contents
 
 - [Quick Start (Any OS)](#quick-start-any-os)

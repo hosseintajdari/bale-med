@@ -15,6 +15,19 @@ from app.shadow_review import (
 )
 from fastapi.testclient import TestClient
 
+LOCAL_REVIEW_TEST_HEADERS = {
+    "Authorization": "Basic cmV2aWV3OnRlc3QtbG9jYWwtcmV2aWV3LXRva2Vu"
+}
+
+
+class AuthorizedTestClient(TestClient):
+    def __init__(self, app, **kwargs):
+        kwargs.setdefault("headers", LOCAL_REVIEW_TEST_HEADERS)
+        super().__init__(app, **kwargs)
+
+
+TestClient = AuthorizedTestClient
+
 
 def _insert_shadow_ok_message(
     connection: sqlite3.Connection,
@@ -99,6 +112,7 @@ class ShadowReviewRouteTests(unittest.TestCase):
                 "DATABASE_PATH",
                 "BALE_REPLY_TEXT",
                 "BALE_WEBHOOK_SECRET",
+                "BALE_LOCAL_REVIEW_TOKEN",
             )
         }
         self.temp_dir = tempfile.TemporaryDirectory()
@@ -112,6 +126,7 @@ class ShadowReviewRouteTests(unittest.TestCase):
         os.environ["DATABASE_PATH"] = "test.db"
         os.environ["BALE_REPLY_TEXT"] = "سلام"
         os.environ["BALE_WEBHOOK_SECRET"] = "test-secret"
+        os.environ["BALE_LOCAL_REVIEW_TOKEN"] = "test-local-review-token"
 
         init_db()
         import app.main as main_module
@@ -279,10 +294,10 @@ class ShadowReviewRouteTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 404)
 
-    def test_shadow_review_routes_reject_non_local_client(self):
+    def test_shadow_review_routes_reject_missing_token_from_non_local_client(self):
         self._seed_shadow_message()
 
-        with TestClient(self.main_module.app, client=("203.0.113.10", 50000)) as client:
+        with TestClient(self.main_module.app, client=("203.0.113.10", 50000), headers={}) as client:
             list_response = client.get("/local/shadow-reviews")
             ui_response = client.get("/local/shadow-reviews/ui")
             annotate_response = client.post(
@@ -290,9 +305,9 @@ class ShadowReviewRouteTests(unittest.TestCase):
                 json={"needs_review_ok": True},
             )
 
-        self.assertEqual(list_response.status_code, 404)
-        self.assertEqual(ui_response.status_code, 404)
-        self.assertEqual(annotate_response.status_code, 404)
+        self.assertEqual(list_response.status_code, 401)
+        self.assertEqual(ui_response.status_code, 401)
+        self.assertEqual(annotate_response.status_code, 401)
 
 
 if __name__ == "__main__":

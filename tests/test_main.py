@@ -12,6 +12,19 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 from starlette.requests import Request
 
+LOCAL_REVIEW_TEST_HEADERS = {
+    "Authorization": "Basic cmV2aWV3OnRlc3QtbG9jYWwtcmV2aWV3LXRva2Vu"
+}
+
+
+class AuthorizedTestClient(TestClient):
+    def __init__(self, app, **kwargs):
+        kwargs.setdefault("headers", LOCAL_REVIEW_TEST_HEADERS)
+        super().__init__(app, **kwargs)
+
+
+TestClient = AuthorizedTestClient
+
 
 class WebhookRouteTests(unittest.TestCase):
     def setUp(self):
@@ -25,6 +38,7 @@ class WebhookRouteTests(unittest.TestCase):
                 "DATABASE_PATH",
                 "BALE_REPLY_TEXT",
                 "BALE_WEBHOOK_SECRET",
+                "BALE_LOCAL_REVIEW_TOKEN",
             )
         }
         self.temp_dir = tempfile.TemporaryDirectory()
@@ -38,6 +52,7 @@ class WebhookRouteTests(unittest.TestCase):
         os.environ["DATABASE_PATH"] = "test.db"
         os.environ["BALE_REPLY_TEXT"] = "سلام حسین جان!"
         os.environ["BALE_WEBHOOK_SECRET"] = "test-secret"
+        os.environ["BALE_LOCAL_REVIEW_TOKEN"] = "test-local-review-token"
 
         import app.main as main_module
 
@@ -187,22 +202,32 @@ class WebhookRouteTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"pending_reviews": []})
 
-    def test_pending_reviews_endpoint_rejects_non_local_client(self):
-        with TestClient(self.main_module.app, client=("203.0.113.10", 50000)) as client:
+    def test_pending_reviews_endpoint_rejects_missing_token_from_non_local_client(self):
+        with TestClient(self.main_module.app, client=("203.0.113.10", 50000), headers={}) as client:
             response = client.get("/local/reviews/pending")
 
-        self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.json()["detail"], "Not Found")
+        self.assertEqual(response.status_code, 401)
 
-    def test_pending_reviews_endpoint_rejects_forwarded_public_client(self):
+    def test_authenticated_review_endpoint_works_behind_header_stripping_proxy(self):
+        with TestClient(self.main_module.app, client=("127.0.0.1", 50000)) as client:
+            response = client.get("/local/reviews/pending")
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_review_endpoint_rejects_missing_token_even_when_proxy_strips_forwarded_headers(self):
+        with TestClient(self.main_module.app, headers={}) as client:
+            response = client.get("/local/reviews/pending")
+
+        self.assertEqual(response.status_code, 401)
+
+    def test_authenticated_pending_reviews_works_with_forwarded_header(self):
         with TestClient(self.main_module.app) as client:
             response = client.get(
                 "/local/reviews/pending",
                 headers={"X-Forwarded-For": "203.0.113.10"},
             )
 
-        self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.json()["detail"], "Not Found")
+        self.assertEqual(response.status_code, 200)
 
     def test_pending_review_item_can_be_marked_reviewed(self):
         with TestClient(self.main_module.app) as client:
@@ -257,7 +282,7 @@ class WebhookRouteTests(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()["detail"], "Not Found")
 
-    def test_mark_reviewed_endpoint_rejects_forwarded_public_client(self):
+    def test_authenticated_mark_reviewed_works_with_forwarded_header(self):
         with TestClient(self.main_module.app) as client:
             webhook_response = client.post(
                 "/webhook/bale/test-secret",
@@ -270,8 +295,7 @@ class WebhookRouteTests(unittest.TestCase):
                 headers={"X-Forwarded-For": "203.0.113.10"},
             )
 
-        self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.json()["detail"], "Not Found")
+        self.assertEqual(response.status_code, 200)
 
         connection = sqlite3.connect("test.db")
         try:
@@ -282,7 +306,7 @@ class WebhookRouteTests(unittest.TestCase):
         finally:
             connection.close()
 
-        self.assertEqual(row, ("pending",))
+        self.assertEqual(row, ("reviewed",))
 
     def test_mark_reviewed_endpoint_returns_404_for_missing_item(self):
         with TestClient(self.main_module.app) as client:
@@ -357,11 +381,10 @@ class WebhookRouteTests(unittest.TestCase):
             self.assertEqual(after_review_stats["pending_reviews"], 0)
             self.assertEqual(after_review_stats["reviewed"], 1)
 
-    def test_review_stats_endpoint_rejects_non_local_client(self):
-        with TestClient(self.main_module.app, client=("203.0.113.10", 50000)) as client:
+    def test_review_stats_endpoint_rejects_missing_token_from_non_local_client(self):
+        with TestClient(self.main_module.app, client=("203.0.113.10", 50000), headers={}) as client:
             response = client.get("/local/reviews/stats")
-        self.assertEqual(response.status_code, 404)
-        self.assertEqual(response.json()["detail"], "Not Found")
+        self.assertEqual(response.status_code, 401)
 
     def test_annotate_shadow_review_rejects_invalid_json_with_400(self):
         with TestClient(self.main_module.app) as client:

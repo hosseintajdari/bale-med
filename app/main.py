@@ -1,3 +1,6 @@
+import base64
+import binascii
+import hmac
 from contextlib import asynccontextmanager
 from typing import Any
 from urllib.parse import parse_qs
@@ -24,17 +27,29 @@ from .shadow_review import (
 )
 from .shadow_review_ui import build_shadow_review_ui_page
 
-LOCAL_REVIEW_CLIENT_HOSTS = {"127.0.0.1", "::1", "localhost", "testclient"}
-FORWARDED_CLIENT_HEADERS = {"forwarded", "x-forwarded-for", "x-real-ip"}
-
 
 def require_local_review_request(request: Request) -> None:
-    client_host = request.client.host if request.client else ""
-    # Reverse proxies connect from loopback, so forwarded client headers mean
-    # the request is not a direct local operator request.
-    has_forwarded_client = any(request.headers.get(header) for header in FORWARDED_CLIENT_HEADERS)
-    if has_forwarded_client or client_host not in LOCAL_REVIEW_CLIENT_HOSTS:
-        raise HTTPException(status_code=404, detail="Not Found")
+    expected_token = get_settings().bale_local_review_token
+    authorization = request.headers.get("authorization", "")
+    scheme, separator, encoded_credentials = authorization.partition(" ")
+    if not expected_token or not separator or scheme.lower() != "basic":
+        raise HTTPException(
+            status_code=401,
+            detail="Local review authentication required",
+            headers={"WWW-Authenticate": 'Basic realm="Bale local review"'},
+        )
+
+    try:
+        credentials = base64.b64decode(encoded_credentials, validate=True).decode("utf-8")
+    except (binascii.Error, UnicodeDecodeError):
+        credentials = ""
+    _, credential_separator, supplied_token = credentials.partition(":")
+    if not credential_separator or not hmac.compare_digest(supplied_token, expected_token):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid local review credentials",
+            headers={"WWW-Authenticate": 'Basic realm="Bale local review"'},
+        )
 
 
 @asynccontextmanager

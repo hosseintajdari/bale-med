@@ -115,6 +115,7 @@ def merge_review_metadata(
             "needs_review": True,
             "review_reason": reason,
             "review_status": "pending",
+            "disposition": "D1",
         }
 
     return dict(keyword_metadata)

@@ -57,6 +57,7 @@ class LLMServiceTests(unittest.TestCase):
             "needs_review": True,
             "review_reason": "pharmacist_review_required",
             "review_status": "pending",
+            "disposition": "D2",
         }
         llm_result = LLMRunResult(
             extracted=LLMExtractedFields(
@@ -97,6 +98,7 @@ class LLMServiceTests(unittest.TestCase):
             "needs_review": False,
             "review_reason": None,
             "review_status": "not_required",
+            "disposition": "D0",
         }
         llm_result = LLMRunResult(
             extracted=LLMExtractedFields(
@@ -133,12 +135,14 @@ class LLMServiceTests(unittest.TestCase):
         self.assertTrue(merged["needs_review"])
         self.assertEqual(merged["review_reason"], "llm_review_required")
         self.assertEqual(merged["review_status"], "pending")
+        self.assertEqual(merged["disposition"], "D1")
 
     def test_merge_review_metadata_escalates_on_llm_failure_in_live_mode(self):
         keyword_metadata = {
             "needs_review": False,
             "review_reason": None,
             "review_status": "not_required",
+            "disposition": "D0",
         }
         llm_result = LLMRunResult(
             extracted=None,
@@ -159,6 +163,7 @@ class LLMServiceTests(unittest.TestCase):
         merged = merge_review_metadata(keyword_metadata, llm_result, settings)
         self.assertTrue(merged["needs_review"])
         self.assertEqual(merged["review_reason"], "llm_fail_safe")
+        self.assertEqual(merged["disposition"], "D1")
 
     def test_merge_review_metadata_does_not_change_routing_in_shadow_mode(self):
         keyword_metadata = {

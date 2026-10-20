@@ -238,6 +238,23 @@ class HandlerTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertEqual(row, (1, "pharmacist_review_required", "pending"))
 
+    def test_controlled_substance_mentions_are_stored_for_pharmacist_review(self):
+        messages = [
+            "I want Valium",
+            "I take clonazepam",
+            "استامینوفن کدئین می‌خواهم",
+            "/help I want Valium",
+            "/rare valium",
+        ]
+        for message in messages:
+            with self.subTest(message=message):
+                result, row = self._route_text_message_and_fetch_review_row(message)
+                self.assertTrue(result["ok"])
+                self.assertEqual(
+                    row,
+                    (1, "pharmacist_review_required", "pending"),
+                )
+
     def test_command_text_stores_no_review_required(self):
         result, row = self._route_text_message_and_fetch_review_row("/status")
 

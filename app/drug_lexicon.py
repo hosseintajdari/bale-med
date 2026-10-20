@@ -313,11 +313,14 @@ class DrugLexiconService:
 
                 # Substring containment match
                 if len(clean_query) >= 3 and (clean_query in norm_target or norm_target in clean_query):
-                    ratio = 0.90 if len(clean_query) >= 4 else 0.85
+                    ratio = 0.84
                     if ratio > highest_score:
                         highest_score = ratio
                         best_entry = entry
                         best_term = target
+                    # Keep ambiguous containment matches below the structured
+                    # confirmation threshold; fuzzy similarity must not raise it.
+                    continue
 
                 # Fuzzy similarity
                 sim = similarity_ratio(clean_query, norm_target)

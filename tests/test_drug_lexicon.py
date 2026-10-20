@@ -92,6 +92,15 @@ class TestDrugLexicon(unittest.TestCase):
         self.assertTrue(result3.matched)
         self.assertTrue(result3.is_controlled)
 
+    def test_substring_matches_require_structured_confirmation(self) -> None:
+        for query in ("val", "valiumx", "I need acetaminophen for a price question"):
+            with self.subTest(query=query):
+                result = self.service.match_drug(query)
+                self.assertTrue(result.matched)
+                self.assertLessEqual(result.confidence, 0.84)
+                self.assertTrue(result.needs_confirmation)
+                self.assertIsNotNone(result.clarification_prompt)
+
     def test_adr0002_structured_confirmation_prompt(self) -> None:
         # Typo: "متفورمن ۵۰۰" (confidence between 0.60 and 0.85)
         result = self.service.match_drug("متفورمن۵۰۰")

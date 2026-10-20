@@ -4,6 +4,7 @@ from urllib.parse import parse_qs
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
+from starlette.concurrency import run_in_threadpool
 
 from .config import get_settings
 from .database import (
@@ -243,4 +244,4 @@ async def bale_webhook(secret: str, request: Request) -> dict[str, Any]:
         raise HTTPException(status_code=400, detail="Invalid JSON payload") from exc
     if not isinstance(update, dict):
         raise HTTPException(status_code=400, detail="Webhook payload must be a JSON object")
-    return route_update(update)
+    return await run_in_threadpool(route_update, update)

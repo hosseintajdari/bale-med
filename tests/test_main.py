@@ -1,11 +1,16 @@
+import asyncio
 import importlib
+import json
 import os
 import sqlite3
 import tempfile
+import threading
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from fastapi.testclient import TestClient
+from starlette.requests import Request
 
 
 class WebhookRouteTests(unittest.TestCase):
@@ -76,6 +81,45 @@ class WebhookRouteTests(unittest.TestCase):
             connection.close()
 
         self.assertEqual(row, ("demo-chat", "123", "Hello pharmacy"))
+
+    def test_webhook_runs_sync_processing_outside_the_event_loop_thread(self):
+        event_loop_thread = threading.get_ident()
+        processing_threads = []
+
+        async def receive():
+            return {
+                "type": "http.request",
+                "body": json.dumps(self._payload()).encode("utf-8"),
+                "more_body": False,
+            }
+
+        request = Request(
+            {
+                "type": "http",
+                "method": "POST",
+                "path": "/webhook/bale/test-secret",
+                "headers": [],
+                "query_string": b"",
+                "server": ("testserver", 80),
+                "client": ("testclient", 123),
+                "scheme": "http",
+                "http_version": "1.1",
+            },
+            receive,
+        )
+
+        def record_processing_thread(update):
+            processing_threads.append(threading.get_ident())
+            return {"ok": True, "update_received": bool(update)}
+
+        with patch.object(
+            self.main_module, "route_update", side_effect=record_processing_thread
+        ):
+            result = asyncio.run(self.main_module.bale_webhook("test-secret", request))
+
+        self.assertEqual(result, {"ok": True, "update_received": True})
+        self.assertEqual(len(processing_threads), 1)
+        self.assertNotEqual(processing_threads[0], event_loop_thread)
 
     def test_webhook_response_does_not_include_admin_notification_text(self):
         os.environ["BALE_ENABLE_ADMIN_NOTIFICATIONS"] = "true"

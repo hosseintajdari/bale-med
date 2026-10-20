@@ -190,6 +190,19 @@ class RareMedicineBotAndApiTests(unittest.TestCase):
             os.environ.pop("DATABASE_PATH", None)
         self.temp_dir.cleanup()
 
+    def test_api_reads_operator_edits_from_sqlite_catalog(self):
+        with sqlite3.connect(self.db_path) as connection:
+            connection.execute(
+                "UPDATE rare_medicines SET generic_name = ? WHERE id = ?",
+                ("ویرایش اپراتور", "rare-ivig"),
+            )
+
+        with TestClient(app) as client:
+            response = client.get("/api/v1/rare-medicines/rare-ivig")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["generic_name"], "ویرایش اپراتور")
+
     def test_bot_rare_command_without_args(self):
         payload = {
             "message": {

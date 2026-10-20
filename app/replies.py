@@ -1,3 +1,5 @@
+from .drug_lexicon import normalize_persian_text
+
 HIGH_RISK_KEYWORDS = (
     "overdose",
     "suicide",
@@ -90,12 +92,12 @@ ER_URGENT_REPLY = (
 
 
 def is_emergency_urgent(message_text: str) -> bool:
-    normalized = message_text.lower()
+    normalized = normalize_persian_text(message_text)
     return any(keyword in normalized for keyword in EMERGENCY_REDLINE_KEYWORDS)
 
 
 def needs_pharmacist_review(message_text: str) -> bool:
-    normalized = message_text.lower()
+    normalized = normalize_persian_text(message_text)
     return any(keyword in normalized for keyword in HIGH_RISK_KEYWORDS)
 
 

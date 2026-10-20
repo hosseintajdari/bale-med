@@ -66,17 +66,21 @@ def form_to_annotation_input(form_data: dict[str, str]) -> ShadowReviewAnnotatio
     return ShadowReviewAnnotationInput(
         needs_review_ok=parse_tristate_choice(form_data.get("needs_review_ok")),
         drug_name_ok=parse_tristate_choice(form_data.get("drug_name_ok")),
-        corrected_drug_name=_clean_optional_text(form_data.get("corrected_drug_name")),
-        owner_notes=_clean_optional_text(form_data.get("owner_notes")),
+        corrected_drug_name=_clean_optional_text(
+            form_data.get("corrected_drug_name"), MAX_CORRECTED_DRUG_NAME_LENGTH
+        ),
+        owner_notes=_clean_optional_text(form_data.get("owner_notes"), MAX_OWNER_NOTES_LENGTH),
     )
 
 
-def _clean_optional_text(value: str | None) -> str | None:
+def _clean_optional_text(value: str | None, max_length: int) -> str | None:
     if value is None:
         return None
     cleaned = value.strip()
     if not cleaned:
         return None
+    if len(cleaned) > max_length:
+        raise ValueError(f"text fields must not exceed {max_length} characters")
     return cleaned
 
 

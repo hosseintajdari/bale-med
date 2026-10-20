@@ -373,6 +373,16 @@ class WebhookRouteTests(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()["detail"], "Invalid JSON payload")
 
+    def test_annotate_shadow_review_rejects_invalid_form_utf8_with_400(self):
+        with TestClient(self.main_module.app, raise_server_exceptions=False) as client:
+            response = client.post(
+                "/local/shadow-reviews/1/annotate",
+                content=b"\xff",
+                headers={"Content-Type": "application/x-www-form-urlencoded"},
+            )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["detail"], "Invalid form encoding")
+
     def test_annotate_shadow_review_rejects_invalid_schema_with_422(self):
         with TestClient(self.main_module.app) as client:
             response = client.post(

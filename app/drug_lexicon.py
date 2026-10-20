@@ -362,6 +362,13 @@ class DrugLexiconService:
         """Return all controlled / psychotropic substances in the catalog."""
         return [entry for entry in self.catalog if entry.is_controlled]
 
+    def match_controlled_drug(
+        self, user_query: str, min_confidence: float = 0.60
+    ) -> DrugMatchResult:
+        """Match only controlled entries so non-controlled prefixes cannot win."""
+        controlled_service = DrugLexiconService(catalog=self.get_controlled_drugs())
+        return controlled_service.match_drug(user_query, min_confidence=min_confidence)
+
 
 _drug_lexicon_service: DrugLexiconService | None = None
 

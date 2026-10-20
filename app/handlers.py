@@ -4,6 +4,7 @@ from typing import Any
 from .bale_client import BaleAPIError, BaleClient
 from .config import Settings, get_settings
 from .database import LLMStorageFields, save_incoming_message
+from .drug_lexicon import get_drug_lexicon_service
 from .llm import classify_message_text, merge_review_metadata
 from .llm.service import should_run_llm_for_message
 from .models import IncomingMessage
@@ -77,8 +78,9 @@ def get_review_metadata(message_text: str | None) -> dict[str, str | bool | None
             "review_status": "not_required",
         }
 
-    command = message_text.strip().split(maxsplit=1)[0].lower()
-    if command in COMMAND_REPLIES or command == "/rare":
+    command_parts = message_text.strip().split(maxsplit=1)
+    command = command_parts[0].lower()
+    if len(command_parts) == 1 and (command in COMMAND_REPLIES or command == "/rare"):
         return {
             "needs_review": False,
             "review_reason": None,
@@ -94,6 +96,15 @@ def get_review_metadata(message_text: str | None) -> dict[str, str | bool | None
         }
 
     if needs_pharmacist_review(message_text):
+        return {
+            "needs_review": True,
+            "review_reason": "pharmacist_review_required",
+            "review_status": "pending",
+            "disposition": "D1",
+        }
+
+    controlled_match = get_drug_lexicon_service().match_controlled_drug(message_text)
+    if controlled_match.matched and controlled_match.is_controlled:
         return {
             "needs_review": True,
             "review_reason": "pharmacist_review_required",

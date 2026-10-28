@@ -6,11 +6,12 @@ cd "$ROOT"
 
 pick_python() {
   local candidate
-  for candidate in ${PYTHON:+"$PYTHON"} python3 python; do
-    if command -v "$candidate" >/dev/null 2>&1 \
-      && "$candidate" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 0) else 1)' >/dev/null 2>&1; then
-      echo "$candidate"
-      return 0
+  for candidate in ${PYTHON:+"$PYTHON"} "$ROOT/.venv/bin/python" python3 python; do
+    if [ -x "$candidate" ] || command -v "$candidate" >/dev/null 2>&1; then
+      if "$candidate" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 0) else 1)' >/dev/null 2>&1; then
+        echo "$candidate"
+        return 0
+      fi
     fi
   done
   return 1

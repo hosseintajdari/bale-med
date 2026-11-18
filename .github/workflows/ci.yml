@@ -1,0 +1,20 @@
+name: ci
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: install
+        run: |
+          pip install -q pytest
+          if [ -f requirements.txt ]; then pip install -q -r requirements.txt; fi
+          pip install -e . -q || echo "editable install skipped"
+      - name: test
+        run: pytest -q --maxfail=5

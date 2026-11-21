@@ -4,7 +4,7 @@ This project handles pharmacy workflow messages, so privacy and operational safe
 
 ## Supported Scope
 
-The current MVP is local-first and deployment-preparation focused. It is not yet production-hardened.
+The current MVP is local-first, with a documented VPS dry-run and internal LLM shadow operation. It is not yet production-hardened or clinically validated. See [the current handoff](docs/agents/HANDOFF.md) for deployment boundaries.
 
 ## Reporting Security Issues
 

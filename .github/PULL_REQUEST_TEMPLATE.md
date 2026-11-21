@@ -22,4 +22,11 @@
 
 - [ ] `make validate` or `scripts/verify.ps1` (Windows) — or wait for GitHub Actions on the PR
 
+Record each command and its result below. If a check was not run, explain why; do not mark pending CI as passed.
+
+- Command / result:
+
 ## Notes
+
+- Related issue or current milestone gate:
+- Human review or owner approval needed (if any):

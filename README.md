@@ -6,7 +6,9 @@ Local-first FastAPI MVP for a Bale-based pharmacy workflow assistant.
 
 The project supports safe pharmacy message intake, pharmacist review tracking, duplicate webhook handling, SQLite backup/restore, and optional admin review notifications. It is intended for constrained pharmacy workflows, including rural or border healthcare settings where clear handoff to a pharmacist matters.
 
-This is not a deployed production system and not a clinically validated product. The bot does not provide diagnosis, prescriptions, dosage recommendations, autonomous triage, or medication-change advice.
+The documented VPS deployment is a dry-run with internal LLM shadow classification, not a clinically validated or production-hardened service. The bot does not provide diagnosis, prescriptions, dosage recommendations, autonomous triage, or medication-change advice.
+
+For contributors: [contribution guide](CONTRIBUTING.md), [safety rules](docs/SAFETY_RULES.md), [security reporting](SECURITY.md), and [issue triage conventions](docs/agents/triage-labels.md). Do not include patient data or credentials in public issues or pull requests.
 
 ## Current Status
 
@@ -37,7 +39,7 @@ For the current drug-price transparency platform, see the separate [Bale-Med-Pri
 
 Build a safe pharmacy automation assistant for Bale that helps a real pharmacy receive messages, collect structured intake information, keep an auditable history, and route cases to a pharmacist when human judgment is needed.
 
-The system is workflow-based, pharmacist-centered, safety-first, local-first, and AI-optional. Later milestones may add real VPS deployment, stronger pharmacist/admin tools, and LLM/AI support. Any AI features must stay inside pharmacist-approved safety boundaries and must not diagnose, prescribe, replace a pharmacist, or recommend medication changes.
+The system is workflow-based, pharmacist-centered, safety-first, local-first, and AI-optional. VPS dry-run deployment and optional internal LLM classification are documented; later milestones may strengthen pharmacist/admin tools. Any AI features must stay inside pharmacist-approved safety boundaries and must not diagnose, prescribe, replace a pharmacist, or recommend medication changes.
 
 This vision and the milestone order are allowed to change as the pharmacy workflow becomes clearer. When direction changes, update the milestone plan before changing implementation.
 
@@ -440,7 +442,7 @@ Webhook behavior:
 
 ## Current Limitations and Next Priorities
 
-Milestone 8 deployment is in progress. An Iran-based VPS has been purchased. Use [deploy/README.md](deploy/README.md) and [deploy/server-info-checklist.md](deploy/server-info-checklist.md) on the server after SSH works. Steps 8A–8E do not require a domain; 8F–8H require DNS and HTTPS.
+VPS dry-run deployment and P1 shadow operation are documented. The [handoff](docs/agents/HANDOFF.md) and [owner shadow-review packet](docs/OWNER_SHADOW_REVIEW_PACKET.md) describe current evidence and unresolved live-mode gates. A completed review packet is not permission to enable live mode; pharmacy owner sign-off is still required. For a new host or recovery, use [deploy/README.md](deploy/README.md) and [deploy/server-info-checklist.md](deploy/server-info-checklist.md).
 
 Before running server commands, collect the server IP address, SSH username and port, OS version, provider console or rescue link, backup/snapshot option, and confirmation that ports 80 and 443 can be opened.
 
@@ -448,7 +450,7 @@ Before public exposure, verify Bale webhook and `sendMessage` assumptions, confi
 
 Future milestone work should use a small branch, draft pull request, review/checks, merge, and local `main` sync before the next submilestone starts. Use branch names like `codex/milestone-8a-vps-readiness`.
 
-AI, Web UI, clinical protocols, diagnosis, autonomous triage, and patient outcome claims remain postponed.
+LLM classification remains internal and shadow-only pending owner approval. Web UI is outside the current scope; diagnosis, autonomous clinical decisions, and patient-facing LLM replies remain prohibited. No patient outcome claims are made.
 
 ## VPS Notes
 

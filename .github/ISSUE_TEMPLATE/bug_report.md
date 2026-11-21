@@ -2,7 +2,7 @@
 name: Bug report
 about: Report a bug using safe, non-sensitive details
 title: "bug: "
-labels: bug
+labels: "bug, needs-triage"
 assignees: ""
 ---
 

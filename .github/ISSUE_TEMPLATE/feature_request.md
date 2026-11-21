@@ -2,7 +2,7 @@
 name: Feature request
 about: Suggest a small, safe product improvement
 title: "feat: "
-labels: enhancement
+labels: "enhancement, needs-triage"
 assignees: ""
 ---
 

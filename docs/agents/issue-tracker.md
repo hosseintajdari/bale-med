@@ -32,3 +32,9 @@ Create a GitHub issue.
 ## When a skill says "fetch the relevant ticket"
 
 Run `gh issue view <number> --comments`.
+
+## Intake and review
+
+Use the [issue templates](../../.github/ISSUE_TEMPLATE) and [label conventions](triage-labels.md). Keep clinical/safety gaps as first-class reports, even without a code fix. Public examples must be synthetic; route sensitive reports through [SECURITY.md](../../SECURITY.md).
+
+A maintainer chooses readiness and priority after reviewing evidence. Label changes do not authorize clinical decisions, deployment, closing issues, or merging PRs. Preserve human review and include a reason for any disposition.

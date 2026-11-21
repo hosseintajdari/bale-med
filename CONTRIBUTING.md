@@ -64,3 +64,11 @@ feat: store review status metadata
 test: cover pending review listing
 fix: handle malformed Bale API base URL
 ```
+
+## Issues and Pull Requests
+
+Use the existing issue templates for bugs, documentation, features, or clinical/safety gaps. Start with `needs-triage`; maintainers assess scope before assigning implementation readiness. See [triage labels](docs/agents/triage-labels.md) and [tracker workflow](docs/agents/issue-tracker.md).
+
+Use synthetic examples only. Report security or sensitive-data concerns privately as described in [SECURITY.md](SECURITY.md). Keep clinical/safety gap reports available even when no code change is proposed.
+
+For pull requests, preserve the safety checklist, link the relevant issue or milestone gate, and report exact verification commands and results (or why they were not run). A readiness label or passing CI does not replace human review or pharmacy owner approval for real sending or live LLM mode.

@@ -2,7 +2,7 @@
 name: Documentation cleanup
 about: Suggest a documentation, formatting, or repository hygiene improvement
 title: "docs: "
-labels: documentation
+labels: "documentation, needs-triage"
 assignees: ""
 ---
 
